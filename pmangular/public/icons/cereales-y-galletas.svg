@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cereales y galletas">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FFFBEB" stroke="#FDE68A" stroke-width="2"/>
+  <path d="M22 44c0-10 4-17 10-22 2 4 3 8 3 12 0 7-5 13-13 14 0-1 0-2 0-4z" fill="#F59E0B"/>
+  <path d="M32 28c3-6 8-10 14-12 0 4-1 8-3 12-3 6-8 10-14 12 0-4 1-8 3-12z" fill="#EAB308"/>
+  <circle cx="42" cy="42" r="7" fill="#D6A561"/>
+  <circle cx="39" cy="40" r="1.5" fill="#92400E"/>
+  <circle cx="45" cy="38" r="1.5" fill="#92400E"/>
+  <circle cx="44" cy="44" r="1.5" fill="#92400E"/>
+</svg>

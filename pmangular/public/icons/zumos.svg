@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Zumos">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FFF7ED" stroke="#FED7AA" stroke-width="2"/>
+  <path d="M22 22h18l-2 24c0 3-2 5-5 5h-4c-3 0-5-2-5-5z" fill="#FB923C"/>
+  <path d="M24 30h14" stroke="#FDE68A" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M41 19l6 12" stroke="#0EA5E9" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="45" cy="18" r="3" fill="#38BDF8"/>
+</svg>

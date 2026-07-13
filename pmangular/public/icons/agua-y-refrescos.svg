@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Agua y refrescos">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="2"/>
+  <path d="M22 20h10v8l3 5v12c0 3-2 5-5 5h-6c-3 0-5-2-5-5V33l3-5z" fill="#60A5FA"/>
+  <path d="M40 25h8v23c0 2-2 4-4 4s-4-2-4-4z" fill="#F97316"/>
+  <path d="M40 30h8" stroke="#FDBA74" stroke-width="2.5"/>
+  <circle cx="44" cy="22" r="3" fill="#F59E0B"/>
+</svg>

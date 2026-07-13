@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cacao cafe e infusiones">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FAF5F5" stroke="#E7E5E4" stroke-width="2"/>
+  <path d="M18 28h20v10c0 6-4 10-10 10s-10-4-10-10z" fill="#92400E"/>
+  <path d="M38 30h4c3 0 5 2 5 5s-2 5-5 5h-2" fill="none" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 22c0-3 2-5 5-6-1 3 0 5 2 7" fill="none" stroke="#A16207" stroke-width="2" stroke-linecap="round"/>
+  <path d="M34 20c0-2 2-4 4-5-1 3 0 5 2 7" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Conservas caldos y cremas">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+  <rect x="18" y="24" width="18" height="24" rx="4" fill="#60A5FA"/>
+  <rect x="20" y="19" width="14" height="6" rx="2" fill="#2563EB"/>
+  <path d="M24 33h6" stroke="#DBEAFE" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M40 39c0-5 4-9 9-9 0 5-4 9-9 9z" fill="#FB923C"/>
+  <path d="M37 40h14c0 5-3 9-7 9s-7-4-7-9z" fill="#FDE68A"/>
+</svg>

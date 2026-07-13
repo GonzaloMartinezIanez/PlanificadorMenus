@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Congelados">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="2"/>
+  <path d="M32 17v30M19 24l26 16M19 40l26-16" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 17l-4 4m4-4l4 4M32 47l-4-4m4 4l4-4M19 24l5 1m-5-1l1 5M45 40l-1-5m1 5l-5-1M19 40l5-1m-5 1l1-5M45 24l-1 5m1-5l-5 1" stroke="#0EA5E9" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Arroz legumbres y pasta">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FFF7ED" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M17 38c0-2 2-4 4-4h22c2 0 4 2 4 4 0 6-5 11-11 11H28c-6 0-11-5-11-11z" fill="#F3F4F6"/>
+  <path d="M22 32c4-5 8-7 13-7 4 0 7 1 10 4" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="44" cy="42" rx="6" ry="4" fill="#B45309"/>
+  <path d="M21 40l2-4m4 4l2-4m4 4l2-4" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round"/>
+</svg>

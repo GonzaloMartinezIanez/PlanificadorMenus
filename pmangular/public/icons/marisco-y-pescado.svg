@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Marisco y pescado">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#EFF6FF" stroke="#DBEAFE" stroke-width="2"/>
+  <path d="M18 33c5-7 12-11 20-11 7 0 12 3 16 8-4 5-9 8-16 8-8 0-15-2-20-5z" fill="#38BDF8"/>
+  <path d="M46 30l8-6v14z" fill="#0EA5E9"/>
+  <circle cx="39" cy="29" r="2" fill="#0F172A"/>
+  <path d="M18 43c2-5 6-8 11-8 4 0 7 2 9 5-2 5-6 8-11 8-4 0-7-2-9-5z" fill="#FB7185"/>
+</svg>

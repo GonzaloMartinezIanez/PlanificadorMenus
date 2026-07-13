@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fitoterapia y parafarmacia">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="2"/>
+  <path d="M23 20c8 2 14 8 16 16-8-1-14-7-16-16z" fill="#22C55E"/>
+  <path d="M24 42h10v-6h6V26h-6v-6H24v6h-6v10h6z" fill="#60A5FA"/>
+  <path d="M40 44c3-6 8-10 13-12-1 7-5 12-11 14" fill="#16A34A"/>
+</svg>

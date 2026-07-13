@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Aperitivos">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FFF7ED" stroke="#FED7AA" stroke-width="2"/>
+  <path d="M20 28h16c4 0 7 3 7 7 0 9-5 15-15 15S13 44 13 35c0-4 3-7 7-7z" fill="#F59E0B"/>
+  <circle cx="44" cy="28" r="5" fill="#22C55E"/>
+  <circle cx="48" cy="24" r="3.5" fill="#16A34A"/>
+  <path d="M42 40l6-10 6 10z" fill="#B45309"/>
+</svg>

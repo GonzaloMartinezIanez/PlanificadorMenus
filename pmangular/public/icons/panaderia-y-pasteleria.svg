@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Panaderia y pasteleria">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FFF7ED" stroke="#FED7AA" stroke-width="2"/>
+  <path d="M18 38c0-8 6-14 14-14s14 6 14 14v8H18z" fill="#D97706"/>
+  <path d="M23 30c2-2 4-3 6-3m4 0c2 0 4 1 6 3m-12 6h10" stroke="#FDE68A" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M42 22c3 0 6 3 6 6v2h-8v-2c0-3 2-6 2-6z" fill="#F9A8D4"/>
+  <path d="M40 31h8v5h-8z" fill="#FBCFE8"/>
+</svg>
