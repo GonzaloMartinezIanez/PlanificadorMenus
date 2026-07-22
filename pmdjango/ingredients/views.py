@@ -4,6 +4,7 @@ from .serializers import IngredientCategorySerializer, IngredientSerializer
 from rest_framework import viewsets
 
 class IngredientCategoryViewSet(viewsets.ModelViewSet):
+  permission_classes = []
   queryset = IngredientCategory.objects.all()
   serializer_class = IngredientCategorySerializer
   lookup_field = 'id_ingredient_category'
@@ -15,6 +16,7 @@ class IngredientCategoryViewSet(viewsets.ModelViewSet):
     return super().get_serializer(*args, **kwargs)
 
 class IngredientViewSet(viewsets.ModelViewSet):
+  permission_classes = []
   queryset = Ingredient.objects.all()
   serializer_class = IngredientSerializer
   lookup_field = 'id_ingredient'
