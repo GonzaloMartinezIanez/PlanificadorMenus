@@ -17,25 +17,25 @@ async function loadCategories(output = "") {
 
   categories.results.forEach((cat) => {
     listCategories.push({
-      idIngredientCategory: Number(cat.id),
+      id_ingredient_category: Number(cat.id),
       name: cat.name,
-      primaryCategory: null,
+      primary_category: null,
       icon: null,
     })
     idCategories.push(Number(cat.id))
 
     cat.categories.forEach((c) => {
       listCategories.push({
-        idIngredientCategory: Number(c.id),
+        id_ingredient_category: Number(c.id),
         name: c.name,
-        primaryCategory: Number(cat.id),
+        primary_category: Number(cat.id),
         icon: null,
       })
       idCategories.push(Number(c.id))
     })
   })
 
-  const sortedCategories = listCategories.sort((a, b) => a.idIngredientCategory > b.idIngredientCategory ? 1 : -1)
+  const sortedCategories = listCategories.sort((a, b) => a.id_ingredient_category > b.id_ingredient_category ? 1 : -1)
 
   switch (output) {
     case "log":
@@ -100,8 +100,8 @@ async function loadProducts() {
         }
 
         productMap.set(productId, {
-          idIngredient: productId,
-          idIngredientCategories: [Number(id)],
+          id_ingredient: productId,
+          id_ingredient_categories: [Number(id)],
           name: product.display_name,
           packaging: product.packaging,
           reference_format: product.price_instructions.reference_format,
@@ -115,7 +115,7 @@ async function loadProducts() {
   }
 
   const listProducts = Array.from(productMap.values()).sort((a, b) =>
-    a.idIngredient > b.idIngredient ? 1 : -1
+    a.id_ingredient > b.id_ingredient ? 1 : -1
   )
 
   console.log(`\nGuardados ${listProducts.length} productos unicos`)
@@ -147,5 +147,5 @@ async function insertIngredientsInDB() {
 
 // await loadCategories("file")
 // await loadProducts()
-// await insertCategoriesInDB()
-// await insertIngredientsInDB()
+ await insertCategoriesInDB()
+ await insertIngredientsInDB()

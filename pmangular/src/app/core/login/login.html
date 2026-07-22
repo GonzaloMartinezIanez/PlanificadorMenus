@@ -1,0 +1,13 @@
+<div style="display: flex; flex-direction: column; align-items: center;">
+  <h1>Planificador de Menús</h1>
+
+  <div #googleButton class="google-button-host"></div>
+
+  @if (isLoading()) {
+  <p class="status-message">Conectando con el backend...</p>
+  }
+
+  @if (errorMessage()) {
+  <p class="error-message">{{ errorMessage() }}</p>
+  }
+</div>

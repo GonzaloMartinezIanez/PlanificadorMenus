@@ -4,3 +4,5 @@ requests
 python-dotenv
 mysqlclient
 django-cors-headers
+djangorestframework-simplejwt
+google-auth

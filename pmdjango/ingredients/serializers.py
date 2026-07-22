@@ -10,7 +10,7 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-  idIngredientCategories = serializers.PrimaryKeyRelatedField(many=True, queryset=IngredientCategory.objects.all())
+  id_ingredient_categories = serializers.PrimaryKeyRelatedField(many=True, queryset=IngredientCategory.objects.all())
 
   class Meta:
     model = Ingredient

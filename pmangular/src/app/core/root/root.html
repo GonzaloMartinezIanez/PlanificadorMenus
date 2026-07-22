@@ -1,0 +1,5 @@
+@if(!authService.isAuthenticated()){
+  <app-login/>
+} @else {
+  <app-home/>
+}

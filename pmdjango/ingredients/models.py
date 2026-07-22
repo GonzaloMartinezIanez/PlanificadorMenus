@@ -2,9 +2,9 @@ from django.db import models
 
 
 class IngredientCategory(models.Model):
-  idIngredientCategory = models.IntegerField(primary_key=True)
+  id_ingredient_category = models.IntegerField(primary_key=True)
   name = models.CharField(max_length=100, null=False, blank=False)
-  primaryCategory = models.IntegerField(null=True, blank=False)
+  primary_category = models.IntegerField(null=True, blank=False)
   icon = models.TextField(null=True, blank=True)
 
   def __str__(self):
@@ -12,8 +12,8 @@ class IngredientCategory(models.Model):
 
 
 class Ingredient(models.Model):
-  idIngredient = models.CharField(primary_key=True) # Algunos ingredientes ids tienen decimales
-  idIngredientCategories = models.ManyToManyField(IngredientCategory, related_name="ingredients", blank=False)
+  id_ingredient = models.CharField(primary_key=True) # Algunos ingredientes ids tienen decimales
+  id_ingredient_categories = models.ManyToManyField(IngredientCategory, blank=False)
   name = models.TextField(null=False, blank=False)
   packaging = models.CharField(max_length=50, null=True, blank=True)
   reference_format = models.CharField(max_length=20, null=True, blank=True)
