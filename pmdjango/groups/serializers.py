@@ -34,3 +34,8 @@ class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMember
         fields = ["user_id", "role"]
+
+class PatchGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+            model = Group
+            fields = ["group_name", "group_description"]

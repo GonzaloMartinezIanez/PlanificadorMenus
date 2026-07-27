@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Group, GroupMember
-from .serializers import GroupCreateSerializer, GroupMemberSerializer, GroupSerializer, RoleSerializer, JoinSerializer
+from .serializers import GroupCreateSerializer, GroupMemberSerializer, GroupSerializer, RoleSerializer, JoinSerializer, PatchGroupSerializer
 
 def generate_random_code():
   while True:
@@ -75,6 +75,25 @@ class GroupCodeApiView(APIView):
     )
 
     return Response({"message": "Solicitud de unirse al grupo enviada."}, status = status.HTTP_201_CREATED)
+
+  # Modificar nombre y descripción del grupo
+  def patch(self, request, group_code):
+    serializer = PatchGroupSerializer(data = request.data)
+    serializer.is_valid(raise_exception = True)
+
+    if not GroupMember.objects.filter(group__group_code = group_code, user = request.user, accepted = True).exists():
+      return Response({"error": "No perteneces a este grupo."}, status = status.HTTP_403_FORBIDDEN)
+
+    if not GroupMember.objects.filter(group__group_code = group_code, user = request.user, role = "ADMIN", accepted = True).exists():
+      return Response({"error": "Solo el admin puede borrar el grupo."}, status = status.HTTP_403_FORBIDDEN)
+
+    group = Group.objects.get(group_code = group_code)
+    group.group_name = serializer.validated_data["group_name"]
+    group.group_description = serializer.validated_data["group_description"]
+    group.save()
+
+    return Response({"message": GroupSerializer(group).data}, status = status.HTTP_200_OK)
+
 
   def delete(self, request, group_code):
     if not GroupMember.objects.filter(group__group_code = group_code, user = request.user, accepted = True).exists():
