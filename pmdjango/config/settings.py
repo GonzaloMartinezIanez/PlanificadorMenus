@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'users',
     'ingredients',
     'groups',
+    'recipes',
 ]
 
 MIDDLEWARE = [
