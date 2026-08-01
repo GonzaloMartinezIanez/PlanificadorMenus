@@ -8,7 +8,6 @@ from django.db.models import Q
 from django.db import transaction
 from groups.models import GroupMember
 from ingredients.models import Ingredient
-from rest_framework.permissions import IsAuthenticated
 
 # Devuelve las recetas públicas si no estás autenticado
 # y las privadas tuyas y de tus miembros de grupos

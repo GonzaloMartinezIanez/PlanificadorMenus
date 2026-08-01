@@ -40,3 +40,16 @@ class RecipeOutputSerializer(serializers.ModelSerializer):
   def get_ingredients(self, obj):
     ingredients = IngredientInRecipe.objects.filter(recipe = obj)
     return RecipeIngredientOutputSerializer(ingredients, many = True).data
+
+class CommentInputSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = RecipeComment
+    fields = ["score", "comment"]
+
+class CommentOutputSerializer(serializers.ModelSerializer):
+  user = serializers.CharField(source = "user.username", read_only = True)
+  recipe = serializers.CharField(source = "recipe.id", read_only = True)
+
+  class Meta:
+    model = RecipeComment
+    fields = ["recipe", "user", "score", "comment"]
