@@ -23,4 +23,6 @@ urlpatterns = [
     path("api/", include("users.urls")),
     path("api/", include("groups.urls")),
     path("api/", include("recipes.urls")),
+    path("api/", include("menus.urls")),
+    path("api/", include("lists.urls")),
 ]

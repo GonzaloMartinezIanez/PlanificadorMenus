@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'ingredients',
     'groups',
     'recipes',
+    'menus',
+    'lists'
 ]
 
 MIDDLEWARE = [
