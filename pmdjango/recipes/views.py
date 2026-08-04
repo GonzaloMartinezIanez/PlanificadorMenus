@@ -4,35 +4,10 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q
 from django.db import transaction
-from groups.models import GroupMember
 from ingredients.models import Ingredient
+from .utils import get_my_visible_recipes
 
-# Devuelve las recetas públicas si no estás autenticado
-# y las privadas tuyas y de tus miembros de grupos
-def get_my_visible_recipes(request):
-  # Si no está autenticado solo ve las públicas
-  if not request.user.is_authenticated:
-    return Recipe.objects.filter(visibility = "PUBLIC")
-
-  # Primero se obtiene los grupos en los que está este usuario
-  # y luego se obtiene el id de todos sus compañeros
-  my_groups_ids = GroupMember.objects.filter(
-    user = request.user,
-    accepted = True
-  ).values_list("group_id", flat = True) # Con flat = True, solo se devuelve el id
-
-  my_group_members_ids = GroupMember.objects.filter(
-    group_id__in = my_groups_ids,
-    accepted = True
-  ).values_list("user_id", flat = True)
-
-  return Recipe.objects.filter(
-    Q(visibility = "PUBLIC") |
-    Q(user = request.user) |
-    Q(visibility = "PRIVATE", user_id__in = my_group_members_ids)
-  )
 
 # CRUD de Categorias de recetas
 class RecipeCategoryViewSet(viewsets.ModelViewSet):

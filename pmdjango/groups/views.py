@@ -85,7 +85,7 @@ class GroupCodeApiView(APIView):
       return Response({"error": "No perteneces a este grupo."}, status = status.HTTP_403_FORBIDDEN)
 
     if not GroupMember.objects.filter(group__group_code = group_code, user = request.user, role = "ADMIN", accepted = True).exists():
-      return Response({"error": "Solo el admin puede borrar el grupo."}, status = status.HTTP_403_FORBIDDEN)
+      return Response({"error": "Solo el admin puede modificar el grupo."}, status = status.HTTP_403_FORBIDDEN)
 
     group = Group.objects.get(group_code = group_code)
     group.group_name = serializer.validated_data["group_name"]

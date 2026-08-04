@@ -6,29 +6,14 @@ from .models import List
 from rest_framework.permissions import IsAuthenticated
 from groups.models import Group, GroupMember
 from ingredients.models import Ingredient
-
-def get_group_for_user(request, group_code):
-  group = Group.objects.filter(group_code = group_code).first()
-  if not group:
-    return None, Response({"error": "El grupo no existe."}, status = status.HTTP_404_NOT_FOUND)
-
-  membership = GroupMember.objects.filter(
-    user = request.user,
-    group = group,
-    accepted = True
-  ).first()
-
-  if not membership:
-    return None, Response({"error": "No perteneces a este grupo."}, status = status.HTTP_403_FORBIDDEN)
-
-  return group, None
+from groups.utils import get_my_group
 
 class ListApiView(APIView):
   permission_classes = [IsAuthenticated]
 
   # Devuelve todos los productos de la lista
   def get(self, request, group_code):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 
@@ -39,7 +24,7 @@ class ListApiView(APIView):
 
   # Añade un producto independiente a la lista
   def post(self, request, group_code):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 
@@ -72,7 +57,7 @@ class ListApiView(APIView):
 
   # Borrar todos los productos de la lista del grupo
   def delete(self, request, group_code):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 
@@ -84,7 +69,7 @@ class ListPatchApiView(APIView):
 
   # Endpoint para cambiar la cantidad, la unidad o el estado de "comprado" de un producto
   def patch(self, request, group_code, id_ingredient):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 

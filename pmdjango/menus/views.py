@@ -6,27 +6,11 @@ from .models import Menu
 from rest_framework.permissions import IsAuthenticated
 from groups.models import Group, GroupMember
 from recipes.models import IngredientInRecipe
-from recipes.views import get_my_visible_recipes
+from recipes.utils import get_my_visible_recipes
+from groups.utils import get_my_group
 from lists.models import List
 from django.db import transaction
 from django.utils import timezone
-
-# Comrpueba que el grupo existe y el usuario pertenece a él
-def get_group_for_user(request, group_code):
-  group = Group.objects.filter(group_code = group_code).first()
-  if not group:
-    return None, Response({"error": "El grupo no existe."}, status = status.HTTP_404_NOT_FOUND)
-
-  membership = GroupMember.objects.filter(
-    user = request.user,
-    group = group,
-    accepted = True
-  ).first()
-
-  if not membership:
-    return None, Response({"error": "No perteneces a este grupo."}, status = status.HTTP_403_FORBIDDEN)
-
-  return group, None
 
 # Recorre la lista de ingredientes de la receta y los añade a la lista del grupo
 def add_recipe_ingredients_to_list(group, recipe):
@@ -79,7 +63,7 @@ class MenuApiView(APIView):
   permission_classes = [IsAuthenticated]
 
   def get(self, request, group_code):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 
@@ -90,7 +74,7 @@ class MenuApiView(APIView):
     return Response(serializer.data, status = status.HTTP_200_OK)
 
   def post(self, request, group_code):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 
@@ -120,7 +104,7 @@ class MenuApiView(APIView):
 
   # Se elimina el menú pasado en el body junto sus ingredientes en la lista
   def delete(self, request, group_code):
-    group, error = get_group_for_user(request, group_code)
+    group, error = get_my_group(request, group_code)
     if error:
       return error
 
