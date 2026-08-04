@@ -1,14 +1,17 @@
 from rest_framework import serializers
 from .models import List
-from ingredients.models import Ingredient
 
 class ListInputSerializer(serializers.ModelSerializer):
-  group_code = serializers.CharField(source = "group.group_code", read_only = True)
-  id_ingredient = serializers.CharField(source = "ingredient.id_ingredient", read_only = True)
-  
+  id_ingredient = serializers.CharField(write_only = True)
+
   class Meta:
     model = List
     fields = ["id_ingredient", "amount", "unit"]
+
+class ListPatchSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = List
+    fields = ["amount", "unit", "bought"]
 
 class ListOutputSerializer(serializers.ModelSerializer):
   group_code = serializers.CharField(source = "group.group_code", read_only = True)
@@ -23,6 +26,5 @@ class ListOutputSerializer(serializers.ModelSerializer):
     return {
       "id_ingredient": ingredient.id_ingredient,
       "name": ingredient.name,
-      "description": ingredient.description,
-      "image": ingredient.image.url if ingredient.image else None
+      "image": ingredient.image
     }

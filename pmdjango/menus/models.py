@@ -15,4 +15,4 @@ class Menu(models.Model):
   time = models.CharField(max_length = 10, choices = TIME_CHOICES, blank=False, null=False)
 
   def __str__(self):
-    return f'{self.group.group_code} - {self.recipe.recipe_id} - {self.date} - {self.time}'
+    return f'{self.group.group_code} - {self.recipe.name} - {self.date} - {self.time}'
