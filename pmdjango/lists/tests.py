@@ -86,6 +86,7 @@ class ListApiTests(APITestCase):
 
     self.assertEqual(response.status_code, status.HTTP_200_OK)
     self.assertEqual(len(response.data), 2)
+    self.assertEqual(response.data[0]["ingredient"]["id_ingredient_categories"], [1])
 
   def test_non_member_cannot_get_list(self):
     self.client.force_authenticate(user = self.outsider)
@@ -105,6 +106,8 @@ class ListApiTests(APITestCase):
 
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     self.assertTrue(List.objects.filter(group = self.group, ingredient = self.ingredient_milk).exists())
+    self.assertEqual(response.data["packages_needed"], 2)
+    self.assertEqual(response.data["purchase_label"], "2 bricks de 1.00000 l")
 
   def test_post_list_sums_existing_item_and_resets_bought(self):
     List.objects.create(
@@ -126,6 +129,7 @@ class ListApiTests(APITestCase):
     list_item = List.objects.get(group = self.group, ingredient = self.ingredient_milk)
     self.assertEqual(float(list_item.amount), 3.0)
     self.assertFalse(list_item.bought)
+    self.assertEqual(response.data["packages_needed"], 3)
 
   def test_post_list_returns_404_for_missing_ingredient(self):
     self.client.force_authenticate(user = self.owner)
@@ -160,6 +164,23 @@ class ListApiTests(APITestCase):
     self.assertEqual(float(list_item.amount), 3.5)
     self.assertEqual(list_item.unit, "kg")
     self.assertTrue(list_item.bought)
+    self.assertIsNone(response.data["packages_needed"])
+
+  def test_get_list_returns_packages_needed_when_unit_matches_reference_format(self):
+    List.objects.create(
+      group = self.group,
+      ingredient = self.ingredient_milk,
+      amount = "2.500",
+      unit = "l",
+      bought = False,
+    )
+    self.client.force_authenticate(user = self.owner)
+
+    response = self.client.get(f"/api/lists/{self.group.group_code}/")
+
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(response.data[0]["packages_needed"], 3)
+    self.assertEqual(response.data[0]["purchase_label"], "3 bricks de 1.00000 l")
 
   def test_patch_list_returns_404_when_item_does_not_exist(self):
     self.client.force_authenticate(user = self.member)
