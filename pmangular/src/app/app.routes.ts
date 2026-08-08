@@ -8,6 +8,7 @@ import { GroupJoin } from './components/groups/group-join/group-join';
 
 import { authGuard } from './guards/auth-guard';
 import { groupGuard } from './guards/group-guard';
+import { GroupManage } from './components/groups/group-manage/group-manage';
 
 export const routes: Routes = [
   { 'path': '', redirectTo: 'login', pathMatch: 'full' },
@@ -20,6 +21,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { 'path': 'home/:group_code', component: Home, canActivate: [groupGuard] },
+      { 'path': 'groups/:group_code/manage', component: GroupManage, canActivate: [groupGuard] },
     ]
   },
   { 'path': '**', component: NotFound }

@@ -10,3 +10,13 @@ export interface GroupShortModel {
   group_name: string;
   group_description: string;
 }
+
+export interface GroupMember{
+  user_id: number;
+  username: string;
+  profile_picture: string;
+  group_code: string;
+  role: string;
+  joining_date: string;
+  accepted: true;
+}

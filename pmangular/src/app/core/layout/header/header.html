@@ -3,7 +3,7 @@
     <!-- Burguer menú en móviles -->
     <button mat-icon-button class="mobile-menu-button" [matMenuTriggerFor]="navigationMenu"
       aria-label="Abrir menú de navegación">
-      <mat-icon aria-label="Menú desplegable de navegación" fontIcon="menu" style="color: white;" />
+      <mat-icon aria-label="Menú desplegable de navegación" fontIcon="menu" style="color: black;" />
     </button>
 
     <!-- Botones en ordenador -->
@@ -42,10 +42,11 @@
   <button mat-menu-item type="button">Calendario</button>
   <button mat-menu-item type="button">Lista de la compra</button>
   <button mat-menu-item type="button">Recetas</button>
-  <button mat-menu-item type="button">Administrar grupos</button>
 </mat-menu>
 
 <mat-menu #userMenu="matMenu">
-  <button mat-menu-item type="button">Administrar mis grupos</button>
+  <a routerLink="groups/{{selectedGroupCode()}}/manage">
+    <button mat-menu-item type="button">Administrar mis grupos</button>
+  </a>
   <button mat-menu-item type="button" (click)="logout()">Cerrar sesión</button>
 </mat-menu>

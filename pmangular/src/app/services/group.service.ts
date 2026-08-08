@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { GroupModel, GroupShortModel } from '../models/group';
+import { GroupMember, GroupModel, GroupShortModel } from '../models/group';
 import { Observable } from 'rxjs';
 import { MessageModel } from '../models/message';
 
@@ -23,7 +23,7 @@ export class GroupService {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/groups/${group_code}/`, {});
   }
 
-  getGroupMembers(group_code: string) {
-    return this.http.get(`${environment.apiUrl}/groups/${group_code}/`);
+  getGroupMembers(group_code: string): Observable<GroupMember[]> {
+    return this.http.get<GroupMember[]>(`${environment.apiUrl}/groups/${group_code}/`);
   }
 }

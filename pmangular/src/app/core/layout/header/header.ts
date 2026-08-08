@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
 import { GroupService } from '../../../services/group.service';
 import { GroupModel } from '../../../models/group';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -14,7 +14,7 @@ import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, MatToolbarModule, MatSelectModule, MatFormFieldModule, MatButtonModule, MatIconModule, MatMenuModule],
+  imports: [CommonModule, MatToolbarModule, MatSelectModule, MatFormFieldModule, MatButtonModule, MatIconModule, MatMenuModule, RouterLink],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })

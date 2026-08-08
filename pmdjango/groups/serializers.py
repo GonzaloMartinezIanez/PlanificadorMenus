@@ -13,11 +13,13 @@ class GroupCreateSerializer(serializers.ModelSerializer):
 
 class GroupMemberSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source = "user.id", read_only = True)
+    username = serializers.CharField(source = "user.username", read_only = True)
+    profile_picture = serializers.URLField(source = "user.profile_picture", read_only = True)
     group_code = serializers.CharField(source = "group.group_code", read_only = True)
 
     class Meta:
         model = GroupMember
-        fields = ["user_id", "group_code", "role", "joining_date", "accepted"]
+        fields = ["user_id", "username", "profile_picture", "group_code", "role", "joining_date", "accepted"]
 
 class JoinSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField()

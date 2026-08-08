@@ -1,6 +1,4 @@
 footer{
-  display: flex;
   height: 3rem;
-  background-color: rgb(171, 245, 122);
-  justify-content: center;
+  text-align: center;
 }
