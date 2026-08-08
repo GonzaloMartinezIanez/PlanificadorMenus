@@ -74,7 +74,7 @@ class GroupCodeApiView(APIView):
       accepted = False,
     )
 
-    return Response({"message": "Solicitud de unirse al grupo enviada."}, status = status.HTTP_201_CREATED)
+    return Response({"message": "Solicitud de unirse al grupo enviada. Espera a que un administrador te acepte."}, status = status.HTTP_201_CREATED)
 
   # Modificar nombre y descripción del grupo
   def patch(self, request, group_code):

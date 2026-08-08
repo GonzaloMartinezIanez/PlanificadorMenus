@@ -9,9 +9,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
+import { GroupService } from '../../services/group.service';
 
 // Modelos que usa google
 interface GoogleCredentialResponse {
@@ -49,6 +51,8 @@ export class Login implements AfterViewInit, OnDestroy {
   @ViewChild('googleButton', { static: true }) googleButton?: ElementRef<HTMLDivElement>;
 
   authService = inject(AuthService);
+  groupService = inject(GroupService);
+  router = inject(Router);
   errorMessage = signal('');
   isLoading = signal(false);
 
@@ -57,6 +61,11 @@ export class Login implements AfterViewInit, OnDestroy {
   destroyed = false;
 
   async ngAfterViewInit() {
+    if (this.authService.isAuthenticated()) {
+      this.redirectAuthenticatedUser();
+      return;
+    }
+
     try {
       await this.loadGoogleIdentityScript();
       this.renderGoogleButton();
@@ -149,14 +158,34 @@ export class Login implements AfterViewInit, OnDestroy {
     });
 
     this.authService.login(response.credential).subscribe({
-      next: (result) => {
-        this.ngZone.run(() => {
-          this.isLoading.set(false);
-        });
+      next: () => {
+        this.redirectAuthenticatedUser();
       },
       error: () => {
         this.ngZone.run(() => {
           this.errorMessage.set('No se pudo iniciar sesion con Google en el backend.');
+          this.isLoading.set(false);
+        });
+      },
+    });
+  }
+
+  private redirectAuthenticatedUser() {
+    this.groupService.getMyGroups().subscribe({
+      next: (groups) => {
+        this.ngZone.run(() => {
+          this.isLoading.set(false);
+
+          if (groups.length > 0) {
+            this.router.navigate([`/home/${groups[0].group_code}`]);
+          } else {
+            this.router.navigate(['/groups/onboarding']);
+          }
+        });
+      },
+      error: () => {
+        this.ngZone.run(() => {
+          this.errorMessage.set('No se pudieron cargar los grupos del usuario.');
           this.isLoading.set(false);
         });
       },

@@ -1,4 +1,7 @@
 <p>Sesion iniciada correctamente.</p>
 <p>ID del usuario: {{ authService.currentUserId() }}</p>
 
-<button (click)="logout()">Logout</button>
+<p>Access token:</p><p>{{accessToken()}}</p>
+<p>Refresh token:</p><p>{{refreshToken()}}</p>
+
+
