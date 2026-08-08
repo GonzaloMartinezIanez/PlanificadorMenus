@@ -6,16 +6,20 @@ import { Login } from './core/login/login';
 import { Layout } from './core/layout/layout';
 import { GroupJoin } from './components/groups/group-join/group-join';
 
+import { authGuard } from './guards/auth-guard';
+import { groupGuard } from './guards/group-guard';
+
 export const routes: Routes = [
   { 'path': '', redirectTo: 'login', pathMatch: 'full' },
   { 'path': 'login', component: Login },
-  { 'path': 'groups/join/:group_code', component:  GroupJoin},
-  { 'path': 'groups/onboarding', component: GroupOnboarding },
+  { 'path': 'groups/join/:group_code', component: GroupJoin},
+  { 'path': 'groups/onboarding', component: GroupOnboarding, canActivate: [authGuard] },
   {
     'path': '',
     component: Layout,
+    canActivate: [authGuard],
     children: [
-      { 'path': 'home/:groupCode', component: Home },
+      { 'path': 'home/:group_code', component: Home, canActivate: [groupGuard] },
     ]
   },
   { 'path': '**', component: NotFound }

@@ -1,1 +1,24 @@
-<p>group-join works!</p>
+<h1>Planificador de menús</h1>
+
+<p>Solicita unirte al grupo {{ groupCode() }}</p>
+
+@if (!authService.isAuthenticated()) {
+  <p>Debes iniciar sesión para unirte a este grupo.</p>
+  <div #googleButton></div>
+} @else {
+  <button type="button" (click)="joinGroup()" [disabled]="isLoading()">
+    Solicitar unirme al grupo
+  </button>
+}
+
+@if (errorMessage()) {
+  <small style="color:red">{{ errorMessage() }}</small>
+}
+
+@if (infoMessage()) {
+  <p>{{ infoMessage() }}</p>
+}
+
+<br>
+
+<a routerLink="/groups/onboarding">Crea un nuevo grupo o únete a otro.</a>

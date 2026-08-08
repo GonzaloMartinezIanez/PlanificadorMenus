@@ -11,15 +11,19 @@ import { MessageModel } from '../models/message';
 export class GroupService {
   private http = inject(HttpClient);
 
-  getMyGroups(): Observable<GroupModel[]>{
+  getMyGroups(): Observable<GroupModel[]> {
     return this.http.get<GroupModel[]>(`${environment.apiUrl}/groups/`);
   }
 
-  createGroup(group_info: GroupShortModel): Observable<GroupModel>{
+  createGroup(group_info: GroupShortModel): Observable<GroupModel> {
     return this.http.post<GroupModel>(`${environment.apiUrl}/groups/`, group_info);
   }
 
   joinGroup(group_code: string): Observable<MessageModel> {
-  return this.http.post<{ message: string }>(`${environment.apiUrl}/groups/${group_code}/`, {});
-}
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/groups/${group_code}/`, {});
+  }
+
+  getGroupMembers(group_code: string) {
+    return this.http.get(`${environment.apiUrl}/groups/${group_code}/`);
+  }
 }
