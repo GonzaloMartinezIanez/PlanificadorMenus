@@ -179,7 +179,7 @@ export class Login implements AfterViewInit, OnDestroy {
           if (groups.length > 0) {
             this.router.navigate([`/home/${groups[0].group_code}`]);
           } else {
-            this.router.navigate(['/groups/onboarding']);
+            this.router.navigate(['/group-onboarding']);
           }
         });
       },

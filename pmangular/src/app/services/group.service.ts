@@ -26,4 +26,30 @@ export class GroupService {
   getGroupMembers(group_code: string): Observable<GroupMember[]> {
     return this.http.get<GroupMember[]>(`${environment.apiUrl}/groups/${group_code}/`);
   }
+
+  updateGroup(group_code: string, group_info: GroupShortModel): Observable<{ message: GroupModel }> {
+    return this.http.patch<{ message: GroupModel }>(`${environment.apiUrl}/groups/${group_code}/`, group_info);
+  }
+
+  updatePendingMember(group_code: string, user_id: number, accepted: boolean): Observable<MessageModel> {
+    return this.http.patch<MessageModel>(`${environment.apiUrl}/groups/${group_code}/join/`, {
+      user_id,
+      accepted,
+    });
+  }
+
+  updateMemberRole(group_code: string, user_id: number, role: string): Observable<MessageModel> {
+    return this.http.patch<MessageModel>(`${environment.apiUrl}/groups/${group_code}/role/`, {
+      user_id,
+      role,
+    });
+  }
+
+  removeMember(group_code: string, user_id: number): Observable<MessageModel> {
+    return this.http.delete<MessageModel>(`${environment.apiUrl}/groups/${group_code}/${user_id}/`);
+  }
+
+  deleteGroup(group_code: string): Observable<MessageModel> {
+    return this.http.delete<MessageModel>(`${environment.apiUrl}/groups/${group_code}/`);
+  }
 }

@@ -18,5 +18,5 @@ export interface GroupMember{
   group_code: string;
   role: string;
   joining_date: string;
-  accepted: true;
+  accepted: boolean;
 }

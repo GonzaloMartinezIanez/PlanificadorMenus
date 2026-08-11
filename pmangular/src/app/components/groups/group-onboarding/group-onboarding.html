@@ -1,58 +1,6 @@
-<h2>Todavía no tienes grupo</h2>
-<p>Crea un grupo nuevo o únete a uno existente</p>
-
-<form [formGroup]="newGroupForm" (ngSubmit)="createGroup()">
-  <h3>Crear grupo</h3>
-  <label>Nombre del grupo:</label>
-  <input type="text" formControlName="group_name" />
-  @if (newGroupForm.get('group_name')?.touched && newGroupForm.get('group_name')?.invalid) {
-    @if (newGroupForm.get('group_name')?.errors?.['required']) {
-      <small style="color:red">El nombre es obligatorio.</small>
-    }
-    @if (newGroupForm.get('group_name')?.errors?.['minlength']) {
-      <small style="color:red">El nombre debe tener al menos 3 caracteres.</small>
-    }
-    @if (newGroupForm.get('group_name')?.errors?.['maxlength']) {
-      <small style="color:red">El nombre no puede tener más de 100 caractéres.</small>
-    }
-  }
-  <br>
-  <label>Descripción del grupo:</label>
-  <input type="text" formControlName="group_description"/>
-
-  <button [disabled]="newGroupForm.invalid" type="submit">Crear grupo</button>
-
-  @if(createErrorMessage()){
-    <small style="color:red">{{createErrorMessage()}}</small>
-  }
-</form>
-
-
-<form [formGroup]="joinGroupForm" (ngSubmit)="joinGroup()">
-  <h3>Unirse a un grupo</h3>
-
-  <label>Código del grupo:</label>
-  <input type="text" formControlName="group_code" />
-  @if (joinGroupForm.get('group_code')?.touched && joinGroupForm.get('group_code')?.invalid) {
-    @if (joinGroupForm.get('group_code')?.errors?.['required']) {
-      <small style="color:red">El código es obligatorio.</small>
-    }
-    @if (joinGroupForm.get('group_code')?.errors?.['minlength'] || joinGroupForm.get('group_code')?.errors?.['maxlength']) {
-      <small style="color:red">El código debe tener 8 caracteres alfamuéricos.</small>
-    }
-  }
-
-  <button [disabled]="joinGroupForm.invalid" type="submit">Solicitar unirse al grupo</button>
-
-  @if(joinErrorMessage()){
-    <small style="color:red">{{joinErrorMessage()}}</small>
-  }
-
-  @if(joinInfoMessage()){
-    <p>{{joinInfoMessage()}}</p>
-  }
-</form>
-
-<button (click)="checkAccepted()">Comprobar si me han aceptado</button>
-
-<button (click)="logout()">Logout</button>
+<app-group-forms
+  title="Todavía no tienes grupo"
+  subtitle="Crea un grupo nuevo o únete a uno existente"
+  [showCheckAcceptedButton]="true"
+  [showLogoutButton]="true">
+</app-group-forms>

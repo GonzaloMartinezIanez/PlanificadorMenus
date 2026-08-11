@@ -10,7 +10,7 @@ export const groupGuard: CanActivateFn = async (route: ActivatedRouteSnapshot, s
   const groupCode = route.paramMap.get('group_code');
 
   if (!groupCode) {
-    router.navigate(['/groups/onboarding']);
+    router.navigate(['/group-onboarding']);
     return false;
   }
 
@@ -19,7 +19,7 @@ export const groupGuard: CanActivateFn = async (route: ActivatedRouteSnapshot, s
     await firstValueFrom(groupService.getGroupMembers(groupCode));
     return true;
   } catch {
-    router.navigate(['/groups/onboarding']);
+    router.navigate(['/group-onboarding']);
     return false;
   }
 };

@@ -23,7 +23,7 @@ export class Root implements OnInit{
         if(res.length > 0){
           this.router.navigate([`/home/${res[0].group_code}`])
         } else{
-          this.router.navigate(['groups/onboarding'])
+          this.router.navigate(['group-onboarding'])
         }
       })
     }
