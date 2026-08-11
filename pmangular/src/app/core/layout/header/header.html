@@ -9,8 +9,8 @@
     <!-- Botones en ordenador -->
     <nav class="desktop-nav">
       <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">Calendario</button>
-      <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">Lista de la compra</button>
-      <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">Recetas</button>
+      <button [routerLink]="['list', selectedGroupCode()]" mat-menu-item type="button">Lista de la compra</button>
+      <button [routerLink]="['recipe-search']" mat-menu-item type="button">Recetas</button>
       <button [routerLink]="['/groups/access']" mat-menu-item type="button">Crear/Unirse a un grupo</button>
     </nav>
   </div>
@@ -41,9 +41,9 @@
 
 <!-- Menú en móvil -->
 <mat-menu #navigationMenu="matMenu">
-  <button [routerLink]="['']" mat-menu-item type="button">Calendario</button>
-  <button [routerLink]="['']" mat-menu-item type="button">Lista de la compra</button>
-  <button [routerLink]="['']" mat-menu-item type="button">Recetas</button>
+  <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">Calendario</button>
+  <button [routerLink]="['list', selectedGroupCode()]" mat-menu-item type="button">Lista de la compra</button>
+  <button [routerLink]="['recipe-search']" mat-menu-item type="button">Recetas</button>
   <button [routerLink]="['/groups/access']" mat-menu-item type="button">Crear/Unirse a un grupo</button>
 </mat-menu>
 

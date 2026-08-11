@@ -21,4 +21,9 @@
 
 <br>
 
-<a routerLink="/group-onboarding">Crea un nuevo grupo o únete a otro.</a>
+@if(!authService.isAuthenticated()){
+  <a routerLink="/group-onboarding">Crea un nuevo grupo o únete a otro.</a>
+} @else{
+  <a routerLink="/groups/access">Crea un nuevo grupo o únete a otro.</a>
+}
+
