@@ -6,24 +6,15 @@
   <p>Debes iniciar sesión para unirte a este grupo.</p>
   <div #googleButton></div>
 } @else {
-  <button type="button" (click)="joinGroup()" [disabled]="isLoading()">
+  <button mat-raised-button type="button" (click)="joinGroup()" [disabled]="isLoading()">
     Solicitar unirme al grupo
   </button>
 }
 
-@if (errorMessage()) {
-  <small style="color:red">{{ errorMessage() }}</small>
-}
+<br />
 
-@if (infoMessage()) {
-  <p>{{ infoMessage() }}</p>
-}
-
-<br>
-
-@if(!authService.isAuthenticated()){
+@if (!authService.isAuthenticated()) {
   <a routerLink="/group-onboarding">Crea un nuevo grupo o únete a otro.</a>
-} @else{
+} @else {
   <a routerLink="/groups/access">Crea un nuevo grupo o únete a otro.</a>
 }
-

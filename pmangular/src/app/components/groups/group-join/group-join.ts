@@ -3,6 +3,8 @@ import { GroupService } from '../../../services/group.service';
 import { AuthService } from '../../../services/auth.service';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -17,10 +19,7 @@ declare global {
             client_id: string;
             callback: (response: GoogleCredentialResponse) => void;
           }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: Record<string, string | number>,
-          ) => void;
+          renderButton: (parent: HTMLElement, options: Record<string, string | number>) => void;
           prompt: () => void;
         };
       };
@@ -30,7 +29,7 @@ declare global {
 
 @Component({
   selector: 'app-group-join',
-  imports: [RouterLink],
+  imports: [RouterLink, MatButtonModule, MatSnackBarModule],
   templateUrl: './group-join.html',
   styleUrl: './group-join.css',
 })
@@ -42,10 +41,9 @@ export class GroupJoin implements OnInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   ngZone = inject(NgZone);
+  snackBar = inject(MatSnackBar);
 
   groupCode = signal('');
-  errorMessage = signal('');
-  infoMessage = signal('');
   isLoading = signal(false);
 
   googleScript?: HTMLScriptElement;
@@ -68,7 +66,7 @@ export class GroupJoin implements OnInit {
       await this.loadGoogleIdentityScript();
       this.renderGoogleButton();
     } catch {
-      this.errorMessage.set('No se pudo cargar Google Login.');
+      this.showError('No se pudo cargar Google Login.');
     }
   }
 
@@ -78,23 +76,21 @@ export class GroupJoin implements OnInit {
 
   joinGroup() {
     if (!this.authService.isAuthenticated()) {
-      this.errorMessage.set('Debes iniciar sesión para unirte al grupo.');
+      this.showError('Debes iniciar sesión para unirte al grupo.');
       return;
     }
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
-    this.infoMessage.set('');
 
     this.groupService.joinGroup(this.groupCode()).subscribe({
       next: (res) => {
-        this.infoMessage.set(res.message);
+        this.showInfo(res.message);
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.errorMessage.set(err.error.error);
+        this.showError(err.error.error ?? 'No se pudo solicitar la unión al grupo.');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -105,7 +101,6 @@ export class GroupJoin implements OnInit {
 
     this.ngZone.run(() => {
       this.isLoading.set(true);
-      this.errorMessage.set('');
     });
 
     this.authService.login(response.credential).subscribe({
@@ -116,7 +111,7 @@ export class GroupJoin implements OnInit {
       },
       error: () => {
         this.ngZone.run(() => {
-          this.errorMessage.set('No se pudo iniciar sesión con Google en el backend.');
+          this.showError('No se pudo iniciar sesión con Google en el backend.');
           this.isLoading.set(false);
         });
       },
@@ -186,6 +181,23 @@ export class GroupJoin implements OnInit {
       type: 'standard',
       text: 'signin_with',
       width: 280,
+    });
+  }
+
+  showInfo(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
+  }
+
+  showError(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['snackbar-error'],
     });
   }
 }

@@ -1,0 +1,112 @@
+@if (isLoading()) {
+  <p>Cargando receta...</p>
+} @else if (errorMessage()) {
+  <p>{{ errorMessage() }}</p>
+} @else if (recipe()) {
+  <h1>{{ recipe()!.name }}</h1>
+  <p>Autor: {{ recipe()!.author }}</p>
+  <p>Descripción: {{ recipe()!.description }}</p>
+  <p>Tiempo de preparación: {{ recipe()!.preparation_time }} minutos</p>
+  <p>Visibilidad: {{ recipe()!.visibility }}</p>
+  <p>Valoración media: {{ recipe()!.avg_score }} ({{ recipe()!.num_valorations }} valoraciones)</p>
+
+  <h2>Categorías</h2>
+  <ul>
+    @for (category of recipe()!.recipe_categories; track category.id) {
+      <li>{{ category.name }}</li>
+    }
+  </ul>
+
+  <h2>Ingredientes</h2>
+  <ul>
+    @for (ingredient of recipe()!.ingredients; track ingredient.id_ingredient) {
+      <li>{{ ingredient.name }} - {{ ingredient.amount }} {{ ingredient.unit }}</li>
+    }
+  </ul>
+
+  <h2>Pasos</h2>
+  <ol>
+    @for (step of recipe()!.steps; track $index) {
+      <li>{{ step }}</li>
+    }
+  </ol>
+
+  @if (this.authService.isAuthenticated()) {
+    <h2>Comentarios</h2>
+
+    @if (comments().length === 0 && !myComment()) {
+      <p>Todavía no hay comentarios.</p>
+    } @else {
+      @if (comments().length > 0) {
+        <ul>
+          @for (comment of comments(); track $index) {
+            <li>
+              <strong>{{ comment.user }}</strong> - {{ comment.score }}/5
+              @if (comment.comment) {
+                <p>{{ comment.comment }}</p>
+              }
+              @if (isRecipeOwner()) {
+                <button mat-button type="button" (click)="deleteCommentText(comment.user_id)">
+                  Eliminar texto del comentario
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+
+    @if (this.myComment()) {
+      <p>Tu comentario:</p>
+      <p>
+        <strong>{{ this.myComment()!.user }}</strong> - {{ this.myComment()!.score }}/5
+      </p>
+      @if (this.myComment()!.comment) {
+        <p>{{ this.myComment()!.comment }}</p>
+      }
+
+      @if (isEditingMyComment()) {
+        <form [formGroup]="commentForm" (ngSubmit)="updateMyComment()">
+          <mat-form-field>
+            <mat-label>Puntuación</mat-label>
+            <input matInput id="edit-score" type="number" min="0" max="5" formControlName="score" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Comentario</mat-label>
+            <textarea matInput id="edit-comment" formControlName="comment"></textarea>
+          </mat-form-field>
+
+          <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
+            Guardar cambios
+          </button>
+          <button mat-button type="button" (click)="cancelEditMyComment()">Cancelar</button>
+        </form>
+      } @else {
+        <button mat-button type="button" (click)="startEditMyComment()">
+          Modificar mi comentario
+        </button>
+        <button mat-button type="button" (click)="deleteMyComment()">Borrar mi comentario</button>
+      }
+    } @else {
+      <h3>Dejar tu valoriación y/o comentario</h3>
+      <form [formGroup]="commentForm" (ngSubmit)="submitComment()">
+        <mat-form-field>
+          <mat-label>Puntuación</mat-label>
+          <input matInput id="score" type="number" min="0" max="5" formControlName="score" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Comentario</mat-label>
+          <textarea matInput id="comment" formControlName="comment"></textarea>
+        </mat-form-field>
+
+        <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
+          Enviar comentario
+        </button>
+      </form>
+    }
+  } @else {
+    <p>Inicia sesión para ver y escribir comentarios.</p>
+  }
+}

@@ -48,8 +48,9 @@ class CommentInputSerializer(serializers.ModelSerializer):
 
 class CommentOutputSerializer(serializers.ModelSerializer):
   user = serializers.CharField(source = "user.username", read_only = True)
+  user_id = serializers.CharField(source = "user.id", read_only = True)
   recipe = serializers.CharField(source = "recipe.id", read_only = True)
 
   class Meta:
     model = RecipeComment
-    fields = ["recipe", "user", "score", "comment"]
+    fields = ["recipe", "user", "user_id", "score", "comment"]

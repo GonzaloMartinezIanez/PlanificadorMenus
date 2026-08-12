@@ -5,8 +5,10 @@
     <form [formGroup]="groupForm" (ngSubmit)="saveGroup()">
       <h3>Información del grupo</h3>
 
-      <label>Nombre del grupo:</label>
-      <input type="text" formControlName="group_name" />
+      <mat-form-field>
+        <mat-label>Nombre del grupo</mat-label>
+        <input matInput type="text" formControlName="group_name" />
+      </mat-form-field>
       @if (groupForm.get('group_name')?.touched && groupForm.get('group_name')?.invalid) {
         @if (groupForm.get('group_name')?.errors?.['required']) {
           <small style="color:red">El nombre es obligatorio.</small>
@@ -18,10 +20,11 @@
           <small style="color:red">El nombre no puede tener más de 100 caracteres.</small>
         }
       }
-      <br>
 
-      <label>Descripción del grupo:</label>
-      <input type="text" formControlName="group_description" />
+      <mat-form-field>
+        <mat-label>Descripción del grupo</mat-label>
+        <input matInput type="text" formControlName="group_description" />
+      </mat-form-field>
 
       <p>Código: {{ selectedGroup()?.group_code }}</p>
       <p>Fecha de creación: {{ selectedGroup()?.creation_date }}</p>

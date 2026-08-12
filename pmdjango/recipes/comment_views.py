@@ -97,6 +97,21 @@ class CommentApiView(APIView):
     output_serializer = CommentOutputSerializer(comment)
     return Response(output_serializer.data, status = status.HTTP_201_CREATED)
 
+class MyCommentApiView(APIView):
+  permission_classes = [IsAuthenticated]
+
+  def get(self, request, id):
+    recipe, error = get_recipe(request, id)
+    if error:
+      return error
+
+    comment = RecipeComment.objects.filter(recipe = recipe, user = request.user).first()
+    if not comment:
+      return Response({"comment": None}, status = status.HTTP_200_OK)
+
+    serializer = CommentOutputSerializer(comment)
+    return Response(serializer.data, status = status.HTTP_200_OK)
+
 class CommentDeleteApiView(APIView):
   permission_classes = [IsAuthenticated]
 

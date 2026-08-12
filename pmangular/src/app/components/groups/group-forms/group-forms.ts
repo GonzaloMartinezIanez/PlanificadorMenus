@@ -1,13 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, signal } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupService } from '../../../services/group.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-group-forms',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSnackBarModule,
+  ],
   templateUrl: './group-forms.html',
   styleUrl: './group-forms.css',
 })
@@ -20,13 +31,10 @@ export class GroupForms {
   groupService = inject(GroupService);
   router = inject(Router);
   authService = inject(AuthService);
+  snackBar = inject(MatSnackBar);
 
   newGroupForm: FormGroup;
   joinGroupForm: FormGroup;
-
-  createErrorMessage = signal("");
-  joinErrorMessage = signal("");
-  joinInfoMessage = signal("");
 
   constructor(private fb: FormBuilder) {
     this.newGroupForm = this.fb.group({
@@ -35,49 +43,67 @@ export class GroupForms {
     });
 
     this.joinGroupForm = this.fb.group({
-      group_code: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]]
-    })
+      group_code: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]],
+    });
   }
 
   createGroup() {
-    if(!this.newGroupForm.valid){
+    if (!this.newGroupForm.valid) {
       return;
     }
 
     this.groupService.createGroup(this.newGroupForm.value).subscribe({
       next: (res) => {
         this.router.navigate([`/home/${res.group_code}`]);
-      }, error: (err) => {
-        this.createErrorMessage.set(err.error.error);
-      }
+      },
+      error: (err) => {
+        this.showError(err.error.error ?? 'No se pudo crear el grupo.');
+      },
     });
   }
 
   joinGroup() {
-    if(!this.joinGroupForm.valid){
+    if (!this.joinGroupForm.valid) {
       return;
     }
 
     this.groupService.joinGroup(this.joinGroupForm.value.group_code).subscribe({
       next: (res) => {
-        this.joinInfoMessage.set(res.message)
-      }, error: (err) => {
-        this.joinErrorMessage.set(err.error.error);
-      }
-    })
+        this.showInfo(res.message);
+      },
+      error: (err) => {
+        this.showError(err.error.error ?? 'No se pudo solicitar la unión al grupo.');
+      },
+    });
   }
 
   checkAccepted() {
     this.groupService.getMyGroups().subscribe({
       next: (res) => {
-        if(res.length > 0)
-          this.router.navigate([`/home/${res[0].group_code}`]);
-      }
-    })
+        if (res.length > 0) this.router.navigate([`/home/${res[0].group_code}`]);
+      },
+    });
   }
 
   logout() {
     this.authService.logout();
-    this.router.navigate([''])
+    this.router.navigate(['']);
+  }
+
+  showInfo(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
+  }
+
+  showError(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['snackbar-error'],
+    });
   }
 }
