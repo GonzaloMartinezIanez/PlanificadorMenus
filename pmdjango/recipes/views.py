@@ -77,6 +77,49 @@ class RecipeApiView(APIView):
     output_serializer = RecipeOutputSerializer(recipe)
     return Response(output_serializer.data, status = status.HTTP_201_CREATED)
 
+class RecipeSearchApiView(APIView):
+  permission_classes = []
+
+  def get(self, request):
+    recipes = get_my_visible_recipes(request)
+
+    name = request.GET.get("name", "").strip()
+    categories = request.GET.get("categories", "").strip()
+
+    # Primero filtrar por nombre
+    if name:
+      recipes = recipes.filter(name__icontains = name)
+
+    if categories:
+      categories_ids = []
+
+      for category_id in categories.split(","):
+        category_id = category_id.strip()
+
+        if not category_id:
+          continue
+
+        if not category_id.isdigit():
+          return Response({"error": "Las categorías deben ser ids numéricos separados por comas."}, status = status.HTTP_400_BAD_REQUEST)
+
+        categories_ids.append(int(category_id))
+
+      # Este filtro es un OR
+      if categories_ids:
+        recipes = recipes.filter(recipe_categories__id__in = categories_ids).distinct() # Sin distinct se repite la misma si pertenece a las dos categorías
+
+    serializer = RecipeOutputSerializer(recipes, many = True)
+    return Response(serializer.data, status = status.HTTP_200_OK)
+
+class RecipeTopApiView(APIView):
+  permission_classes = []
+
+  def get(self, request):
+    recipes = get_my_visible_recipes(request).filter(num_valorations__gt = 0).order_by("-num_valorations", "-avg_score")[:10] # Las diez con más valoraciones
+
+    serializer = RecipeOutputSerializer(recipes, many = True)
+    return Response(serializer.data, status = status.HTTP_200_OK)
+
 # GET, PUT, PATCH, DELETE receta por id
 class RecipeIdApiView(APIView):
   permission_classes = []

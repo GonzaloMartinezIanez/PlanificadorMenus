@@ -14,7 +14,16 @@ import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, MatToolbarModule, MatSelectModule, MatFormFieldModule, MatButtonModule, MatIconModule, MatMenuModule, RouterLink],
+  imports: [
+    CommonModule,
+    MatToolbarModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    RouterLink,
+  ],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -33,19 +42,12 @@ export class Header implements OnInit {
     // Guardar el código del grupo en selectedGroupCode
     this.updateSelectedGroupFromUrl();
 
-    // Detectar cada vez que se cambia la url y cambiar selectedGroupCode
-    this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.updateSelectedGroupFromUrl();
+      this.loadMyGroups();
     });
 
-    // Carga todos los grupos a los que pertenece el usuario (para el select)
-    this.groupService.getMyGroups().subscribe({
-      next: (groups) => {
-        this.myGroups.set(groups);
-      }
-    });
+    this.loadMyGroups();
   }
 
   // Capta el parámetro group_code del parámetro de la url
@@ -59,10 +61,25 @@ export class Header implements OnInit {
     const groupCode = currentRoute.snapshot.paramMap.get('group_code');
     if (groupCode) {
       this.selectedGroupCode.set(groupCode);
+    } else {
+      this.selectedGroupCode.set('');
     }
   }
 
   // Select para cambiar de grupo recarga la vista actual con el nuevo grupo
+  loadMyGroups() {
+    if (!this.authService.isAuthenticated()) {
+      this.myGroups.set([]);
+      return;
+    }
+
+    this.groupService.getMyGroups().subscribe({
+      next: (groups) => {
+        this.myGroups.set(groups);
+      },
+    });
+  }
+
   changeGroup(groupCode: string) {
     const currentGroupCode = this.selectedGroupCode();
 
@@ -76,6 +93,6 @@ export class Header implements OnInit {
 
   logout() {
     this.authService.logout();
-    this.router.navigate([''])
+    this.router.navigate(['']);
   }
 }

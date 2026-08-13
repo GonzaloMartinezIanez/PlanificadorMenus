@@ -1,0 +1,25 @@
+<h2>Filtra recetas</h2>
+
+<mat-form-field appearance="fill">
+  <mat-label>Busca recetas por texto</mat-label>
+  <input matInput placeholder="Nombre de la receta" (input)="updateSearchName($event)" />
+</mat-form-field>
+
+<mat-button-toggle-group multiple>
+  @for (cat of recipeCategories(); track cat.id) {
+    <mat-button-toggle [checked]="isCategorySelected(cat.id)" (click)="toggleCategory(cat.id)">
+      {{ cat.name }}
+    </mat-button-toggle>
+  }
+</mat-button-toggle-group>
+
+@if (searchedRecipes().length > 0) {
+  @for (rec of searchedRecipes(); track rec.id) {
+    <app-recipe-search-result
+      [recipe]="rec"
+      [actionLabel]="actionLabel"
+      (actionClicked)="onActionClicked($event)" />
+  }
+} @else {
+  <p>No se han encontrado recetas.</p>
+}

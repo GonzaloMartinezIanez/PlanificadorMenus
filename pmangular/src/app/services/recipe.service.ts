@@ -2,13 +2,30 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Recipe, RecipeComment } from '../models/recipe';
+import { Recipe, RecipeCategory, RecipeComment } from '../models/recipe';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RecipeService {
   private http = inject(HttpClient);
+
+  getRecipes(): Observable<Recipe[]> {
+    return this.http.get<Recipe[]>(`${environment.apiUrl}/recipes/`);
+  }
+
+  searchRecipes(name: string, categoryIds: number[]): Observable<Recipe[]> {
+    const url = `${environment.apiUrl}/recipes/search/?name${name}=&categories=${categoryIds.join(',')}`;
+    return this.http.get<Recipe[]>(url);
+  }
+
+  getTopRecipes(): Observable<Recipe[]> {
+    return this.http.get<Recipe[]>(`${environment.apiUrl}/recipes/top/`);
+  }
+
+  getRecipesCategories(): Observable<RecipeCategory[]> {
+    return this.http.get<RecipeCategory[]>(`${environment.apiUrl}/recipe_category/`);
+  }
 
   getRecipeById(id: number): Observable<Recipe> {
     return this.http.get<Recipe>(`${environment.apiUrl}/recipes/${id}/`);

@@ -1,53 +1,86 @@
 <mat-toolbar class="app-header">
-  <div class="header-left">
-    <!-- Burguer menú en móviles -->
-    <button mat-icon-button class="mobile-menu-button" [matMenuTriggerFor]="navigationMenu"
-      aria-label="Abrir menú de navegación">
-      <mat-icon aria-label="Menú desplegable de navegación" fontIcon="menu" style="color: black;" />
-    </button>
+  <div class="header-top">
+    <div class="header-left">
+      <!-- Burguer menú en móviles -->
+      <button
+        mat-icon-button
+        class="mobile-menu-button"
+        [matMenuTriggerFor]="navigationMenu"
+        aria-label="Abrir menú de navegación"
+      >
+        <mat-icon
+          aria-label="Menú desplegable de navegación"
+          fontIcon="menu"
+          style="color: black"
+        />
+      </button>
+    </div>
 
-    <!-- Botones en ordenador -->
-    <nav class="desktop-nav">
-      <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">Calendario</button>
-      <button [routerLink]="['list', selectedGroupCode()]" mat-menu-item type="button">Lista de la compra</button>
-      <button [routerLink]="['recipe-search']" mat-menu-item type="button">Recetas</button>
-      <button [routerLink]="['/groups/access']" mat-menu-item type="button">Crear/Unirse a un grupo</button>
-    </nav>
-  </div>
+    <h1 class="header-title">Planificador de menús</h1>
 
-  <h1 class="header-title">Planificador de menús</h1>
-
-  <div class="header-right">
-    @if (myGroups().length > 1) {
-    <mat-form-field>
-      <mat-select [value]="selectedGroupCode()" (valueChange)="changeGroup($event)">
-        @for (group of myGroups(); track group.group_code) {
-        <mat-option [value]="group.group_code">{{group.group_name}}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    }
-
-    <button mat-icon-button class="avatar-button" [matMenuTriggerFor]="userMenu" aria-label="Abrir menú de usuario">
-      @if (currentUser()?.profile_picture) {
-      <img class="avatar-image" [src]="currentUser()?.profile_picture" alt="Avatar del usuario" />
-      } @else {
-      <!-- Si hay un problema con la foto, se carga su inicial -->
-      <span class="avatar-fallback">{{ userInitialLetter() }}</span>
+    <div class="header-right">
+      @if (myGroups().length > 1) {
+        <mat-form-field>
+          <mat-select [value]="selectedGroupCode()" (valueChange)="changeGroup($event)">
+            @for (group of myGroups(); track group.group_code) {
+              <mat-option [value]="group.group_code">{{ group.group_name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       }
-    </button>
+
+      <button
+        mat-icon-button
+        class="avatar-button"
+        [matMenuTriggerFor]="userMenu"
+        aria-label="Abrir menú de usuario"
+      >
+        @if (currentUser()?.profile_picture) {
+          <img
+            class="avatar-image"
+            [src]="currentUser()?.profile_picture"
+            alt="Avatar del usuario"
+          />
+        } @else {
+          <!-- Si hay un problema con la foto, se carga su inicial -->
+          <span class="avatar-fallback">{{ userInitialLetter() }}</span>
+        }
+      </button>
+    </div>
   </div>
+
+  <!-- Botones en ordenador -->
+  <nav class="desktop-nav">
+    <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">
+      Calendario
+    </button>
+    <button [routerLink]="['list', selectedGroupCode()]" mat-menu-item type="button">
+      Lista de la compra
+    </button>
+    <button [routerLink]="['recipes']" mat-menu-item type="button">Recetas</button>
+    <button [routerLink]="['/groups/access']" mat-menu-item type="button">
+      Crear/Unirse a un grupo
+    </button>
+  </nav>
 </mat-toolbar>
 
 <!-- Menú en móvil -->
 <mat-menu #navigationMenu="matMenu">
-  <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">Calendario</button>
-  <button [routerLink]="['list', selectedGroupCode()]" mat-menu-item type="button">Lista de la compra</button>
-  <button [routerLink]="['recipe-search']" mat-menu-item type="button">Recetas</button>
-  <button [routerLink]="['/groups/access']" mat-menu-item type="button">Crear/Unirse a un grupo</button>
+  <button [routerLink]="['home', selectedGroupCode()]" mat-menu-item type="button">
+    Calendario
+  </button>
+  <button [routerLink]="['list', selectedGroupCode()]" mat-menu-item type="button">
+    Lista de la compra
+  </button>
+  <button [routerLink]="['recipes']" mat-menu-item type="button">Recetas</button>
+  <button [routerLink]="['/groups/access']" mat-menu-item type="button">
+    Crear/Unirse a un grupo
+  </button>
 </mat-menu>
 
 <mat-menu #userMenu="matMenu">
-  <button [routerLink]="['groups', selectedGroupCode(), 'manage']" mat-menu-item type="button">Administrar mis grupos</button>
+  <button [routerLink]="['groups', selectedGroupCode(), 'manage']" mat-menu-item type="button">
+    Administrar mis grupos
+  </button>
   <button mat-menu-item type="button" (click)="logout()">Cerrar sesión</button>
 </mat-menu>

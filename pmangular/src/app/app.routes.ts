@@ -11,8 +11,8 @@ import { groupGuard } from './guards/group-guard';
 import { GroupManage } from './components/groups/group-manage/group-manage';
 import { Calendar } from './components/menus/calendar/calendar';
 import { List } from './components/lists/list/list';
-import { RecipeSerach } from './components/recipes/recipe-serach/recipe-serach';
 import { RecipeDetail } from './components/recipes/recipe-detail/recipe-detail';
+import { Recipes } from './components/recipes/recipes';
 
 export const routes: Routes = [
   { 'path': '', redirectTo: 'login', pathMatch: 'full' },
@@ -28,7 +28,7 @@ export const routes: Routes = [
       { 'path': 'list/:group_code', component: List, canActivate: [groupGuard] },
       { 'path': 'home/:group_code', component: Calendar, canActivate: [groupGuard] },
       { 'path': 'groups/access', component: GroupAccess },
-      { 'path': 'recipe-search', component: RecipeSerach },
+      { 'path': 'recipes', component: Recipes },
       { 'path': 'recipes/:id', component: RecipeDetail },
       { 'path': 'groups/:group_code/manage', component: GroupManage, canActivate: [groupGuard] },
     ]
