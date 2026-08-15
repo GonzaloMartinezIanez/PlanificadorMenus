@@ -25,7 +25,7 @@ class RecipeCategoryRecipesApiView(APIView):
 
     recipes = get_my_visible_recipes(request).filter(recipe_categories__id = id_recipe_category)
 
-    serializer = RecipeOutputSerializer(recipes, many = True)
+    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
 
     return Response(serializer.data, status = status.HTTP_200_OK)
 
@@ -35,7 +35,7 @@ class RecipeApiView(APIView):
 
   def get(self, request):
     recipes = get_my_visible_recipes(request)
-    serializer = RecipeOutputSerializer(recipes, many = True)
+    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
 
     return Response(serializer.data, status = status.HTTP_200_OK)
 
@@ -74,7 +74,7 @@ class RecipeApiView(APIView):
     except Exception as e:
       return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
-    output_serializer = RecipeOutputSerializer(recipe)
+    output_serializer = RecipeOutputSerializer(recipe, context = {"request": request})
     return Response(output_serializer.data, status = status.HTTP_201_CREATED)
 
 class RecipeSearchApiView(APIView):
@@ -108,7 +108,7 @@ class RecipeSearchApiView(APIView):
       if categories_ids:
         recipes = recipes.filter(recipe_categories__id__in = categories_ids).distinct() # Sin distinct se repite la misma si pertenece a las dos categorías
 
-    serializer = RecipeOutputSerializer(recipes, many = True)
+    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
     return Response(serializer.data, status = status.HTTP_200_OK)
 
 class RecipeTopApiView(APIView):
@@ -117,7 +117,7 @@ class RecipeTopApiView(APIView):
   def get(self, request):
     recipes = get_my_visible_recipes(request).filter(num_valorations__gt = 0).order_by("-num_valorations", "-avg_score")[:10] # Las diez con más valoraciones
 
-    serializer = RecipeOutputSerializer(recipes, many = True)
+    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
     return Response(serializer.data, status = status.HTTP_200_OK)
 
 # GET, PUT, PATCH, DELETE receta por id
@@ -129,7 +129,7 @@ class RecipeIdApiView(APIView):
     if not recipe:
       return Response({"error": "Receta no encontrada."}, status = status.HTTP_404_NOT_FOUND)
 
-    serializer = RecipeOutputSerializer(recipe)
+    serializer = RecipeOutputSerializer(recipe, context = {"request": request})
     return Response(serializer.data, status = status.HTTP_200_OK)
 
   def put(self, request, id):
@@ -176,7 +176,7 @@ class RecipeIdApiView(APIView):
     except Exception as e:
       return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
-    output_serializer = RecipeOutputSerializer(recipe)
+    output_serializer = RecipeOutputSerializer(recipe, context = {"request": request})
     return Response(output_serializer.data, status = status.HTTP_200_OK)
 
   def patch(self, request, id):
@@ -224,7 +224,7 @@ class RecipeIdApiView(APIView):
     except Exception as e:
       return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
-    output_serializer = RecipeOutputSerializer(recipe)
+    output_serializer = RecipeOutputSerializer(recipe, context = {"request": request})
     return Response(output_serializer.data, status = status.HTTP_200_OK)
 
   def delete(self, request, id):

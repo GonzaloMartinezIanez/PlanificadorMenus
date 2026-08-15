@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { RecipeCreate } from './recipe-create/recipe-create';
 import { RecipeSearch } from './recipe-search/recipe-search';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-recipes',
-  imports: [RecipeCreate, RecipeSearch],
+  imports: [RecipeSearch, RouterLink, MatButtonModule],
   templateUrl: './recipes.html',
   styleUrl: './recipes.css',
 })

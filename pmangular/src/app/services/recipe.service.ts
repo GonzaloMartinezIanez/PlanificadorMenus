@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Recipe, RecipeCategory, RecipeComment } from '../models/recipe';
+import { IngredientOption, Recipe, RecipeCategory, RecipeComment } from '../models/recipe';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +15,13 @@ export class RecipeService {
   }
 
   searchRecipes(name: string, categoryIds: number[]): Observable<Recipe[]> {
-    const url = `${environment.apiUrl}/recipes/search/?name${name}=&categories=${categoryIds.join(',')}`;
+    let url = `${environment.apiUrl}/recipes/search/?`;
+    if(name)
+      url += `name=${name}&`
+
+    if(categoryIds.length > 0)
+      url += `categories=${categoryIds.join(',')}`
+
     return this.http.get<Recipe[]>(url);
   }
 
@@ -29,6 +35,22 @@ export class RecipeService {
 
   getRecipeById(id: number): Observable<Recipe> {
     return this.http.get<Recipe>(`${environment.apiUrl}/recipes/${id}/`);
+  }
+
+  createRecipe(data: unknown) {
+    return this.http.post<Recipe>(`${environment.apiUrl}/recipes/`, data);
+  }
+
+  updateRecipe(id: number, data: unknown) {
+    return this.http.put<Recipe>(`${environment.apiUrl}/recipes/${id}/`, data);
+  }
+
+  deleteRecipe(id: number) {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/recipes/${id}/`);
+  }
+
+  searchIngredientsByName(name: string): Observable<IngredientOption[]> {
+    return this.http.get<IngredientOption[]>(`${environment.apiUrl}/ingredient_by_name/?name=${encodeURIComponent(name)}`);
   }
 
   getCommentsByRecipeId(id: number): Observable<RecipeComment[]> {

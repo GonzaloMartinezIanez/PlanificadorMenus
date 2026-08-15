@@ -23,23 +23,34 @@ class RecipeInputSerializer(serializers.ModelSerializer):
 class RecipeIngredientOutputSerializer(serializers.ModelSerializer):
   id_ingredient = serializers.CharField(source = "ingredient.id_ingredient", read_only = True)
   name = serializers.CharField(source = "ingredient.name", read_only = True)
+  image = serializers.CharField(source = "ingredient.image", read_only = True)
+  reference_format = serializers.CharField(source = "ingredient.reference_format", read_only = True)
 
   class Meta:
     model = IngredientInRecipe
-    fields = ["id_ingredient", "name", "amount", "unit"]
+    fields = ["id_ingredient", "name", "image", "reference_format", "amount", "unit"]
 
 class RecipeOutputSerializer(serializers.ModelSerializer):
   author = serializers.CharField(source = "user.username", read_only = True)
   recipe_categories = RecipeCategorySerializer(many = True, read_only = True)
   ingredients = serializers.SerializerMethodField() # get_ingredients()
+  is_author = serializers.SerializerMethodField()
 
   class Meta:
     model = Recipe
-    fields = ["id", "author", "name", "description", "preparation_time", "steps", "visibility", "recipe_categories", "num_valorations", "avg_score", "ingredients"]
+    fields = ["id", "author", "is_author", "name", "description", "preparation_time", "steps", "visibility", "recipe_categories", "num_valorations", "avg_score", "ingredients"]
 
   def get_ingredients(self, obj):
     ingredients = IngredientInRecipe.objects.filter(recipe = obj)
     return RecipeIngredientOutputSerializer(ingredients, many = True).data
+
+  def get_is_author(self, obj):
+    request = self.context.get("request")
+
+    if not request or not request.user.is_authenticated:
+      return False
+
+    return obj.user_id == request.user.id
 
 class CommentInputSerializer(serializers.ModelSerializer):
   class Meta:

@@ -10,6 +10,18 @@
   <p>Visibilidad: {{ recipe()!.visibility }}</p>
   <p>Valoración media: {{ recipe()!.avg_score }} ({{ recipe()!.num_valorations }} valoraciones)</p>
 
+  @if (this.authService.isAuthenticated()) {
+    <p>
+      <a mat-button [routerLink]="['/recipes/create-from', recipe()?.id]"
+        >Crear a partir de esta receta</a
+      >
+      @if (isRecipeOwner()) {
+        <a mat-button [routerLink]="['/recipes', recipe()!.id, 'edit']">Editar receta</a>
+        <button mat-button type="button" (click)="deleteRecipe()">Borrar receta</button>
+      }
+    </p>
+  }
+
   <h2>Categorías</h2>
   <ul>
     @for (category of recipe()!.recipe_categories; track category.id) {
@@ -20,7 +32,12 @@
   <h2>Ingredientes</h2>
   <ul>
     @for (ingredient of recipe()!.ingredients; track ingredient.id_ingredient) {
-      <li>{{ ingredient.name }} - {{ ingredient.amount }} {{ ingredient.unit }}</li>
+      <li>
+        @if (ingredient.image) {
+          <img [src]="ingredient.image" [alt]="ingredient.name" width="48" height="48" />
+        }
+        {{ ingredient.name }} - {{ ingredient.amount }} {{ ingredient.unit }}
+      </li>
     }
   </ul>
 
@@ -89,7 +106,7 @@
         <button mat-button type="button" (click)="deleteMyComment()">Borrar mi comentario</button>
       }
     } @else {
-      <h3>Dejar tu valoriación y/o comentario</h3>
+      <h3>Deja tu valoriración y/o comentario</h3>
       <form [formGroup]="commentForm" (ngSubmit)="submitComment()">
         <mat-form-field>
           <mat-label>Puntuación</mat-label>

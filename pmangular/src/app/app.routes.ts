@@ -13,6 +13,7 @@ import { Calendar } from './components/menus/calendar/calendar';
 import { List } from './components/lists/list/list';
 import { RecipeDetail } from './components/recipes/recipe-detail/recipe-detail';
 import { Recipes } from './components/recipes/recipes';
+import { RecipeCreate } from './components/recipes/recipe-create/recipe-create';
 
 export const routes: Routes = [
   { 'path': '', redirectTo: 'login', pathMatch: 'full' },
@@ -29,6 +30,9 @@ export const routes: Routes = [
       { 'path': 'home/:group_code', component: Calendar, canActivate: [groupGuard] },
       { 'path': 'groups/access', component: GroupAccess },
       { 'path': 'recipes', component: Recipes },
+      { 'path': 'recipes/create', component: RecipeCreate },
+      { 'path': 'recipes/create-from/:originalId', component: RecipeCreate },
+      { 'path': 'recipes/:id/edit', component: RecipeCreate },
       { 'path': 'recipes/:id', component: RecipeDetail },
       { 'path': 'groups/:group_code/manage', component: GroupManage, canActivate: [groupGuard] },
     ]

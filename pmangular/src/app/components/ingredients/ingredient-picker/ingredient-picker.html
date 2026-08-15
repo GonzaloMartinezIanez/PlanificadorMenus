@@ -1,0 +1,97 @@
+<h3>Buscar ingrediente</h3>
+
+<mat-form-field>
+  <mat-label>Nombre del ingrediente</mat-label>
+  <input matInput [value]="searchText()" (input)="searchIngredients($event)" />
+</mat-form-field>
+
+<!-- Si se busca por texto desaparecen las categorías (TODO Añadir un endpoint que acepte ambos) -->
+@if (searchText()) {
+  <h4>Resultados</h4>
+
+  @if (isLoadingSearchResults()) {
+    <p>Cargando...</p>
+  } @else if (searchResults().length > 0) {
+    @for (ingredient of searchResults(); track ingredient.id_ingredient) {
+      @if (ingredient.image) {
+        <img [src]="ingredient.image" [alt]="ingredient.name" width="48" height="48" />
+      }
+      {{ ingredient.name }}
+      <button
+        mat-button
+        type="button"
+        [disabled]="isIngredientSelected(ingredient.id_ingredient)"
+        (click)="addIngredient(ingredient)"
+      >
+        Añadir
+      </button>
+    }
+  } @else {
+    <p>No se han encontrado ingredientes.</p>
+  }
+} @else {
+  <h4>Categorías</h4>
+
+  <div>
+    @for (category of mainCategories(); track category.id_ingredient_category) {
+      <button mat-button type="button" (click)="selectMainCategory(category)">
+        @if (category.icon) {
+          <img [src]="category.icon" [alt]="category.name" width="24" height="24" />
+        }
+        {{
+          selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category
+            ? category.name + ' X'
+            : category.name
+        }}
+      </button>
+    }
+  </div>
+
+  @if (selectedMainCategory()) {
+    <h4>Subcategorías de {{ selectedMainCategory()!.name }}</h4>
+
+    @if (subcategories().length > 0) {
+      <div>
+        @for (subcategory of subcategories(); track subcategory.id_ingredient_category) {
+          <button mat-button type="button" (click)="selectSubcategory(subcategory)">
+            @if (subcategory.icon) {
+              <img [src]="subcategory.icon" [alt]="subcategory.name" width="24" height="24" />
+            }
+            {{
+              selectedSubcategory()?.id_ingredient_category === subcategory.id_ingredient_category
+                ? subcategory.name + ' X'
+                : subcategory.name
+            }}
+          </button>
+        }
+      </div>
+    } @else {
+      <p>No hay subcategorías.</p>
+    }
+  }
+
+  @if (selectedSubcategory()) {
+    <h4>Ingredientes de {{ selectedSubcategory()!.name }}</h4>
+
+    @if (isLoadingCategoryIngredients()) {
+      <p>Cargando...</p>
+    } @else if (categoryIngredients().length > 0) {
+      @for (ingredient of categoryIngredients(); track ingredient.id_ingredient) {
+        @if (ingredient.image) {
+          <img [src]="ingredient.image" [alt]="ingredient.name" width="48" height="48" />
+        }
+        {{ ingredient.name }}
+        <button
+          mat-button
+          type="button"
+          [disabled]="isIngredientSelected(ingredient.id_ingredient)"
+          (click)="addIngredient(ingredient)"
+        >
+          Añadir
+        </button>
+      }
+    } @else {
+      <p>No hay ingredientes en esta subcategoría.</p>
+    }
+  }
+}

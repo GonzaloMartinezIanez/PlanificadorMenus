@@ -1,1 +1,113 @@
-<p>recipe-create works!</p>
+@if (isLoading()) {
+  <p>Cargando receta...</p>
+} @else {
+  <h1>{{ getTitle() }}</h1>
+
+  <form [formGroup]="recipeForm" (ngSubmit)="saveRecipe()">
+    <mat-form-field>
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Tiempo de preparación</mat-label>
+      <input matInput type="number" min="1" formControlName="preparation_time" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Visibilidad</mat-label>
+      <mat-select formControlName="visibility">
+        <mat-option value="PUBLIC">PUBLIC</mat-option>
+        <mat-option value="PRIVATE">PRIVATE</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Categorías</mat-label>
+      <mat-select formControlName="recipe_categories" multiple>
+        @for (category of recipeCategories(); track category.id) {
+          <mat-option [value]="category.id">
+            @if (category.icon) {
+              <img [src]="category.icon" [alt]="category.name" width="24" height="24" />
+            }
+            {{ category.name }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <h2>Pasos</h2>
+
+    <div formArrayName="steps">
+      @for (step of steps().controls; track $index) {
+        <div>
+          <mat-form-field>
+            <mat-label>Paso {{ $index + 1 }}</mat-label>
+            <textarea matInput [formControlName]="$index"></textarea>
+          </mat-form-field>
+
+          <button mat-button type="button" (click)="removeStep($index)">Eliminar paso</button>
+        </div>
+      }
+    </div>
+
+    <button mat-button type="button" (click)="addStep()">Añadir paso</button>
+
+    <h2>Ingredientes</h2>
+
+    <app-ingredient-picker
+      [selectedIngredientIds]="getSelectedIngredientIds()"
+      (ingredientSelected)="addIngredient($event)">
+    </app-ingredient-picker>
+
+    <div formArrayName="ingredients">
+      @for (ingredient of ingredients().controls; track $index) {
+        <div [formGroupName]="$index">
+          @if (ingredient.get('image')?.value) {
+            <img
+              [src]="ingredient.get('image')?.value"
+              [alt]="ingredient.get('name')?.value"
+              width="64"
+              height="64" />
+          }
+          <p>{{ ingredient.get('name')?.value }}</p>
+
+          <mat-form-field>
+            <mat-label>Cantidad</mat-label>
+            <input matInput type="number" min="0.001" step="0.001" formControlName="amount" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Unidad</mat-label>
+            <mat-select formControlName="unit">
+              @for (unit of getUnitOptions($index); track unit) {
+                <mat-option [value]="unit">
+                  @if (unit === 'unit') {
+                    Unidad
+                  } @else {
+                    {{ unit }}
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-button type="button" (click)="removeIngredient($index)">
+            Eliminar ingrediente
+          </button>
+        </div>
+      }
+    </div>
+
+    <p>
+      <button mat-button type="submit" [disabled]="recipeForm.invalid || isSaving()">
+        Guardar receta
+      </button>
+    </p>
+  </form>
+}

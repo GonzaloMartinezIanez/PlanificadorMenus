@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeComment } from '../../../models/recipe';
 import { AuthService } from '../../../services/auth.service';
@@ -19,12 +19,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,
+    RouterLink,
   ],
   templateUrl: './recipe-detail.html',
   styleUrl: './recipe-detail.css',
 })
 export class RecipeDetail implements OnInit {
   route = inject(ActivatedRoute);
+  router = inject(Router);
   recipeService = inject(RecipeService);
   authService = inject(AuthService);
   snackBar = inject(MatSnackBar);
@@ -204,7 +206,7 @@ export class RecipeDetail implements OnInit {
   }
 
   isRecipeOwner() {
-    return this.currentUser()?.username === this.recipe()?.author;
+    return this.recipe()?.is_author ?? false;
   }
 
   deleteCommentText(user_id: number) {
@@ -223,6 +225,30 @@ export class RecipeDetail implements OnInit {
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudo eliminar el texto del comentario.');
+      },
+    });
+  }
+
+  deleteRecipe() {
+    const recipe = this.recipe();
+
+    if (!recipe || !this.isRecipeOwner()) {
+      return;
+    }
+
+    const confirmed = window.confirm('¿Seguro que quieres borrar esta receta?');
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.recipeService.deleteRecipe(recipe.id).subscribe({
+      next: () => {
+        this.showInfo('Receta eliminada correctamente.');
+        this.router.navigate(['/recipes']);
+      },
+      error: (err) => {
+        this.showError(err.error.error ?? 'No se pudo eliminar la receta.');
       },
     });
   }
