@@ -1,0 +1,12 @@
+@for (day of week(); track day.toISOString()) {
+  @if (day.getTime() >= todayStart().getTime()) {
+    <p>{{ day }}</p>
+  } @else {
+    <p>Día anterior</p>
+  }
+}
+
+@if (canGoToPreviousWeek()) {
+  <button mat-button (click)="generatePreviousWeek()">Semana anterior</button>
+}
+<button mat-button (click)="generateNextWeek()">Semana siguiente</button>
