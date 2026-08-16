@@ -44,7 +44,6 @@ export class Header implements OnInit {
 
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.updateSelectedGroupFromUrl();
-      this.loadMyGroups();
     });
 
     this.loadMyGroups();
@@ -61,8 +60,6 @@ export class Header implements OnInit {
     const groupCode = currentRoute.snapshot.paramMap.get('group_code');
     if (groupCode) {
       this.selectedGroupCode.set(groupCode);
-    } else {
-      this.selectedGroupCode.set('');
     }
   }
 
