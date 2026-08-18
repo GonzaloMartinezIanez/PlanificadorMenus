@@ -1,0 +1,22 @@
+<h3>{{ title }}</h3>
+
+@if (menus.length > 0) {
+  @for (menu of menus; track $index) {
+    <p>
+      <a [routerLink]="['/recipes', menu.recipe.id]">{{ menu.recipe.name }}</a>
+
+      <button mat-button type="button" (click)="onDeleteRecipe(menu.recipe.id)">Eliminar</button>
+    </p>
+  }
+}
+
+<button mat-button type="button" (click)="openRecipeSearch()">Añadir receta</button>
+
+<ng-template #recipeSearchDialog>
+  <app-recipe-search
+    [actionLabel]="'Añadir'"
+    (actionClicked)="selectRecipe($event)"
+    (detailsClicked)="closeRecipeSearch()">
+  </app-recipe-search>
+  <button mat-button type="button" (click)="dialog.closeAll()">Cerrar</button>
+</ng-template>

@@ -1,12 +1,17 @@
-@for (day of week(); track day.toISOString()) {
-  @if (day.getTime() >= todayStart().getTime()) {
-    <p>{{ day }}</p>
-  } @else {
-    <p>Día anterior</p>
+<div style="display: flex; flex-direction: columns; width: 100%; justify-content: space-around;">
+  @for (day of week(); track day.toISOString()) {
+    @if(!isPastDay(day)){
+    <app-calendar-day
+      [day]="day"
+      [menus]="getMenusByDay(day)"
+      (addRecipe)="addRecipeToMenu($event)"
+      (deleteRecipe)="deleteRecipeFromMenu($event)"
+    />
+    }
   }
-}
+</div>
 
 @if (canGoToPreviousWeek()) {
-  <button mat-button (click)="generatePreviousWeek()">Semana anterior</button>
+  <button mat-button type="button" (click)="generatePreviousWeek()">Semana anterior</button>
 }
-<button mat-button (click)="generateNextWeek()">Semana siguiente</button>
+<button mat-button type="button" (click)="generateNextWeek()">Semana siguiente</button>

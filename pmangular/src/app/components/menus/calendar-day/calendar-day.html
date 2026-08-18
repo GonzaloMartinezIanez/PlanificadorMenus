@@ -1,1 +1,27 @@
-<p>calendar-day works!</p>
+@if (day) {
+  <h2>{{ formatDayText(day) }}</h2>
+
+  <app-day-mealtime
+    [title]="'Desayuno'"
+    [time]="'BREAKFAST'"
+    [menus]="getMenusByTime('BREAKFAST')"
+    (addRecipe)="onRecipeSelected($event)"
+    (deleteRecipe)="onDeleteRecipe($event)">
+  </app-day-mealtime>
+
+  <app-day-mealtime
+    [title]="'Comida'"
+    [time]="'LUNCH'"
+    [menus]="getMenusByTime('LUNCH')"
+    (addRecipe)="onRecipeSelected($event)"
+    (deleteRecipe)="onDeleteRecipe($event)">
+  </app-day-mealtime>
+
+  <app-day-mealtime
+    [title]="'Cena'"
+    [time]="'DINNER'"
+    [menus]="getMenusByTime('DINNER')"
+    (addRecipe)="onRecipeSelected($event)"
+    (deleteRecipe)="onDeleteRecipe($event)">
+  </app-day-mealtime>
+}

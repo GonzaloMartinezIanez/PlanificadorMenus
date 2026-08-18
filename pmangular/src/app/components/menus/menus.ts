@@ -1,12 +1,14 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { MenuService } from '../../services/menu.service';
-import { MenuModel } from '../../models/menu';
-import { MatAnchor } from '@angular/material/button';
+import { MenuModel, ShortMenuModel } from '../../models/menu';
+import { CalendarDay } from './calendar-day/calendar-day';
+import { Recipe } from '../../models/recipe';
 
 @Component({
   selector: 'app-menus',
-  imports: [MatAnchor],
+  imports: [MatButtonModule, CalendarDay],
   templateUrl: './menus.html',
   styleUrl: './menus.css',
 })
@@ -14,6 +16,7 @@ export class Menus implements OnInit {
   route = inject(ActivatedRoute);
   menuService = inject(MenuService);
 
+  groupCode = signal<string | null>(null);
   menus = signal<MenuModel[]>([]);
   today = signal(new Date());
   todayStart = computed(() => {
@@ -27,16 +30,34 @@ export class Menus implements OnInit {
 
     // Hay que tener en cuenta que: Domingo = 0, Lunes = 1, Martes = 2...
     const day = date.getDay();
-    const numDays = day === 0 ? -6 : 1 - day; // Si hoy es: lunes 0, martes -1 ... domingo -6
+    // Si hoy es: lunes 0, martes -1 ... domingo -6
+    const numDays = day === 0 ? -6 : 1 - day;
 
     return new Date(date.setDate(date.getDate() + numDays));
   });
   week = signal<Date[] | null>(null);
 
   ngOnInit(): void {
-    this.updateDayMidnight(); // Cambiar this.today() a las 24:00
+    this.updateDayMidnight();
+    this.week.set(this.generateWeek(this.thisMonday()));
 
-    const groupCode = this.route.snapshot.paramMap.get('group_code');
+    // Escuchar la url para el cambio de grupo
+    this.route.paramMap.subscribe({
+      next: (params) => {
+        const groupCode = params.get('group_code');
+
+        if (!groupCode) {
+          return;
+        }
+
+        this.groupCode.set(groupCode);
+        this.loadMenus();
+      },
+    });
+  }
+
+  loadMenus() {
+    const groupCode = this.groupCode();
 
     if (!groupCode) {
       return;
@@ -47,8 +68,6 @@ export class Menus implements OnInit {
         this.menus.set(menus);
       },
     });
-
-    this.week.set(this.generateWeek(this.thisMonday()));
   }
 
   generateWeek(monday: Date): Date[] {
@@ -56,6 +75,7 @@ export class Menus implements OnInit {
     for (let i = 0; i < 7; i++) {
       const date = new Date(monday);
       date.setDate(date.getDate() + i);
+      date.setHours(0, 0, 0, 0);
       days.push(date);
     }
 
@@ -95,6 +115,64 @@ export class Menus implements OnInit {
     }
 
     return monday.getTime() > this.thisMonday().getTime();
+  }
+
+  getMenusByDay(day: Date) {
+    const formattedDay = this.formatDate(day);
+
+    return this.menus().filter((menu) => menu.date === formattedDay);
+  }
+
+  isPastDay(day: Date) {
+    return day.getTime() < this.todayStart().getTime();
+  }
+
+  addRecipeToMenu(event: MenuModel) {
+    const groupCode = this.groupCode();
+
+    if (!groupCode) {
+      return;
+    }
+
+    const menu: ShortMenuModel = {
+      id_recipe: event.recipe.id,
+      date: event.date,
+      time: event.time,
+    };
+
+    this.menuService.postMenus(groupCode, menu).subscribe({
+      next: () => {
+        this.loadMenus();
+      },
+    });
+  }
+
+  deleteRecipeFromMenu(event: ShortMenuModel) {
+    const groupCode = this.groupCode();
+
+    if (!groupCode) {
+      return;
+    }
+
+    const menu: ShortMenuModel = {
+      id_recipe: event.id_recipe,
+      date: event.date,
+      time: event.time,
+    };
+
+    this.menuService.deleteMenus(groupCode, menu).subscribe({
+      next: () => {
+        this.loadMenus();
+      },
+    });
+  }
+
+  formatDate(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   updateDayMidnight() {

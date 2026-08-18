@@ -15,10 +15,15 @@ export class RecipeSearchResult {
   @Input() recipe: Recipe | null = null;
   @Input() actionLabel = '';
   @Output() actionClicked = new EventEmitter<Recipe>();
+  @Output() detailsClicked = new EventEmitter<void>();
 
   emitAction() {
     if (this.recipe) {
       this.actionClicked.emit(this.recipe);
     }
+  }
+
+  emitDetails() {
+    this.detailsClicked.emit();
   }
 }

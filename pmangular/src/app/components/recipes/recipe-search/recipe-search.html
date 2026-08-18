@@ -18,7 +18,8 @@
     <app-recipe-search-result
       [recipe]="rec"
       [actionLabel]="actionLabel"
-      (actionClicked)="onActionClicked($event)" />
+      (actionClicked)="onActionClicked($event)"
+      (detailsClicked)="onDetailsClicked()" />
   }
 } @else {
   <p>No se han encontrado recetas.</p>

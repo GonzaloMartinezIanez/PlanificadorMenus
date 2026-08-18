@@ -10,7 +10,9 @@
   </mat-card-content>
   <mat-card-actions>
     @if (recipe) {
-      <button mat-button [routerLink]="['/recipes', recipe.id]">Ver detalles</button>
+      <button mat-button [routerLink]="['/recipes', recipe.id]" (click)="emitDetails()">
+        Ver detalles
+      </button>
     }
     @if (recipe && actionLabel) {
       <button mat-button type="button" (click)="emitAction()">{{ actionLabel }}</button>

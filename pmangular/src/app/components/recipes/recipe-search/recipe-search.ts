@@ -33,6 +33,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 export class RecipeSearch implements OnInit {
   @Input() actionLabel = '';
   @Output() actionClicked = new EventEmitter<Recipe>();
+  @Output() detailsClicked = new EventEmitter<void>();
 
   recipeService = inject(RecipeService);
 
@@ -103,5 +104,9 @@ export class RecipeSearch implements OnInit {
 
   onActionClicked(recipe: Recipe) {
     this.actionClicked.emit(recipe);
+  }
+
+  onDetailsClicked() {
+    this.detailsClicked.emit();
   }
 }
