@@ -9,7 +9,7 @@ import { GroupAccess } from './components/groups/group-access/group-access';
 import { authGuard } from './guards/auth-guard';
 import { groupGuard } from './guards/group-guard';
 import { GroupManage } from './components/groups/group-manage/group-manage';
-import { List } from './components/lists/list/list';
+import { List } from './components/lists/list';
 import { RecipeDetail } from './components/recipes/recipe-detail/recipe-detail';
 import { Recipes } from './components/recipes/recipes';
 import { RecipeCreate } from './components/recipes/recipe-create/recipe-create';

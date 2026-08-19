@@ -1,0 +1,25 @@
+<div style="display: flex; flex-direction: row">
+  @if (item?.bought) {
+    <mat-icon
+      (click)="change(false)"
+      aria-hidden="false"
+      aria-label="Desmarcar un item"
+      fontIcon="check"
+      [style.color]="'green'"
+    ></mat-icon>
+  } @else {
+    <mat-icon
+      (click)="change(true)"
+      aria-hidden="false"
+      aria-label="Marcar un item"
+      fontIcon="check"
+    ></mat-icon>
+  }
+
+  <img src="{{ item?.ingredient?.image }}" alt="{{ item?.ingredient?.name }}" />
+  <p [ngStyle]="item?.bought ? { 'text-decoration': 'line-through' } : {}">
+    {{ item?.ingredient?.name }}
+  </p>
+  <p>{{ item?.amount }} {{ item?.unit }}</p>
+  <p>{{ item?.purchase_label }}</p>
+</div>

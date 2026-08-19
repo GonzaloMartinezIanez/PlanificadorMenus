@@ -1,0 +1,5 @@
+<button mat-button type="button" (click)="deleteList()">Limpiar la lista</button>
+
+@for (item of list(); track item.ingredient.id_ingredient) {
+  <app-list-item [item]="item" (changeItemStatus)="changeItemStatus($event)"/>
+}
