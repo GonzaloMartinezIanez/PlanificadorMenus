@@ -1,5 +1,19 @@
 <button mat-button type="button" (click)="deleteList()">Limpiar la lista</button>
 
-@for (item of list(); track item.ingredient.id_ingredient) {
-  <app-list-item [item]="item" (changeItemStatus)="changeItemStatus($event)"/>
+<br>
+
+@for (cat of activeCategories(); track cat.id_ingredient_category) {
+  <img
+    [src]="cat.icon"
+    [alt]="cat.name"
+    style="width: 70px"
+    (click)="changeSelectedCategory(cat.id_ingredient_category)"
+  />
+  @if (selectedCategory() === cat.id_ingredient_category) {
+    <span>{{ cat.name }}</span>
+  }
+}
+
+@for (item of filteredList(); track item.ingredient.id_ingredient) {
+  <app-list-item [item]="item" (changeItemStatus)="changeItemStatus($event)" />
 }
