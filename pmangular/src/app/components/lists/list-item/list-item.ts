@@ -1,18 +1,24 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ListModel, ListStatusItem } from '../../../models/lists';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { ListModel, ListPatchItem, ListStatusItem } from '../../../models/lists';
 import { NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-list-item',
-  imports: [NgStyle, MatIconModule],
+  imports: [NgStyle, MatIconModule, MatButtonModule, MatInputModule, FormsModule],
   templateUrl: './list-item.html',
   styleUrl: './list-item.css',
 })
 export class ListItem {
   @Input() item: ListModel | null = null;
   @Output() changeItemStatus = new EventEmitter<ListStatusItem>();
-  @Output() changeItemAmount = new EventEmitter<ListStatusItem>();
+  @Output() changeItemAmount = new EventEmitter<ListPatchItem>();
+
+  editMode = signal(false);
+  editedAmount = signal(0);
 
   change(bought: boolean) {
     if (!this.item) {
@@ -47,5 +53,27 @@ export class ListItem {
 
   getItemPrice() {
     return this.item?.calculated_price ?? null;
+  }
+
+  startEdit() {
+    if (!this.item) {
+      return;
+    }
+
+    this.editedAmount.set(this.item?.amount);
+    this.editMode.set(true);
+  }
+
+  editAmount() {
+    if (!this.item || this.editedAmount() < 0.001) {
+      return;
+    }
+
+    this.changeItemAmount.emit({
+      id_ingredient: this.item.ingredient.id_ingredient,
+      amount: this.editedAmount(),
+    });
+    
+    this.editMode.set(false);
   }
 }

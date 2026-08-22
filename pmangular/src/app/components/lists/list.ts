@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ListService } from '../../services/list.service';
-import { ListModel, ListStatusItem } from '../../models/lists';
+import { ListModel, ListPatchItem, ListStatusItem } from '../../models/lists';
 import { ListItem } from './list-item/list-item';
 import { MatButtonModule } from '@angular/material/button';
 import { IngredientService } from '../../services/ingredient.service';
@@ -107,6 +107,16 @@ export class List implements OnInit {
   changeItemStatus(event: ListStatusItem) {
     this.listService
       .changeStatusListItem(this.groupCode() || '', event.id_ingredient, event.bought)
+      .subscribe({
+        next: () => {
+          this.loadList();
+        },
+      });
+  }
+
+  changeItemAmount(event: ListPatchItem) {
+    this.listService
+      .changeAmountListItem(this.groupCode() || '', event.id_ingredient, { amount: event.amount })
       .subscribe({
         next: () => {
           this.loadList();

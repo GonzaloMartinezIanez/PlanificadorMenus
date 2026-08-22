@@ -17,6 +17,10 @@
   }
 
   @for (item of filteredList(); track item.ingredient.id_ingredient) {
-    <app-list-item [item]="item" (changeItemStatus)="changeItemStatus($event)" />
+    <app-list-item
+      [item]="item"
+      (changeItemStatus)="changeItemStatus($event)"
+      (changeItemAmount)="changeItemAmount($event)"
+    />
   }
 }

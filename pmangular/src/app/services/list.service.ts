@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Ingredient } from '../models/ingredient';
-import { ListItem, ListPatchItem, ListResponse } from '../models/lists';
+import { ListItem, ListResponse } from '../models/lists';
 import { Observable } from 'rxjs';
 import { MessageModel } from '../models/message';
 
@@ -23,7 +23,7 @@ export class ListService {
   changeAmountListItem(
     group_code: string,
     id_ingredient: string,
-    patchItem: ListPatchItem,
+    patchItem: { amount?: number; unit?: string },
   ): Observable<MessageModel> {
     return this.http.patch<MessageModel>(
       `${environment.apiUrl}/lists/${group_code}/${id_ingredient}/`,
