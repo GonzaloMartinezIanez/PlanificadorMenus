@@ -94,6 +94,23 @@ export class RecipeCreate implements OnInit {
     }
   }
 
+  formatUnit(unit: string) {
+    if (!unit) {
+      return '';
+    }
+
+    if (unit === 'ud') {
+      return 'unidades';
+    }
+
+    // Tanto dc como dz representan docenas
+    if (unit === 'dc' || unit === 'dz') {
+      return 'docenas';
+    }
+
+    return unit;
+  }
+
   loadRecipe(id: number) {
     this.isLoading.set(true);
 
@@ -176,7 +193,7 @@ export class RecipeCreate implements OnInit {
         image: [ingredient.image],
         reference_format: [ingredient.reference_format],
         amount: [0, [Validators.required, Validators.min(0.001)]],
-        unit: [this.getDefaultUnit(ingredient), Validators.required], // Por defecto se marca el tipo de unidad de referencia
+        unit: [ingredient.reference_format, Validators.required],
       }),
     );
   }
@@ -187,27 +204,6 @@ export class RecipeCreate implements OnInit {
 
   getSelectedIngredientIds() {
     return this.ingredients().controls.map((control) => control.value.id_ingredient);
-  }
-
-  getDefaultUnit(ingredient: Ingredient) {
-    if (ingredient.reference_format) {
-      return ingredient.reference_format;
-    }
-
-    return 'unit';
-  }
-
-  // Dar la opción de elegir la cantidad en la unidad de medida del producto (Kg, L...) o
-  // en las unidades que vende mercadona
-  getUnitOptions(index: number) {
-    const ingredient = this.ingredients().at(index);
-    const referenceFormat = ingredient?.get('reference_format')?.value;
-
-    if (referenceFormat && referenceFormat !== 'unit') {
-      return ['unit', referenceFormat];
-    }
-
-    return ['unit'];
   }
 
   saveRecipe() {

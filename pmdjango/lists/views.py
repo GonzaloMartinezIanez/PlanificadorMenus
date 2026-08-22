@@ -4,7 +4,6 @@ from rest_framework import status
 from .serializers import ListInputSerializer, ListOutputSerializer, ListPatchSerializer
 from .models import List
 from rest_framework.permissions import IsAuthenticated
-from groups.models import Group, GroupMember
 from ingredients.models import Ingredient
 from groups.utils import get_my_group
 
@@ -19,8 +18,16 @@ class ListApiView(APIView):
 
     list_items = List.objects.filter(group = group)
     serializer = ListOutputSerializer(list_items, many = True)
+    total_price = 0
 
-    return Response(serializer.data, status = status.HTTP_200_OK)
+    for item in serializer.data:
+      if item["calculated_price"] is not None:
+        total_price += item["calculated_price"]
+
+    return Response({
+      "items": serializer.data,
+      "total_price": round(total_price, 2),
+    }, status = status.HTTP_200_OK)
 
   # Añade un producto independiente a la lista
   def post(self, request, group_code):

@@ -25,6 +25,7 @@ class RecipeIngredientOutputSerializer(serializers.ModelSerializer):
   name = serializers.CharField(source = "ingredient.name", read_only = True)
   image = serializers.CharField(source = "ingredient.image", read_only = True)
   reference_format = serializers.CharField(source = "ingredient.reference_format", read_only = True)
+  amount = serializers.DecimalField(max_digits = 10, decimal_places = 3, coerce_to_string = False) # Eliminar los 0 a la derecha y limita a 3 decimales
 
   class Meta:
     model = IngredientInRecipe

@@ -20,6 +20,7 @@ export class List implements OnInit {
 
   groupCode = signal<string | null>(null);
   list = signal<ListModel[]>([]);
+  totalPrice = signal<number>(0);
   categories = signal<IngredientCategory[]>([]);
   activeCategories = computed(() => {
     const usedCategories: IngredientCategory[] = [];
@@ -65,7 +66,6 @@ export class List implements OnInit {
     });
 
     this.loadIngredientCategories();
-    this.loadList();
   }
 
   getMainCategory(id: number) {
@@ -89,8 +89,9 @@ export class List implements OnInit {
 
   loadList() {
     this.listService.getLists(this.groupCode() || '').subscribe({
-      next: (items) => {
-        this.list.set(items);
+      next: (response) => {
+        this.list.set(response.items);
+        this.totalPrice.set(response.total_price);
       },
     });
   }

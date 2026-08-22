@@ -2,11 +2,17 @@ import { Ingredient } from './ingredient';
 
 export interface ListModel {
   ingredient: Ingredient;
-  amount: string;
+  amount: number;
   unit: string;
   bought: boolean;
-  packages_needed: number;
-  purchase_label: string;
+  packages_needed: number | null;
+  purchase_label: string | null;
+  calculated_price: number | null;
+}
+
+export interface ListResponse {
+  items: ListModel[];
+  total_price: number;
 }
 
 export interface ListItem {

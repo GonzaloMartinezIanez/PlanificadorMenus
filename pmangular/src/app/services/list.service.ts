@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Ingredient } from '../models/ingredient';
-import { ListItem, ListModel, ListPatchItem } from '../models/lists';
+import { ListItem, ListPatchItem, ListResponse } from '../models/lists';
 import { Observable } from 'rxjs';
 import { MessageModel } from '../models/message';
 
@@ -12,8 +12,8 @@ import { MessageModel } from '../models/message';
 export class ListService {
   private http = inject(HttpClient);
 
-  getLists(group_code: string): Observable<ListModel[]> {
-    return this.http.get<ListModel[]>(`${environment.apiUrl}/lists/${group_code}/`);
+  getLists(group_code: string): Observable<ListResponse> {
+    return this.http.get<ListResponse>(`${environment.apiUrl}/lists/${group_code}/`);
   }
 
   postListItem(group_code: string, ingredient: ListItem): Observable<MessageModel> {

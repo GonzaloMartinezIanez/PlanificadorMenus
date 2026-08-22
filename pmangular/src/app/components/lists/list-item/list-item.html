@@ -17,9 +17,13 @@
   }
 
   <img src="{{ item?.ingredient?.image }}" alt="{{ item?.ingredient?.name }}" />
-  <p [ngStyle]="item?.bought ? { 'text-decoration': 'line-through' } : {}">
-    {{ item?.ingredient?.name }}
-  </p>
-  <p>{{ item?.amount }} {{ item?.unit }}</p>
-  <p>{{ item?.purchase_label }}</p>
+  <div style="display: flex; flex-direction: column">
+    <p [ngStyle]="item?.bought ? { 'text-decoration': 'line-through' } : {}">
+      <strong>{{ item?.ingredient?.name }}</strong> - {{ item?.amount }} {{ formatUnit() }}
+    </p>
+    <p>{{ item?.purchase_label }}</p>
+    @if (getItemPrice() !== null) {
+      <p>Precio: {{ getItemPrice() }} €</p>
+    }
+  </div>
 </div>

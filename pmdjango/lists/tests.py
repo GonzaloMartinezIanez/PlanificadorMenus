@@ -85,8 +85,9 @@ class ListApiTests(APITestCase):
     response = self.client.get(f"/api/lists/{self.group.group_code}/")
 
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertEqual(len(response.data), 2)
-    self.assertEqual(response.data[0]["ingredient"]["id_ingredient_categories"], [1])
+    self.assertEqual(len(response.data["items"]), 2)
+    self.assertEqual(response.data["items"][0]["ingredient"]["id_ingredient_categories"], [1])
+    self.assertEqual(float(response.data["total_price"]), 3.20)
 
   def test_non_member_cannot_get_list(self):
     self.client.force_authenticate(user = self.outsider)
@@ -107,7 +108,8 @@ class ListApiTests(APITestCase):
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     self.assertTrue(List.objects.filter(group = self.group, ingredient = self.ingredient_milk).exists())
     self.assertEqual(response.data["packages_needed"], 2)
-    self.assertEqual(response.data["purchase_label"], "2 bricks de 1.00000 l")
+    self.assertEqual(response.data["purchase_label"], "2 bricks de 1 l")
+    self.assertEqual(float(response.data["calculated_price"]), 2.30)
 
   def test_post_list_sums_existing_item_and_resets_bought(self):
     List.objects.create(
@@ -143,7 +145,7 @@ class ListApiTests(APITestCase):
     self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     self.assertEqual(response.data["error"], "El producto no existe.")
 
-  def test_patch_list_updates_amount_unit_and_bought(self):
+  def test_patch_list_rejects_an_incompatible_unit(self):
     List.objects.create(
       group = self.group,
       ingredient = self.ingredient_bread,
@@ -159,12 +161,11 @@ class ListApiTests(APITestCase):
       "bought": True,
     }, format = "json")
 
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     list_item = List.objects.get(group = self.group, ingredient = self.ingredient_bread)
-    self.assertEqual(float(list_item.amount), 3.5)
-    self.assertEqual(list_item.unit, "kg")
-    self.assertTrue(list_item.bought)
-    self.assertIsNone(response.data["packages_needed"])
+    self.assertEqual(float(list_item.amount), 1.0)
+    self.assertEqual(list_item.unit, "ud")
+    self.assertFalse(list_item.bought)
 
   def test_get_list_returns_packages_needed_when_unit_matches_reference_format(self):
     List.objects.create(
@@ -179,8 +180,37 @@ class ListApiTests(APITestCase):
     response = self.client.get(f"/api/lists/{self.group.group_code}/")
 
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertEqual(response.data[0]["packages_needed"], 3)
-    self.assertEqual(response.data[0]["purchase_label"], "3 bricks de 1.00000 l")
+    self.assertEqual(response.data["items"][0]["packages_needed"], 3)
+    self.assertEqual(response.data["items"][0]["purchase_label"], "3 bricks de 1 l")
+    self.assertEqual(float(response.data["items"][0]["calculated_price"]), 3.45)
+
+  def test_get_list_calculates_packages_for_reference_format(self):
+    ingredient_egg = Ingredient.objects.create(
+      id_ingredient = "2003",
+      name = "Huevos",
+      packaging = "Paquete",
+      reference_format = "dc",
+      reference_price = "3.200",
+      unit_price = "3.20",
+      unit_size = "12.00000",
+      image = "eggs.jpg",
+    )
+    ingredient_egg.id_ingredient_categories.set([self.category])
+    List.objects.create(
+      group = self.group,
+      ingredient = ingredient_egg,
+      amount = "2.000",
+      unit = "dc",
+      bought = False,
+    )
+    self.client.force_authenticate(user = self.owner)
+
+    response = self.client.get(f"/api/lists/{self.group.group_code}/")
+
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(response.data["items"][0]["packages_needed"], 2)
+    self.assertEqual(response.data["items"][0]["purchase_label"], "2 paquetes de 1 docena")
+    self.assertEqual(float(response.data["items"][0]["calculated_price"]), 6.40)
 
   def test_patch_list_returns_404_when_item_does_not_exist(self):
     self.client.force_authenticate(user = self.member)
