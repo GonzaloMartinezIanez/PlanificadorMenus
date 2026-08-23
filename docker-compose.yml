@@ -1,0 +1,96 @@
+# Para desplegar en el servidor solo hay que pegar este fichero junto al .env
+# Primero se descargan las imágenes con: docker compose pull
+# Si todo va bien se lanza en modo proceso con: docker compose up -d
+services:
+  # Se crea un contenedor con la base de datos MySQL
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    env_file: .env
+    # Variables necesarias para crear la base de datos
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    # Volumen persistente en disco con la información de la base de datos
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Verificar que está corriendo MySQL
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Evitar que se pueda acceder a la base de datos desde Internet
+    networks:
+      - internal
+
+  # Contenedor con la API de django
+  backend:
+    # Usar la imagen subida a ghcr.io
+    image: ${BACKEND_IMAGE}
+    restart: unless-stopped
+    env_file: .env
+    # Se conecta a la base de datos mediante su contenedor
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+    # Lanzar la API dentro del contenedor
+    command: sh -c "python manage.py migrate --noinput && uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --workers 3"
+    # No la lanza si no funciona la base de datos
+    depends_on:
+      db:
+        condition: service_healthy
+    # Expone su puerto 8000 de su contenedor, pero no a Internet, de eso se encarga nginx
+    expose:
+      - "8000"
+    networks:
+      - internal
+
+  # Contenedor que se encarga de crear y renovar el certificado ssl además de actuar
+  # como proxy einverso para la API de Django y la web de Angular
+  nginx:
+    image: ${FRONTEND_IMAGE}
+    restart: unless-stopped
+    # Se pasa el dominio asignado al VPS
+    environment:
+      DOMAIN: ${DOMAIN}
+    # Usa los puertos 80 (para pedir/renovar el certificado) y 433 para https de Django y Angular
+    ports:
+      - "80:80"
+      - "443:443"
+    # Compartir los ficheros de configuración y certificado con certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Tiene que arrancar después del backend
+    depends_on:
+      - backend
+    # A diferencia del resto, este si expone los puertos al exterior
+    # pero se sigue comunicando mediante la red interna de docker
+    networks:
+      - internal
+
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    # Compartir los ficheros de configuración y certificado con nginx
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Sobrescribir el programa inicial de la imagen de certbot
+    # Como no se quiere que se ejecute "certbot", se especifica que se ejecutará
+    # el comando inferior
+    entrypoint: /bin/sh
+    # Cada 12 horas comprueba si un certificado tiene que renovarse
+    command: -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $$!; done"
+
+networks:
+  internal:
+
+volumes:
+  mysql_data:
+  certbot_conf:
+  certbot_www:

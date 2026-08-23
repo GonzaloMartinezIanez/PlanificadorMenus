@@ -6,3 +6,4 @@ mysqlclient
 django-cors-headers
 djangorestframework-simplejwt
 google-auth
+uvicorn

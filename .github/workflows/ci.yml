@@ -1,0 +1,88 @@
+name: Build y publicar las imágenes en el repositorio de github
+
+on:
+  push:
+    tags:
+      - "v*" # Solo se activa si el tag empieza por v
+
+# Permisos para leer
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Compila y lanza los test de Django
+  test-backend:
+    runs-on: ubuntu-latest
+    # Los comandos se ejecutrán desde la carpeta pmdjango
+    defaults:
+      run:
+        working-directory: pmdjango
+    # .env inventado solo para probar (usará sqlite para los test)
+    env:
+      GOOGLE_CLIENT_ID: test-client-id
+      AUTHORIZED_EMAIL: admin@example.com
+    steps:
+      # Descarga el código en la máquina virtual
+      - uses: actions/checkout@v4
+      # Instala python
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # Actualiza el sistema (se instalan librerías de mysql porque en requirement.txt está esta dependencia)
+      - run: sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev pkg-config
+      # Instala las dependencias
+      - run: pip install -r requirements.txt
+      # Ejecuta los test
+      - run: python manage.py test
+
+  # Compila y lanza los tes de Angular
+  test-frontend:
+    runs-on: ubuntu-latest
+    # Los comandos se ejecutrán desde la carpeta pmdjango
+    defaults:
+      run:
+        working-directory: pmangular
+    steps:
+      # Descarga el código
+      - uses: actions/checkout@v4
+      # Instala node
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: pmangular/package-lock.json
+      # Instala las dependencias
+      - run: npm ci
+      # Lanza los test
+      - run: npm test -- --watch=false # Con false no se queda esperando cambios en los test
+      # Compila la aplicación
+      - run: npm run build
+
+  # Conectar con github container registry y subir las imágenes del frontend + nginx y el backend
+  publish-images:
+    # Si los dos trabajos anteriores has pasado los builds y los test, se empieza con este trabajo
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Iniciar sesión en ghcr.io
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Sube la imagen de angular al registro con el formato:
+      # ghcr.io/GonzaloMartinezIanez/planificador-menus-frontend:v1.0.0
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./pmangular
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/planificador-menus-frontend:${{ github.ref_name }}
+      # Sube la imagen de django al registro con el formato:
+      # ghcr.io/GonzaloMartinezIanez/planificador-menus-backend:v1.0.0
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./pmdjango
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/planificador-menus-backend:${{ github.ref_name }}

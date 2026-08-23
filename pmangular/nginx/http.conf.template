@@ -1,0 +1,24 @@
+server {
+  listen 80;
+  server_name ${DOMAIN} www.${DOMAIN};
+
+  # Sirve el archivo de verificación de Let's Encrypt 
+  location /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+  }
+
+  # Sirve la API de Django
+  location /api/ {
+    proxy_pass http://backend:8000/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  # Sirve la aplicación de Angular
+  location / {
+    root /usr/share/nginx/html;
+    try_files $uri $uri/ /index.html;
+  }
+}
