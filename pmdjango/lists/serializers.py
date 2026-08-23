@@ -11,10 +11,24 @@ class ListInputSerializer(serializers.ModelSerializer):
     model = List
     fields = ["id_ingredient", "amount", "unit"]
 
+  def validate(self, data):
+    ingredient = Ingredient.objects.filter(id_ingredient = data["id_ingredient"]).first()
+
+    if ingredient and data["unit"] != ingredient.reference_format:
+      raise serializers.ValidationError({"unit": "La unidad debe coincidir con el formato de referencia del producto."})
+
+    return data
+
 class ListPatchSerializer(serializers.ModelSerializer):
   class Meta:
     model = List
     fields = ["amount", "unit", "bought"]
+
+  def validate(self, data):
+    if "unit" in data and data["unit"] != self.instance.ingredient.reference_format:
+      raise serializers.ValidationError({"unit": "La unidad debe coincidir con el formato de referencia del producto."})
+
+    return data
 
 class ListOutputSerializer(serializers.ModelSerializer):
   ingredient = serializers.SerializerMethodField()

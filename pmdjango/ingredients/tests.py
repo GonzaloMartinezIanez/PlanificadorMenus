@@ -1,9 +1,19 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
+from django.contrib.auth import get_user_model
+from django.test import override_settings
 from .models import Ingredient, IngredientCategory
 
+User = get_user_model()
+
+@override_settings(AUTHORIZED_EMAIL = ["admin@example.com"])
 class IngredientApiTests(APITestCase):
   def setUp(self):
+    self.admin = User.objects.create_user(
+      username = "admin",
+      email = "admin@example.com",
+    )
+    self.client.force_authenticate(user = self.admin)
     self.category_main = IngredientCategory.objects.create(
       id_ingredient_category = 1,
       name = "Fruta y verdura",
