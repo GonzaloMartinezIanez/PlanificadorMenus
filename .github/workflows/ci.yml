@@ -66,6 +66,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Como mi nombre de usuario tiene mayúsculas y las imagenes no pueden tener
+      # Se pasa a minúsculas
+      - name: Convert repository owner to lowercase
+        run: echo "IMAGE_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
       # Iniciar sesión en ghcr.io
       - uses: docker/login-action@v3
         with:
@@ -73,16 +77,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       # Sube la imagen de angular al registro con el formato:
-      # ghcr.io/GonzaloMartinezIanez/planificador-menus-frontend:v1.0.0
+      # ghcr.io/gonzalomartinezianez/planificador-menus-frontend:v1.0.0
       - uses: docker/build-push-action@v6
         with:
           context: ./pmangular
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/planificador-menus-frontend:${{ github.ref_name }}
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/planificador-menus-frontend:${{ github.ref_name }}
       # Sube la imagen de django al registro con el formato:
-      # ghcr.io/GonzaloMartinezIanez/planificador-menus-backend:v1.0.0
+      # ghcr.io/gonzalomartinezianez/planificador-menus-backend:v1.0.0
       - uses: docker/build-push-action@v6
         with:
           context: ./pmdjango
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/planificador-menus-backend:${{ github.ref_name }}
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/planificador-menus-backend:${{ github.ref_name }}
