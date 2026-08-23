@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GroupOnboarding } from './group-onboarding';
+import { defaultTestProviders } from '../../../testing/test-providers';
 
 describe('GroupOnboarding', () => {
   let component: GroupOnboarding;
@@ -9,11 +10,11 @@ describe('GroupOnboarding', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GroupOnboarding],
+      providers: defaultTestProviders,
     }).compileComponents();
 
     fixture = TestBed.createComponent(GroupOnboarding);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {

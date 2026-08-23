@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Recipes } from './recipes';
+import { defaultTestProviders } from '../../testing/test-providers';
 
 describe('Recipes', () => {
   let component: Recipes;
@@ -9,11 +10,11 @@ describe('Recipes', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Recipes],
+      providers: defaultTestProviders,
     }).compileComponents();
 
     fixture = TestBed.createComponent(Recipes);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {

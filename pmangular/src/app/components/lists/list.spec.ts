@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { List } from './list/list';
+import { List } from "./list"
+import { defaultTestProviders } from '../../testing/test-providers';
 
 describe('List', () => {
   let component: List;
@@ -9,11 +10,11 @@ describe('List', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [List],
+      providers: defaultTestProviders,
     }).compileComponents();
 
     fixture = TestBed.createComponent(List);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {
