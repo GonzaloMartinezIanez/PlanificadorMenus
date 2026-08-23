@@ -152,3 +152,5 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
+
+AUTHORIZED_EMAIL =  os.getenv("AUTHORIZED_EMAIL").split(",") # Se asume que está bien el .env

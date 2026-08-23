@@ -4,10 +4,11 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from config.permissions import IsEmailAuthorizedOrReadOnly
 
 # CRUD de Categorías de ingredientes
 class IngredientCategoryViewSet(viewsets.ModelViewSet):
-  permission_classes = []
+  permission_classes = [IsEmailAuthorizedOrReadOnly]
   queryset = IngredientCategory.objects.all()
   serializer_class = IngredientCategorySerializer
   lookup_field = 'id_ingredient_category'
@@ -32,7 +33,7 @@ class IngredientCategoryIngredientsApiView(APIView):
     return Response(serializer.data, status = status.HTTP_200_OK)
 
 class IngredientViewSet(viewsets.ModelViewSet):
-  permission_classes = []
+  permission_classes = [IsEmailAuthorizedOrReadOnly]
   queryset = Ingredient.objects.all()
   serializer_class = IngredientSerializer
   lookup_field = 'id_ingredient'

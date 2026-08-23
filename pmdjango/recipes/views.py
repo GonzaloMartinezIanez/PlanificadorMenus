@@ -7,11 +7,12 @@ from rest_framework import status
 from django.db import transaction
 from ingredients.models import Ingredient
 from .utils import get_my_visible_recipes
+from config.permissions import IsEmailAuthorizedOrReadOnly
 
 
 # CRUD de Categorias de recetas
 class RecipeCategoryViewSet(viewsets.ModelViewSet):
-  permission_classes = []
+  permission_classes = [IsEmailAuthorizedOrReadOnly]
   queryset = RecipeCategory.objects.all()
   serializer_class = RecipeCategorySerializer
 
