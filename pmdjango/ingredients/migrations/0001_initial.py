@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Ingredient',
             fields=[
-                ('id_ingredient', models.CharField(primary_key=True, serialize=False)),
+                ('id_ingredient', models.CharField(max_length=50, primary_key=True, serialize=False)),
                 ('name', models.TextField()),
                 ('packaging', models.CharField(blank=True, max_length=50, null=True)),
                 ('reference_format', models.CharField(blank=True, max_length=20, null=True)),
