@@ -1,22 +1,37 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ListService } from '../../services/list.service';
 import { ListModel, ListPatchItem, ListStatusItem } from '../../models/lists';
 import { ListItem } from './list-item/list-item';
 import { MatButtonModule } from '@angular/material/button';
 import { IngredientService } from '../../services/ingredient.service';
-import { IngredientCategory } from '../../models/ingredient';
+import { Ingredient, IngredientCategory } from '../../models/ingredient';
+import { IngredientPicker } from '../ingredients/ingredient-picker/ingredient-picker';
+import { MatDialog } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-list',
-  imports: [ListItem, MatButtonModule],
+  imports: [
+    ListItem,
+    MatButtonModule,
+    IngredientPicker,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
 export class List implements OnInit {
+  @ViewChild('ingredientPickerDialog') ingredientPickerDialog!: TemplateRef<unknown>;
+
   route = inject(ActivatedRoute);
   listService = inject(ListService);
   ingredientService = inject(IngredientService);
+  dialog = inject(MatDialog);
 
   groupCode = signal<string | null>(null);
   list = signal<ListModel[]>([]);
@@ -46,9 +61,15 @@ export class List implements OnInit {
     if (!this.selectedCategory()) return this.list();
 
     return this.list().filter((item) => {
-      return this.getMainCategory(item.ingredient.id_ingredient_categories[0]) === this.selectedCategory();
+      return (
+        this.getMainCategory(item.ingredient.id_ingredient_categories[0]) ===
+        this.selectedCategory()
+      );
     });
   });
+
+  selectedIngredient = signal<Ingredient | null>(null);
+  ingredientAmount = signal(1);
 
   ngOnInit(): void {
     // Escuchar la url para el cambio de grupo
@@ -119,6 +140,44 @@ export class List implements OnInit {
       .changeAmountListItem(this.groupCode() || '', event.id_ingredient, { amount: event.amount })
       .subscribe({
         next: () => {
+          this.loadList();
+        },
+      });
+  }
+
+  openIngredientPicker() {
+    this.selectedIngredient.set(null);
+    this.ingredientAmount.set(1);
+    this.dialog.open(this.ingredientPickerDialog, {
+      width: '95vw',
+      maxWidth: '95vw',
+    });
+  }
+
+  selectIngredient(ingredient: Ingredient) {
+    this.selectedIngredient.set(ingredient);
+  }
+
+  getSelectedIngredientIds() {
+    return this.list().map((item) => item.ingredient.id_ingredient);
+  }
+
+  addSelectedIngredient() {
+    const ingredient = this.selectedIngredient();
+
+    if (!ingredient || this.ingredientAmount() < 0.001 || !ingredient.reference_format) {
+      return;
+    }
+
+    this.listService
+      .postListItem(this.groupCode() || '', {
+        id_ingredient: ingredient.id_ingredient,
+        amount: this.ingredientAmount(),
+        unit: ingredient.reference_format,
+      })
+      .subscribe({
+        next: () => {
+          this.dialog.closeAll();
           this.loadList();
         },
       });

@@ -1,3 +1,37 @@
+<button mat-button type="button" (click)="openIngredientPicker()">Añadir producto</button>
+
+<ng-template #ingredientPickerDialog>
+  @if (!selectedIngredient()) {
+    <app-ingredient-picker
+      [selectedIngredientIds]="getSelectedIngredientIds()"
+      (ingredientSelected)="selectIngredient($event)"
+    />
+  } @else {
+    <h2>{{ selectedIngredient()!.name }}</h2>
+
+    <mat-form-field>
+      <mat-label>Cantidad</mat-label>
+      <input
+        matInput
+        type="number"
+        min="0.001"
+        step="0.001"
+        [ngModel]="ingredientAmount()"
+        (ngModelChange)="ingredientAmount.set($event)"
+      />
+    </mat-form-field>
+
+    <p>{{ selectedIngredient()!.reference_format }}</p>
+
+    <button mat-button type="button" (click)="addSelectedIngredient()" [disabled]="ingredientAmount() < 0.001">
+      Añadir a la lista
+    </button>
+    <button mat-button type="button" (click)="selectedIngredient.set(null)">Volver</button>
+  }
+
+  <button mat-button type="button" (click)="dialog.closeAll()">Cerrar</button>
+</ng-template>
+
 @if (filteredList().length === 0) {
   <p>No hay productos en la lista.</p>
 } @else {
