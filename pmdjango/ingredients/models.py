@@ -12,7 +12,7 @@ class IngredientCategory(models.Model):
 
 
 class Ingredient(models.Model):
-  id_ingredient = models.CharField(primary_key=True) # Algunos ingredientes ids tienen decimales
+  id_ingredient = models.CharField(max_length = 50, primary_key=True) # Algunos ingredientes ids tienen decimales
   id_ingredient_categories = models.ManyToManyField(IngredientCategory, blank=False)
   name = models.TextField(null=False, blank=False)
   packaging = models.CharField(max_length=50, null=True, blank=True)
