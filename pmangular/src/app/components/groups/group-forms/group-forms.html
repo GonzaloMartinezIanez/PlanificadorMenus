@@ -1,59 +1,59 @@
-<h2>{{ title }}</h2>
-<p>{{ subtitle }}</p>
+<section class="group-forms">
+  <header>
+    <h2>{{ title }}</h2>
+    <p>{{ subtitle }}</p>
+  </header>
 
-<form [formGroup]="newGroupForm" (ngSubmit)="createGroup()">
-  <h3>Crear grupo</h3>
-  <mat-form-field>
-    <mat-label>Nombre del grupo</mat-label>
-    <input matInput type="text" formControlName="group_name" />
-  </mat-form-field>
-  @if (newGroupForm.get('group_name')?.touched && newGroupForm.get('group_name')?.invalid) {
-    @if (newGroupForm.get('group_name')?.errors?.['required']) {
-      <small style="color: red">El nombre es obligatorio.</small>
+  <form [formGroup]="newGroupForm" (ngSubmit)="createGroup()">
+    <h3>Crear grupo</h3>
+    <mat-form-field>
+      <mat-label>Nombre del grupo</mat-label>
+      <input matInput type="text" formControlName="group_name" />
+    </mat-form-field>
+    @if (newGroupForm.get('group_name')?.touched && newGroupForm.get('group_name')?.invalid) {
+      @if (newGroupForm.get('group_name')?.errors?.['required']) {
+        <small>El nombre es obligatorio.</small>
+      }
+      @if (newGroupForm.get('group_name')?.errors?.['minlength']) {
+        <small>El nombre debe tener al menos 3 caracteres.</small>
+      }
+      @if (newGroupForm.get('group_name')?.errors?.['maxlength']) {
+        <small>El nombre no puede tener más de 100 caracteres.</small>
+      }
     }
-    @if (newGroupForm.get('group_name')?.errors?.['minlength']) {
-      <small style="color: red">El nombre debe tener al menos 3 caracteres.</small>
+    <mat-form-field>
+      <mat-label>Descripción del grupo</mat-label>
+      <input matInput type="text" formControlName="group_description" />
+    </mat-form-field>
+
+    <button mat-raised-button [disabled]="newGroupForm.invalid" type="submit">Crear grupo</button>
+  </form>
+
+  <form [formGroup]="joinGroupForm" (ngSubmit)="joinGroup()">
+    <h3>Unirse a un grupo</h3>
+
+    <mat-form-field>
+      <mat-label>Código del grupo</mat-label>
+      <input matInput type="text" formControlName="group_code" />
+    </mat-form-field>
+    @if (joinGroupForm.get('group_code')?.touched && joinGroupForm.get('group_code')?.invalid) {
+      @if (joinGroupForm.get('group_code')?.errors?.['required']) {
+        <small>El código es obligatorio.</small>
+      }
+      @if (
+        joinGroupForm.get('group_code')?.errors?.['minlength'] ||
+        joinGroupForm.get('group_code')?.errors?.['maxlength']
+      ) {
+        <small>El código debe tener 8 caracteres alfanuméricos.</small>
+      }
     }
-    @if (newGroupForm.get('group_name')?.errors?.['maxlength']) {
-      <small style="color: red">El nombre no puede tener más de 100 caracteres.</small>
-    }
+
+    <button mat-raised-button [disabled]="joinGroupForm.invalid" type="submit">
+      Solicitar unirse al grupo
+    </button>
+  </form>
+
+  @if (showCheckAcceptedButton()) {
+    <button mat-button (click)="checkAccepted()">Comprobar si me han aceptado</button>
   }
-  <mat-form-field>
-    <mat-label>Descripción del grupo</mat-label>
-    <input matInput type="text" formControlName="group_description" />
-  </mat-form-field>
-
-  <button mat-raised-button [disabled]="newGroupForm.invalid" type="submit">Crear grupo</button>
-</form>
-
-<form [formGroup]="joinGroupForm" (ngSubmit)="joinGroup()">
-  <h3>Unirse a un grupo</h3>
-
-  <mat-form-field>
-    <mat-label>Código del grupo</mat-label>
-    <input matInput type="text" formControlName="group_code" />
-  </mat-form-field>
-  @if (joinGroupForm.get('group_code')?.touched && joinGroupForm.get('group_code')?.invalid) {
-    @if (joinGroupForm.get('group_code')?.errors?.['required']) {
-      <small style="color: red">El código es obligatorio.</small>
-    }
-    @if (
-      joinGroupForm.get('group_code')?.errors?.['minlength'] ||
-      joinGroupForm.get('group_code')?.errors?.['maxlength']
-    ) {
-      <small style="color: red">El código debe tener 8 caracteres alfanuméricos.</small>
-    }
-  }
-
-  <button mat-raised-button [disabled]="joinGroupForm.invalid" type="submit">
-    Solicitar unirse al grupo
-  </button>
-</form>
-
-@if (showCheckAcceptedButton) {
-  <button mat-button (click)="checkAccepted()">Comprobar si me han aceptado</button>
-}
-
-@if (showLogoutButton) {
-  <button mat-button (click)="logout()">Logout</button>
-}
+</section>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupService } from '../../../services/group.service';
 import { Router } from '@angular/router';
@@ -25,8 +25,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export class GroupForms {
   @Input() title = '';
   @Input() subtitle = '';
-  @Input() showCheckAcceptedButton = false;
-  @Input() showLogoutButton = false;
+  showCheckAcceptedButton = signal(false);
+  requestedGroupCode = signal('');
 
   groupService = inject(GroupService);
   router = inject(Router);
@@ -67,8 +67,12 @@ export class GroupForms {
       return;
     }
 
-    this.groupService.joinGroup(this.joinGroupForm.value.group_code).subscribe({
+    const groupCode = this.joinGroupForm.value.group_code;
+
+    this.groupService.joinGroup(groupCode).subscribe({
       next: (res) => {
+        this.requestedGroupCode.set(groupCode);
+        this.showCheckAcceptedButton.set(true);
         this.showInfo(res.message);
       },
       error: (err) => {
@@ -80,7 +84,14 @@ export class GroupForms {
   checkAccepted() {
     this.groupService.getMyGroups().subscribe({
       next: (res) => {
-        if (res.length > 0) this.router.navigate([`/home/${res[0].group_code}`]);
+        const acceptedGroup = res.find((group) => group.group_code === this.requestedGroupCode());
+
+        if (acceptedGroup) {
+          this.router.navigate([`/home/${res[0].group_code}`]);
+          return;
+        }
+
+        this.showInfo('Tu solicitud está pendiente de aprobación.');
       },
     });
   }

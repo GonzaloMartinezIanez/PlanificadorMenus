@@ -194,7 +194,28 @@ export class GroupManage implements OnInit {
     });
   }
 
-  openDialog() {
+  leaveGroup() {
+    this.groupService.leaveGroup(this.selectedGroupCode(), this.currentUserId() || -1).subscribe({
+      next: () => {
+        const remainingGroups = this.myGroups().filter(
+          (group) => group.group_code !== this.selectedGroupCode(),
+        );
+        this.myGroups.set(remainingGroups);
+        this.showInfo('Has abandonado el grupo.');
+
+        if (remainingGroups.length > 0) {
+          this.router.navigate(['/home', remainingGroups[0].group_code]);
+        } else {
+          this.router.navigate(['/group-onboarding']);
+        }
+      },
+      error: (err) => {
+        this.showError(err.error.error ?? 'No se pudo abandonar el grupo.');
+      },
+    });
+  }
+
+  openDialogDelete() {
     this.dialog
       .open(ConfirmDialog, {
         data: {
@@ -207,6 +228,24 @@ export class GroupManage implements OnInit {
       .subscribe((confirmed) => {
         if (confirmed) {
           this.deleteGroup();
+        }
+      });
+  }
+
+  openDialogLeave() {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Abandonar el grupo',
+          message: '¿Seguro que quieres salir del grupo?',
+          cancelText: 'No',
+          confirmText: 'Sí',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.leaveGroup();
         }
       });
   }

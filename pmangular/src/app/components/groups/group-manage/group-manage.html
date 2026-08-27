@@ -2,17 +2,29 @@
   @if (isAdmin()) {
     <section class="group-info">
       <form [formGroup]="groupForm" (ngSubmit)="saveGroup()">
-        <h2>Información del grupo</h2>
+        <div class="group-info-header">
+          <h2>Información del grupo</h2>
 
-        <button
-          class="delete-button button-danger"
-          mat-flat-button
-          type="button"
-          (click)="openDialog()"
-        >
-          Eliminar grupo
-        </button>
+          <div class="group-danger-actions">
+            <button
+              class="button-danger-outline"
+              mat-stroked-button
+              type="button"
+              (click)="openDialogLeave()"
+            >
+              Abandonar grupo
+            </button>
 
+            <button
+              class="delete-button button-danger"
+              mat-flat-button
+              type="button"
+              (click)="openDialogDelete()"
+            >
+              Eliminar grupo
+            </button>
+          </div>
+        </div>
         <mat-form-field>
           <mat-label>Nombre del grupo</mat-label>
           <input matInput type="text" formControlName="group_name" />
@@ -50,8 +62,20 @@
       </form>
     </section>
   } @else {
-    <section>
-      <h2>Información del grupo</h2>
+    <section class="group-info">
+      <div class="group-info-header">
+        <h2>Información del grupo</h2>
+
+        <button
+          class="button-danger-outline .group-danger-actions"
+          mat-stroked-button
+          type="button"
+          (click)="openDialogLeave()"
+        >
+          Salir del grupo
+        </button>
+      </div>
+
       <p><strong>Nombre del grupo</strong>: {{ selectedGroup()?.group_name }}</p>
       <p><strong>Descripción del grupo</strong>: {{ selectedGroup()?.group_description }}</p>
       <p><strong>Código del grupo</strong>: {{ selectedGroup()?.group_code }}</p>
@@ -94,11 +118,11 @@
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Eliminar</th>
+        <th mat-header-cell *matHeaderCellDef>Expulsar</th>
         <td mat-cell *matCellDef="let element">
           @if (isAdmin()) {
             <button mat-button type="button" (click)="removeMember(element.user_id)">
-              Eliminar
+              Expulsar
             </button>
           }
         </td>
@@ -157,12 +181,19 @@
     <mat-form-field appearance="outline">
       <mat-label>Enlace de invitación</mat-label>
       <input matInput [value]="joinUrlLong()" readonly />
-      <button mat-icon-button matSuffix type="button" aria-label="Copiar enlace" (click)="copyInvitationCode()">
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Copiar enlace"
+        (click)="copyInvitationCode()"
+      >
         <mat-icon>content_copy</mat-icon>
       </button>
     </mat-form-field>
 
     @if (qrCodeUrl()) {
+      <p style="text-align: center;">Para que tus amigos o familiares se unan al grupo también pueden escanear este código QR.</p>
       <img
         class="qr"
         [src]="qrCodeUrl()"

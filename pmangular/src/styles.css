@@ -18,3 +18,9 @@ body {
   --mat-button-filled-label-text-color: #fff;
   --mat-button-filled-state-layer-color: #fff;
 }
+
+.button-danger-outline {
+  --mat-button-outlined-outline-color: #b3261e;
+  --mat-button-outlined-label-text-color: #b3261e;
+  --mat-button-outlined-state-layer-color: #b3261e;
+}
