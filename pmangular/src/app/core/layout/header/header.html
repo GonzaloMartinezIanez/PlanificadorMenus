@@ -16,11 +16,11 @@
       </button>
     </div>
 
-    <h1 class="header-title">Planificador de menús</h1>
+    <h1 class="header-title" [routerLink]="['home', selectedGroupCode()]">Planificador de menús</h1>
 
     <div class="header-right">
       @if (myGroups().length > 1) {
-        <mat-form-field>
+        <mat-form-field class="group-select" subscriptSizing="dynamic">
           <mat-select [value]="selectedGroupCode()" (valueChange)="changeGroup($event)">
             @for (group of myGroups(); track group.group_code) {
               <mat-option [value]="group.group_code">{{ group.group_name }}</mat-option>
@@ -35,16 +35,7 @@
         [matMenuTriggerFor]="userMenu"
         aria-label="Abrir menú de usuario"
       >
-        @if (currentUser()?.profile_picture) {
-          <img
-            class="avatar-image"
-            [src]="currentUser()?.profile_picture"
-            alt="Avatar del usuario"
-          />
-        } @else {
-          <!-- Si hay un problema con la foto, se carga su inicial -->
-          <span class="avatar-fallback">{{ userInitialLetter() }}</span>
-        }
+        <img class="avatar-image" [src]="currentUser()?.profile_picture" alt="Avatar del usuario" />
       </button>
     </div>
   </div>
