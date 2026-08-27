@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { GroupService } from '../../../services/group.service';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { GroupMember, GroupModel } from '../../../models/group';
 import { filter } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
@@ -14,10 +14,23 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { environment } from '../../../../environments/environment';
 import { toDataURL } from 'qrcode';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialog } from '../../../core/confirm-dialog/confirm-dialog';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-group-manage',
-  imports: [CommonModule, ReactiveFormsModule, MatTableModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatSnackBarModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSnackBarModule,
+    MatIcon,
+  ],
   templateUrl: './group-manage.html',
   styleUrl: './group-manage.css',
 })
@@ -27,24 +40,47 @@ export class GroupManage implements OnInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   snackBar = inject(MatSnackBar);
+  dialog = inject(MatDialog);
 
-  displayedAcceptedColumns: string[] = ['username', 'role', 'joining_date', 'actions'];
-  displayedPendingColumns: string[] = ['username', 'role', 'joining_date', 'actions'];
+  displayedAcceptedColumns = computed(() => {
+    if (this.isAdmin()) {
+      return ['username', 'role', 'joining_date', 'actions'];
+    }
+
+    return ['username', 'role', 'joining_date'];
+  });
+  displayedPendingColumns: string[] = ['username', 'joining_date', 'actions'];
 
   myGroups = signal<GroupModel[]>([]);
   selectedGroupCode = signal('');
-  selectedGroup = computed<GroupModel | undefined>(() => this.myGroups().find(g => g.group_code === this.selectedGroupCode()));
+  selectedGroup = computed<GroupModel | undefined>(() =>
+    this.myGroups().find((g) => g.group_code === this.selectedGroupCode()),
+  );
   groupMembers = signal<GroupMember[]>([]);
 
   currentUserId = this.authService.currentUserId;
-  currentMembership = computed(() => this.groupMembers().find(member => member.user_id === this.currentUserId()));
+  currentMembership = computed(() =>
+    this.groupMembers().find((member) => member.user_id === this.currentUserId()),
+  );
   isAdmin = computed(() => this.currentMembership()?.role === 'ADMIN');
 
-  acceptedMembers = computed(() => this.groupMembers().filter(member => member.accepted));
-  pendingMembers = computed(() => this.groupMembers().filter(member => !member.accepted));
+  acceptedMembers = computed(() => this.groupMembers().filter((member) => member.accepted));
+  pendingMembers = computed(() => this.groupMembers().filter((member) => !member.accepted));
   qrCodeUrl = signal('');
 
   groupForm: FormGroup;
+  hasGroupChanges() {
+    const group = this.selectedGroup();
+
+    if (!group) {
+      return false;
+    }
+
+    return (
+      this.groupForm.value.group_name !== group.group_name ||
+      (this.groupForm.value.group_description ?? '') !== (group.group_description ?? '')
+    );
+  }
 
   joinUrl = computed(() => `/groups/${this.selectedGroupCode()}/join`);
   joinUrlLong = computed(() => `${environment.frontendUrl}${this.joinUrl()}`);
@@ -59,9 +95,7 @@ export class GroupManage implements OnInit {
   ngOnInit(): void {
     this.updateSelectedGroupFromUrl();
 
-    this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.updateSelectedGroupFromUrl();
       this.syncGroupForm();
       this.loadQRCode();
@@ -73,7 +107,7 @@ export class GroupManage implements OnInit {
         this.myGroups.set(groups);
         this.syncGroupForm();
         this.loadQRCode();
-      }
+      },
     });
 
     this.syncGroupForm();
@@ -90,15 +124,15 @@ export class GroupManage implements OnInit {
       next: (res) => {
         this.myGroups.update((groups) =>
           groups.map((group) =>
-            group.group_code === this.selectedGroupCode() ? res.message : group
-          )
+            group.group_code === this.selectedGroupCode() ? res.message : group,
+          ),
         );
         this.syncGroupForm();
         this.showInfo('Grupo actualizado correctamente.');
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudo actualizar el grupo.');
-      }
+      },
     });
   }
 
@@ -119,7 +153,7 @@ export class GroupManage implements OnInit {
       error: (err) => {
         this.loadGroupMembers();
         this.showError(err.error.error ?? 'No se pudo actualizar el rol.');
-      }
+      },
     });
   }
 
@@ -131,7 +165,7 @@ export class GroupManage implements OnInit {
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudo eliminar el usuario.');
-      }
+      },
     });
   }
 
@@ -140,14 +174,11 @@ export class GroupManage implements OnInit {
       return;
     }
 
-    const confirmed = window.confirm('¿Seguro que quieres eliminar este grupo?');
-    if (!confirmed) {
-      return;
-    }
-
     this.groupService.deleteGroup(this.selectedGroupCode()).subscribe({
       next: () => {
-        const remainingGroups = this.myGroups().filter(group => group.group_code !== this.selectedGroupCode());
+        const remainingGroups = this.myGroups().filter(
+          (group) => group.group_code !== this.selectedGroupCode(),
+        );
         this.myGroups.set(remainingGroups);
         this.showInfo('Grupo eliminado correctamente.');
 
@@ -159,8 +190,25 @@ export class GroupManage implements OnInit {
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudo eliminar el grupo.');
-      }
+      },
     });
+  }
+
+  openDialog() {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Eliminar grupo',
+          message: '¿Seguro que quieres borrar el grupo?',
+          confirmText: 'Eliminar',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.deleteGroup();
+        }
+      });
   }
 
   updateSelectedGroupFromUrl() {
@@ -206,7 +254,7 @@ export class GroupManage implements OnInit {
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudieron cargar los miembros del grupo.');
-      }
+      },
     });
   }
 
@@ -214,11 +262,13 @@ export class GroupManage implements OnInit {
     this.groupService.updatePendingMember(this.selectedGroupCode(), user_id, accepted).subscribe({
       next: () => {
         this.loadGroupMembers();
-        this.showInfo(accepted ? 'Usuario aceptado correctamente.' : 'Solicitud rechazada correctamente.');
+        this.showInfo(
+          accepted ? 'Usuario aceptado correctamente.' : 'Solicitud rechazada correctamente.',
+        );
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudo actualizar la solicitud.');
-      }
+      },
     });
   }
 
@@ -231,12 +281,14 @@ export class GroupManage implements OnInit {
     toDataURL(this.joinUrlLong(), {
       width: 220,
       margin: 2,
-    }).then((url) => {
-      this.qrCodeUrl.set(url);
-    }).catch(() => {
-      this.qrCodeUrl.set('');
-      this.showError('No se pudo generar el código QR.');
-    });
+    })
+      .then((url) => {
+        this.qrCodeUrl.set(url);
+      })
+      .catch(() => {
+        this.qrCodeUrl.set('');
+        this.showError('No se pudo generar el código QR.');
+      });
   }
 
   showInfo(message: string) {
@@ -254,5 +306,20 @@ export class GroupManage implements OnInit {
       verticalPosition: 'bottom',
       panelClass: ['snackbar-error'],
     });
+  }
+
+  copyInvitationCode() {
+    navigator.clipboard.writeText(this.joinUrlLong()).then(
+      () => {
+        this.showInfo('Enlace copiado al portapapeles.');
+      },
+      () => {
+        this.showError('No se pudo copiar el enlace.');
+      },
+    );
+  }
+
+  formatDate(date: string) {
+    return new Date(date).toLocaleDateString('es-ES');
   }
 }

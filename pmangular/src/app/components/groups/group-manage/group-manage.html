@@ -1,125 +1,173 @@
 @if (selectedGroup()) {
-  <h2>Administrar grupo {{selectedGroupCode()}}</h2>
+  @if (isAdmin()) {
+    <section class="group-info">
+      <form [formGroup]="groupForm" (ngSubmit)="saveGroup()">
+        <h2>Información del grupo</h2>
+
+        <button
+          class="delete-button button-danger"
+          mat-flat-button
+          type="button"
+          (click)="openDialog()"
+        >
+          Eliminar grupo
+        </button>
+
+        <mat-form-field>
+          <mat-label>Nombre del grupo</mat-label>
+          <input matInput type="text" formControlName="group_name" />
+        </mat-form-field>
+        @if (groupForm.get('group_name')?.touched && groupForm.get('group_name')?.invalid) {
+          @if (groupForm.get('group_name')?.errors?.['required']) {
+            <small style="color: red">El nombre es obligatorio.</small>
+          }
+          @if (groupForm.get('group_name')?.errors?.['minlength']) {
+            <small style="color: red">El nombre debe tener al menos 3 caracteres.</small>
+          }
+          @if (groupForm.get('group_name')?.errors?.['maxlength']) {
+            <small style="color: red">El nombre no puede tener más de 100 caracteres.</small>
+          }
+        }
+
+        <mat-form-field>
+          <mat-label>Descripción del grupo</mat-label>
+          <textarea matInput type="text" formControlName="group_description"></textarea>
+        </mat-form-field>
+
+        <p><strong>Código del grupo</strong>: {{ selectedGroup()?.group_code }}</p>
+        <p>
+          <strong>Fecha de creación</strong>: {{ formatDate(selectedGroup()?.creation_date || '') }}
+        </p>
+
+        <button
+          class="save-button"
+          mat-stroked-button
+          type="submit"
+          [disabled]="groupForm.invalid || !hasGroupChanges()"
+        >
+          Guardar cambios
+        </button>
+      </form>
+    </section>
+  } @else {
+    <section>
+      <h2>Información del grupo</h2>
+      <p><strong>Nombre del grupo</strong>: {{ selectedGroup()?.group_name }}</p>
+      <p><strong>Descripción del grupo</strong>: {{ selectedGroup()?.group_description }}</p>
+      <p><strong>Código del grupo</strong>: {{ selectedGroup()?.group_code }}</p>
+      <p>
+        <strong>Fecha de creación</strong>: {{ formatDate(selectedGroup()?.creation_date || '') }}
+      </p>
+    </section>
+  }
+
+  <section>
+    <h2>Miembros del grupo</h2>
+    <table mat-table [dataSource]="acceptedMembers()" class="mat-shadow-2">
+      <ng-container matColumnDef="username">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Rol</th>
+        <td mat-cell *matCellDef="let element">
+          @if (isAdmin()) {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-select
+                [value]="element.role"
+                (valueChange)="changeRole(element.user_id, $event)"
+              >
+                <mat-option value="ADMIN">Administrador</mat-option>
+                <mat-option value="MEMBER">Miembro</mat-option>
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            {{ element.role }}
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="joining_date">
+        <th mat-header-cell *matHeaderCellDef>Fecha de unión</th>
+        <td mat-cell *matCellDef="let element">{{ formatDate(element.joining_date) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Eliminar</th>
+        <td mat-cell *matCellDef="let element">
+          @if (isAdmin()) {
+            <button mat-button type="button" (click)="removeMember(element.user_id)">
+              Eliminar
+            </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedAcceptedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedAcceptedColumns()"></tr>
+    </table>
+  </section>
 
   @if (isAdmin()) {
-    <form [formGroup]="groupForm" (ngSubmit)="saveGroup()">
-      <h3>Información del grupo</h3>
+    @if (pendingMembers().length === 0) {
+      <section>
+        <h2>No hay solicitudes de unión pendientes</h2>
+        <button mat-stroked-button type="button" (click)="loadGroupMembers()">
+          Comprobar si hay solicitudes pendientes
+        </button>
+      </section>
+    } @else {
+      <section>
+        <h2>Solicitudes pendientes</h2>
+        <table mat-table [dataSource]="pendingMembers()" class="mat-shadow-2">
+          <ng-container matColumnDef="username">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+          </ng-container>
 
-      <mat-form-field>
-        <mat-label>Nombre del grupo</mat-label>
-        <input matInput type="text" formControlName="group_name" />
-      </mat-form-field>
-      @if (groupForm.get('group_name')?.touched && groupForm.get('group_name')?.invalid) {
-        @if (groupForm.get('group_name')?.errors?.['required']) {
-          <small style="color:red">El nombre es obligatorio.</small>
-        }
-        @if (groupForm.get('group_name')?.errors?.['minlength']) {
-          <small style="color:red">El nombre debe tener al menos 3 caracteres.</small>
-        }
-        @if (groupForm.get('group_name')?.errors?.['maxlength']) {
-          <small style="color:red">El nombre no puede tener más de 100 caracteres.</small>
-        }
-      }
+          <ng-container matColumnDef="joining_date">
+            <th mat-header-cell *matHeaderCellDef>Fecha de solicitud</th>
+            <td mat-cell *matCellDef="let element">{{ formatDate(element.joining_date) }}</td>
+          </ng-container>
 
-      <mat-form-field>
-        <mat-label>Descripción del grupo</mat-label>
-        <input matInput type="text" formControlName="group_description" />
-      </mat-form-field>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let element">
+              @if (isAdmin()) {
+                <button mat-button type="button" (click)="acceptMember(element.user_id)">
+                  Aceptar
+                </button>
+                <button mat-button type="button" (click)="rejectMember(element.user_id)">
+                  Rechazar
+                </button>
+              }
+            </td>
+          </ng-container>
 
-      <p>Código: {{ selectedGroup()?.group_code }}</p>
-      <p>Fecha de creación: {{ selectedGroup()?.creation_date }}</p>
-
-      <button mat-button type="submit" [disabled]="groupForm.invalid">Guardar cambios</button>
-    </form>
-    <button mat-button type="button" (click)="deleteGroup()">Eliminar grupo</button>
-  } @else {
-    <h3>Información del grupo</h3>
-    <p>{{ selectedGroup()?.group_name }}</p>
-    <p>{{ selectedGroup()?.group_description }}</p>
-    <p>{{ selectedGroup()?.group_code }}</p>
-    <p>{{ selectedGroup()?.creation_date }}</p>
+          <tr mat-header-row *matHeaderRowDef="displayedPendingColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedPendingColumns"></tr>
+        </table>
+      </section>
+    }
   }
 
-  <h3>Miembros del grupo</h3>
-  <table mat-table [dataSource]="acceptedMembers()" class="mat-shadow-2">
-    <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef> Nombre </th>
-      <td mat-cell *matCellDef="let element"> {{ element.username }} </td>
-    </ng-container>
+  <section class="invitation">
+    <h2>Invitación al grupo</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>Enlace de invitación</mat-label>
+      <input matInput [value]="joinUrlLong()" readonly />
+      <button mat-icon-button matSuffix type="button" aria-label="Copiar enlace" (click)="copyInvitationCode()">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+    </mat-form-field>
 
-    <ng-container matColumnDef="role">
-      <th mat-header-cell *matHeaderCellDef> Rol </th>
-      <td mat-cell *matCellDef="let element">
-        @if (isAdmin()) {
-          <mat-form-field appearance="outline">
-            <mat-select [value]="element.role" (valueChange)="changeRole(element.user_id, $event)">
-              <mat-option value="ADMIN">ADMIN</mat-option>
-              <mat-option value="MEMBER">MEMBER</mat-option>
-            </mat-select>
-          </mat-form-field>
-        } @else {
-          {{ element.role }}
-        }
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="joining_date">
-      <th mat-header-cell *matHeaderCellDef> Fecha de unión </th>
-      <td mat-cell *matCellDef="let element"> {{ element.joining_date }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef> Acciones </th>
-      <td mat-cell *matCellDef="let element">
-        @if (isAdmin()) {
-          <button mat-button type="button" (click)="removeMember(element.user_id)">Eliminar</button>
-        }
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedAcceptedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedAcceptedColumns;"></tr>
-  </table>
-
-  <h3>Solicitudes pendientes</h3>
-  <table mat-table [dataSource]="pendingMembers()" class="mat-shadow-2">
-    <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef> Nombre </th>
-      <td mat-cell *matCellDef="let element"> {{ element.username }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="role">
-      <th mat-header-cell *matHeaderCellDef> Rol </th>
-      <td mat-cell *matCellDef="let element"> {{ element.role }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="joining_date">
-      <th mat-header-cell *matHeaderCellDef> Fecha de solicitud </th>
-      <td mat-cell *matCellDef="let element"> {{ element.joining_date }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef> Acciones </th>
-      <td mat-cell *matCellDef="let element">
-        @if (isAdmin()) {
-          <button mat-button type="button" (click)="acceptMember(element.user_id)">Aceptar</button>
-          <button mat-button type="button" (click)="rejectMember(element.user_id)">Rechazar</button>
-          <button mat-button type="button" (click)="removeMember(element.user_id)">Eliminar</button>
-        }
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedPendingColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedPendingColumns;"></tr>
-  </table>
-
-  <h3>Invitación al grupo</h3>
-  <a [routerLink]="joinUrl()">{{joinUrlLong()}}</a>
-
-  @if (qrCodeUrl()) {
-    <div>
-      <p>Invita a tus amigos y familiares con este QR:</p>
-      <img [src]="qrCodeUrl()" [alt]="'QR para unirse al grupo ' + selectedGroupCode()" />
-    </div>
-  }
+    @if (qrCodeUrl()) {
+      <img
+        class="qr"
+        [src]="qrCodeUrl()"
+        [alt]="'QR para unirse al grupo ' + selectedGroupCode()"
+      />
+    }
+  </section>
 }

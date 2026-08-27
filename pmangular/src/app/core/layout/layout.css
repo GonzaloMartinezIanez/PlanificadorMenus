@@ -9,7 +9,13 @@
 .page-content {
   flex: 1;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 0 2rem;
+}
+
+@media (max-width: 960px) {
+  .page-content {
+    padding: 1rem;
+  }
 }

@@ -1,4 +1,10 @@
 footer{
+  margin-top: 1rem;
   height: 3rem;
   text-align: center;
+  box-shadow: 0 -2px 2px 1px rgba(0, 0, 0, 0.1);
+}
+
+footer p{
+  padding-top: 1rem;
 }

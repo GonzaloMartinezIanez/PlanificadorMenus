@@ -1,0 +1,65 @@
+.group-info {
+  position: relative;
+  width: 100%;
+  max-width: 600;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.group-info mat-form-field {
+  display: block;
+  width: 100%;
+}
+
+.group-info p {
+  font-size: large;
+  margin: 0.5rem 0;
+}
+
+.save-button{
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.delete-button{
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.invitation{
+  display: flex;
+  flex-direction: column;
+}
+
+.qr{
+  align-self: center;
+  width: 40%;
+  height: 40%;
+}
+
+@media (max-width: 960px) {
+  th,
+  td {
+    padding: 0.5rem;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  .group-information {
+    padding: 1rem;
+  }
+}
