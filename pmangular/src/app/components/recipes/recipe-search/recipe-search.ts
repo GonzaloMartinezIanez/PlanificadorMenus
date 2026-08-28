@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  computed,
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output,
   signal,
@@ -15,7 +15,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { RecipeSearchResult } from './recipe-search-result/recipe-search-result';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-recipe-search',
@@ -25,7 +26,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatSelectModule,
     MatInputModule,
     RecipeSearchResult,
-    MatButtonToggleModule,
+    MatChipsModule,
+    MatIconModule,
   ],
   templateUrl: './recipe-search.html',
   styleUrl: './recipe-search.css',
@@ -42,6 +44,9 @@ export class RecipeSearch implements OnInit {
 
   searchName = signal('');
   selectedCategoryIds = signal<number[]>([]);
+  showingTopRecipes = computed(
+    () => this.searchName().trim() === '' && this.selectedCategoryIds().length === 0,
+  );
 
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -52,11 +57,7 @@ export class RecipeSearch implements OnInit {
       },
     });
 
-    this.recipeService.getTopRecipes().subscribe({
-      next: (recipes) => {
-        this.searchedRecipes.set(recipes);
-      },
-    });
+    this.loadRecipes();
   }
 
   updateSearchName(event: Event) {
@@ -76,7 +77,7 @@ export class RecipeSearch implements OnInit {
       this.selectedCategoryIds.set([...currentCategoryIds, categoryId]);
     }
 
-    this.searchRecipes();
+    this.loadRecipes();
   }
 
   // Para que no se haga una búsqueda en cada tecla, se añade un delay de 300ms
@@ -86,12 +87,29 @@ export class RecipeSearch implements OnInit {
     }
 
     this.searchTimeout = setTimeout(() => {
-      this.searchRecipes();
+      this.loadRecipes();
     }, 300);
+  }
+
+  loadRecipes() {
+    if (this.showingTopRecipes()) {
+      this.searchTopRecipes();
+      return;
+    }
+
+    this.searchRecipes();
   }
 
   searchRecipes() {
     this.recipeService.searchRecipes(this.searchName(), this.selectedCategoryIds()).subscribe({
+      next: (recipes) => {
+        this.searchedRecipes.set(recipes);
+      },
+    });
+  }
+
+  searchTopRecipes() {
+    this.recipeService.getTopRecipes().subscribe({
       next: (recipes) => {
         this.searchedRecipes.set(recipes);
       },

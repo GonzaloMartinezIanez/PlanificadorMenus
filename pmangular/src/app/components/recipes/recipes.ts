@@ -10,7 +10,4 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './recipes.css',
 })
 export class Recipes {
-  prueba(){
-    alert("Esto es una prueba")
-  }
 }

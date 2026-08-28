@@ -1,0 +1,15 @@
+.recipe-rating {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recipe-rating-stars {
+  display: flex;
+  color: #eaac00;
+}
+
+.recipe-rating-star:hover {
+  transform: scale(1.2);
+}

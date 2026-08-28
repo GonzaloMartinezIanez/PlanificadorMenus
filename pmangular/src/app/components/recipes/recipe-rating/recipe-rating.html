@@ -1,0 +1,28 @@
+<div class="recipe-rating">
+  <div class="recipe-rating-stars" (mouseleave)="clearHoveredScore()">
+    @for (star of stars; track star) {
+      @if (editable) {
+        <mat-icon
+          class="recipe-rating-star"
+          (mouseenter)="setHoveredScore(star)"
+          (click)="selectScore(star)"
+        >
+          {{ getStarIcon(star) }}
+        </mat-icon>
+      } @else {
+        <mat-icon>
+          {{ getStarIcon(star) }}
+        </mat-icon>
+      }
+    }
+  </div>
+  @if (!editable) {
+    <span>
+      @if (num_valorations === 1) {
+        ({{ num_valorations }} valoración)
+      } @else {
+        ({{ num_valorations }} valoraciones)
+      }
+    </span>
+  }
+</div>

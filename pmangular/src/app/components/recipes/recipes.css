@@ -1,0 +1,22 @@
+.create-recipe {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.create-recipe-button {
+  width: 30%;
+}
+
+@media (max-width: 960px) {
+  .create-recipe {
+    margin-top: 0.5rem;
+    flex-direction: column;
+  }
+
+  .create-recipe-button {
+    width: 100%;
+  }
+}

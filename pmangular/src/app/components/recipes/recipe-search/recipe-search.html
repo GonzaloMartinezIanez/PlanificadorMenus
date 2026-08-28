@@ -1,26 +1,40 @@
-<h2>Filtra recetas</h2>
+<section>
+  <h2>Busca recetas</h2>
+  <p>Explora recetas filtrando por su nombre o categoría.</p>
 
-<mat-form-field appearance="fill">
-  <mat-label>Busca recetas por texto</mat-label>
-  <input matInput placeholder="Nombre de la receta" (input)="updateSearchName($event)" />
-</mat-form-field>
+  <mat-form-field appearance="fill" class="recipe-search-text">
+    <mat-label>Busca recetas por texto</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput placeholder="Nombre de la receta" (input)="updateSearchName($event)" />
+  </mat-form-field>
 
-<mat-button-toggle-group multiple>
-  @for (cat of recipeCategories(); track cat.id) {
-    <mat-button-toggle [checked]="isCategorySelected(cat.id)" (click)="toggleCategory(cat.id)">
-      {{ cat.name }}
-    </mat-button-toggle>
+  <mat-chip-listbox class="recipe-search-categories" multiple aria-label="Filtrar por categorías">
+    @for (cat of recipeCategories(); track cat.id) {
+      <mat-chip-option
+        [selected]="isCategorySelected(cat.id)"
+        (selectionChange)="toggleCategory(cat.id)"
+      >
+        {{ cat.name }}
+      </mat-chip-option>
+    }
+  </mat-chip-listbox>
+
+  @if (showingTopRecipes()) {
+    <h3>Recetas populares</h3>
   }
-</mat-button-toggle-group>
 
-@if (searchedRecipes().length > 0) {
-  @for (rec of searchedRecipes(); track rec.id) {
-    <app-recipe-search-result
-      [recipe]="rec"
-      [actionLabel]="actionLabel"
-      (actionClicked)="onActionClicked($event)"
-      (detailsClicked)="onDetailsClicked()" />
+  @if (searchedRecipes().length > 0) {
+    <div class="recipe-search-results">
+      @for (rec of searchedRecipes(); track rec.id) {
+        <app-recipe-search-result
+          [recipe]="rec"
+          [actionLabel]="actionLabel"
+          (actionClicked)="onActionClicked($event)"
+          (detailsClicked)="onDetailsClicked()"
+        />
+      }
+    </div>
+  } @else {
+    <p>No hemos encontrado recetas que coincidan con tu búsqueda.</p>
   }
-} @else {
-  <p>No se han encontrado recetas.</p>
-}
+</section>

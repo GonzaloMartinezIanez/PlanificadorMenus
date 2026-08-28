@@ -1,14 +1,29 @@
-<mat-card>
-  <mat-card-header>
+<mat-card class="recipe-card">
+  <mat-card-header class="recipe-card-header">
     <mat-card-title>{{ recipe?.name }}</mat-card-title>
     <mat-card-subtitle>De: {{ recipe?.author }}</mat-card-subtitle>
-    <mat-card-subtitle>{{ recipe?.preparation_time }} minutos</mat-card-subtitle>
-    <mat-card-subtitle>{{ recipe?.avg_score }}/5 de {{recipe?.num_valorations}} valoraciones</mat-card-subtitle>
+    <mat-card-subtitle class="recipe-card-time">
+      <mat-icon>schedule</mat-icon>
+      {{ recipe?.preparation_time }} minutos
+    </mat-card-subtitle>
+    <app-recipe-rating
+      class="recipe-card-rating"
+      [score]="recipe?.avg_score ?? 0"
+      [num_valorations]="recipe?.num_valorations ?? 0"
+    />
   </mat-card-header>
   <mat-card-content>
-    <p>{{ recipe?.description }}</p>
+    <p class="recipe-card-description">{{ recipe?.description }}</p>
+
+    @if (recipe?.recipe_categories?.length != 0) {
+      <div class="recipe-card-categories">
+        @for (category of recipe?.recipe_categories; track category.id) {
+          <span class="recipe-card-category">{{ category.name }}</span>
+        }
+      </div>
+    }
   </mat-card-content>
-  <mat-card-actions>
+  <mat-card-actions class="recipe-card-actions">
     @if (recipe) {
       <button mat-button [routerLink]="['/recipes', recipe.id]" (click)="emitDetails()">
         Ver detalles

@@ -1,4 +1,9 @@
-<h1>Recetas</h1>
+<section class="create-recipe">
+  <h1>Recetas</h1>
 
-<button matButton routerLink="/recipes/create">Crear receta</button>
-<app-recipe-search [actionLabel]="'prueba'" (actionClicked)="prueba()"></app-recipe-search>
+  <button mat-stroked-button routerLink="/recipes/create" class="create-recipe-button">
+    Crear receta
+  </button>
+</section>
+
+<app-recipe-search />

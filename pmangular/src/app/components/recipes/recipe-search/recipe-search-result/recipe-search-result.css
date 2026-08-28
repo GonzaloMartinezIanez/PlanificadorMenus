@@ -1,0 +1,52 @@
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.recipe-card-header {
+  align-items: flex-start;
+}
+
+.recipe-card-rating {
+  margin-left: auto;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.recipe-card-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.recipe-card-time mat-icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+/* Evitar que ocupe más de 3 líneas */
+.recipe-card-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.recipe-card-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recipe-card-category {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #626262;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+}
+
+.recipe-card-actions {
+  margin-top: auto;
+}
