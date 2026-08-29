@@ -1,0 +1,78 @@
+.recipe {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.recipe-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-form-step {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.recipe-form-step mat-form-field {
+  flex: 1;
+}
+
+.recipe-form-ingredients {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 5px;
+}
+
+.recipe-form-ingredients-info {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.recipe-form-ingredients-info > div {
+  min-width: 0;
+}
+
+.recipe-form-ingredients-name {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.recipe-form-ingredients-input {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.recipe-form-ingredients-input mat-form-field {
+  flex: 1;
+}
+
+.recipe-form-ingredients-unit {
+  padding-right: 0.5rem;
+}
+
+.recipe-form-ingredients-remove {
+  color: #b3261e !important; /* Sobrescribir el color de angular material */
+}
+
+.recipe-form-submit {
+  margin-top: 2rem;
+}
+
+@media (max-width: 960px) {
+  .recipe-form-ingredients {
+    padding: 0;
+  }
+
+  .recipe-form-ingredients-remove {
+    margin: 0.5rem;
+  }
+}

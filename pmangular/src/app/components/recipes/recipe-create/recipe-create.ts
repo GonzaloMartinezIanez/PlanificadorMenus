@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,6 +39,7 @@ export class RecipeCreate implements OnInit {
   recipeService = inject(RecipeService);
   snackBar = inject(MatSnackBar);
   dialog = inject(MatDialog);
+  changeDetectorRef = inject(ChangeDetectorRef);
 
   recipeCategories = signal<RecipeCategory[]>([]);
   isLoading = signal(false);
@@ -202,6 +203,8 @@ export class RecipeCreate implements OnInit {
         unit: [ingredient.reference_format, Validators.required],
       }),
     );
+
+    this.changeDetectorRef.markForCheck(); // Fuerza que se rendericen los ingredientes insertados
   }
 
   openIngredientPicker() {
