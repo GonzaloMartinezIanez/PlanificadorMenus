@@ -11,6 +11,7 @@ export class RecipeRating {
   @Input() score = 0; // Si está en modo editable debe ser el score del usuario
   @Input() num_valorations = 0;
   @Input() editable = false;
+  @Input() showValorations = false;
   @Output() scoreChange = new EventEmitter<number>();
 
   stars = [1, 2, 3, 4, 5];

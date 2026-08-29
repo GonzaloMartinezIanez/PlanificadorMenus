@@ -9,6 +9,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatChipsModule } from '@angular/material/chips';
+import { RecipeRating } from '../recipe-rating/recipe-rating';
+import { ConfirmDialog } from '../../../core/confirm-dialog/confirm-dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-recipe-detail',
@@ -20,6 +24,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatInputModule,
     MatSnackBarModule,
     RouterLink,
+    MatChipsModule,
+    RecipeRating,
   ],
   templateUrl: './recipe-detail.html',
   styleUrl: './recipe-detail.css',
@@ -40,6 +46,7 @@ export class RecipeDetail implements OnInit {
   currentUser = this.authService.currentUser;
 
   commentForm: FormGroup;
+  dialog = inject(MatDialog);
 
   constructor(private fb: FormBuilder) {
     this.commentForm = this.fb.group({
@@ -236,12 +243,6 @@ export class RecipeDetail implements OnInit {
       return;
     }
 
-    const confirmed = window.confirm('¿Seguro que quieres borrar esta receta?');
-
-    if (!confirmed) {
-      return;
-    }
-
     this.recipeService.deleteRecipe(recipe.id).subscribe({
       next: () => {
         this.showInfo('Receta eliminada correctamente.');
@@ -251,6 +252,23 @@ export class RecipeDetail implements OnInit {
         this.showError(err.error.error ?? 'No se pudo eliminar la receta.');
       },
     });
+  }
+
+  opendDeleteDialog() {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Eliminar receta',
+          message: '¿Seguro que quieres borrar la receta?',
+          confirmText: 'Eliminar',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.deleteRecipe();
+        }
+      });
   }
 
   showInfo(message: string) {

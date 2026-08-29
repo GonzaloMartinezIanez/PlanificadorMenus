@@ -1,129 +1,204 @@
-@if (isLoading()) {
-  <p>Cargando receta...</p>
-} @else if (errorMessage()) {
-  <p>{{ errorMessage() }}</p>
-} @else if (recipe()) {
-  <h1>{{ recipe()!.name }}</h1>
-  <p>Autor: {{ recipe()!.author }}</p>
-  <p>Descripción: {{ recipe()!.description }}</p>
-  <p>Tiempo de preparación: {{ recipe()!.preparation_time }} minutos</p>
-  <p>Visibilidad: {{ recipe()!.visibility }}</p>
-  <p>Valoración media: {{ recipe()!.avg_score }} ({{ recipe()!.num_valorations }} valoraciones)</p>
-
-  @if (this.authService.isAuthenticated()) {
-    <p>
-      <a mat-button [routerLink]="['/recipes/create-from', recipe()?.id]"
-        >Crear a partir de esta receta</a
-      >
-      @if (isRecipeOwner()) {
-        <a mat-button [routerLink]="['/recipes', recipe()!.id, 'edit']">Editar receta</a>
-        <button mat-button type="button" (click)="deleteRecipe()">Borrar receta</button>
-      }
-    </p>
-  }
-
-  <h2>Categorías</h2>
-  <ul>
-    @for (category of recipe()!.recipe_categories; track category.id) {
-      <li>{{ category.name }}</li>
-    }
-  </ul>
-
-  <h2>Ingredientes</h2>
-  <ul>
-    @for (ingredient of recipe()!.ingredients; track ingredient.id_ingredient) {
-      <li>
-        @if (ingredient.image) {
-          <img [src]="ingredient.image" [alt]="ingredient.name" width="48" height="48" />
-        }
-        {{ ingredient.name }} - {{ ingredient.amount }} {{ ingredient.unit }}
-      </li>
-    }
-  </ul>
-
-  <h2>Pasos</h2>
-  <ol>
-    @for (step of recipe()!.steps; track $index) {
-      <li>{{ step }}</li>
-    }
-  </ol>
-
-  @if (this.authService.isAuthenticated()) {
-    <h2>Comentarios</h2>
-
-    @if (comments().length === 0 && !myComment()) {
-      <p>Todavía no hay comentarios.</p>
-    } @else {
-      @if (comments().length > 0) {
-        <ul>
-          @for (comment of comments(); track $index) {
-            <li>
-              <strong>{{ comment.user }}</strong> - {{ comment.score }}/5
-              @if (comment.comment) {
-                <p>{{ comment.comment }}</p>
-              }
-              @if (isRecipeOwner()) {
-                <button mat-button type="button" (click)="deleteCommentText(comment.user_id)">
-                  Eliminar texto del comentario
-                </button>
-              }
-            </li>
+<section class="recipe-detail">
+  @if (isLoading()) {
+    <p>Cargando receta...</p>
+  } @else if (errorMessage()) {
+    <p>{{ errorMessage() }}</p>
+  } @else if (recipe()) {
+    <article>
+      <section class="recipe-detail-header">
+        <div>
+          <h1>{{ recipe()!.name }}</h1>
+          <h3>Autor: {{ recipe()!.author }}</h3>
+          @if (recipe()!.visibility === 'PRIVATE') {
+            <p>
+              Esta receta es privada. Las recetas privadas solo la pueden ver los usuarios que
+              tienen un grupo en común con el Autor
+            </p>
           }
-        </ul>
-      }
-    }
+        </div>
 
-    @if (this.myComment()) {
-      <p>Tu comentario:</p>
-      <p>
-        <strong>{{ this.myComment()!.user }}</strong> - {{ this.myComment()!.score }}/5
-      </p>
-      @if (this.myComment()!.comment) {
-        <p>{{ this.myComment()!.comment }}</p>
-      }
+        <app-recipe-rating
+          class="recipe-detail-header-rating"
+          [score]="recipe()!.avg_score"
+          [num_valorations]="recipe()!.num_valorations"
+          [showValorations]="true"
+        />
+      </section>
 
-      @if (isEditingMyComment()) {
-        <form [formGroup]="commentForm" (ngSubmit)="updateMyComment()">
-          <mat-form-field>
-            <mat-label>Puntuación</mat-label>
-            <input matInput id="edit-score" type="number" min="0" max="5" formControlName="score" />
-          </mat-form-field>
+      <section>
+        @if (recipe()!.description !== '') {
+          <p>{{ recipe()!.description }}</p>
+        }
+        @if (recipe()!.preparation_time) {
+          <p>Tiempo de preparación: {{ recipe()!.preparation_time }} minutos</p>
+        }
 
-          <mat-form-field>
-            <mat-label>Comentario</mat-label>
-            <textarea matInput id="edit-comment" formControlName="comment"></textarea>
-          </mat-form-field>
-
-          <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
-            Guardar cambios
+        <mat-chip-set aria-label="Categorías de recetas de esta receta">
+          @for (category of recipe()!.recipe_categories; track category.id) {
+            <mat-chip>{{ category.name }}</mat-chip>
+          }
+        </mat-chip-set>
+      </section>
+    </article>
+    @if (this.authService.isAuthenticated()) {
+      <div class="recipe-detail-actions">
+        <button mat-button [routerLink]="['/recipes/create-from', recipe()?.id]">
+          Crear nueva receta a partir de esta
+        </button>
+        @if (isRecipeOwner()) {
+          <button mat-button [routerLink]="['/recipes', recipe()!.id, 'edit']">
+            Editar receta
           </button>
-          <button mat-button type="button" (click)="cancelEditMyComment()">Cancelar</button>
-        </form>
-      } @else {
-        <button mat-button type="button" (click)="startEditMyComment()">
-          Modificar mi comentario
-        </button>
-        <button mat-button type="button" (click)="deleteMyComment()">Borrar mi comentario</button>
-      }
-    } @else {
-      <h3>Deja tu valoriración y/o comentario</h3>
-      <form [formGroup]="commentForm" (ngSubmit)="submitComment()">
-        <mat-form-field>
-          <mat-label>Puntuación</mat-label>
-          <input matInput id="score" type="number" min="0" max="5" formControlName="score" />
-        </mat-form-field>
-
-        <mat-form-field>
-          <mat-label>Comentario</mat-label>
-          <textarea matInput id="comment" formControlName="comment"></textarea>
-        </mat-form-field>
-
-        <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
-          Enviar comentario
-        </button>
-      </form>
+          <button
+            class="button-danger button-delete"
+            mat-flat-button
+            type="button"
+            (click)="opendDeleteDialog()"
+          >
+            Borrar receta
+          </button>
+        }
+      </div>
     }
-  } @else {
-    <p>Inicia sesión para ver y escribir comentarios.</p>
+
+    <section>
+      <h2>Pasos</h2>
+      <ol class="recipe-detail-steps">
+        @for (step of recipe()!.steps; track $index) {
+          <li>{{ step }}</li>
+        }
+      </ol>
+    </section>
+
+    <section>
+      <h2>Ingredientes</h2>
+      <ul class="recipe-detail-ingredients">
+        @for (ingredient of recipe()!.ingredients; track ingredient.id_ingredient) {
+          <li class="recipe-detail-ingredient">
+            @if (ingredient.image) {
+              <img [src]="ingredient.image" [alt]="ingredient.name" width="100" height="100" />
+            }
+            <p>
+              {{ ingredient.name }}
+            </p>
+
+            <p>{{ ingredient.amount }} {{ ingredient.unit }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+
+    @if (this.authService.isAuthenticated()) {
+      <section class="recipe-detail-comments">
+        <h2>Comentarios</h2>
+
+        @if (this.myComment()) {
+          <article class="recipe-comment recipe-comment--mine">
+            <div class="recipe-comment-header">
+              <strong>Tu valoración</strong>
+              <app-recipe-rating [score]="myComment()!.score" />
+            </div>
+
+            @if (this.myComment()!.comment) {
+              <p class="recipe-comment-text">{{ this.myComment()!.comment }}</p>
+            }
+
+            @if (isEditingMyComment()) {
+              <form
+                class="recipe-comment-form"
+                [formGroup]="commentForm"
+                (ngSubmit)="updateMyComment()"
+              >
+                <div class="recipe-comment-form-content">
+                  <app-recipe-rating
+                    [score]="commentForm.get('score')?.value ?? 0"
+                    [editable]="true"
+                    (scoreChange)="commentForm.get('score')?.setValue($event)"
+                  />
+
+                  <mat-form-field>
+                    <mat-label>Comentario (opcional)</mat-label>
+                    <textarea matInput id="edit-comment" formControlName="comment"></textarea>
+                  </mat-form-field>
+                </div>
+
+                <div class="recipe-comment-actions">
+                  <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
+                    Guardar cambios
+                  </button>
+                  <button mat-button type="button" (click)="cancelEditMyComment()">Cancelar</button>
+                </div>
+              </form>
+            } @else {
+              <div class="recipe-comment-actions">
+                <button mat-button type="button" (click)="startEditMyComment()">
+                  Modificar mi comentario
+                </button>
+                <button mat-button type="button" (click)="deleteMyComment()">
+                  Borrar mi comentario
+                </button>
+              </div>
+            }
+          </article>
+        } @else {
+          <article class="recipe-comment recipe-comment--form">
+            <h3>Deja tu valoración y/o comentario</h3>
+            <form
+              class="recipe-comment-form"
+              [formGroup]="commentForm"
+              (ngSubmit)="submitComment()"
+            >
+              <div class="recipe-comment-form-content">
+                <app-recipe-rating
+                  [score]="commentForm.get('score')?.value ?? 0"
+                  [editable]="true"
+                  (scoreChange)="commentForm.get('score')?.setValue($event)"
+                />
+
+                <mat-form-field>
+                  <mat-label>Comentario (opcional)</mat-label>
+                  <textarea matInput id="comment" formControlName="comment"></textarea>
+                </mat-form-field>
+              </div>
+
+              <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
+                Enviar comentario
+              </button>
+            </form>
+          </article>
+        }
+
+        @if (comments().length === 0 && !myComment()) {
+          <p>Todavía no hay comentarios.</p>
+        } @else {
+          @if (comments().length > 0) {
+            <ul class="recipe-comment-list">
+              @for (comment of comments(); track $index) {
+                <li class="recipe-comment">
+                  <div class="recipe-comment-header">
+                    <strong>{{ comment.user }}</strong>
+                    <app-recipe-rating [score]="comment.score" />
+                  </div>
+                  @if (comment.comment) {
+                    <p class="recipe-comment-text">{{ comment.comment }}</p>
+                  }
+                  @if (isRecipeOwner()) {
+                    <div class="recipe-comment-actions">
+                      <button mat-button type="button" (click)="deleteCommentText(comment.user_id)">
+                        Eliminar texto del comentario
+                      </button>
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        }
+      </section>
+    } @else {
+      <section>
+        <p>Inicia sesión para ver y escribir comentarios.</p>
+      </section>
+    }
   }
-}
+</section>

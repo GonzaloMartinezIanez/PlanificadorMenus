@@ -1,0 +1,125 @@
+.recipe-detail {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.recipe-detail-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  line-height: normal;
+}
+
+.recipe-detail-header-rating {
+  align-self: center;
+}
+
+.recipe-detail-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button-delete {
+  margin-left: auto;
+}
+
+.recipe-detail-steps {
+  font-size: large;
+  line-height: 3;
+}
+
+.recipe-detail-ingredients {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe-detail-ingredient {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.recipe-detail-comments {
+  margin-top: 2rem;
+}
+
+.recipe-comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe-comment {
+  padding: 1rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.recipe-comment--mine {
+  border-color: #9bc6a7;
+  background: #f2f8f3;
+}
+
+.recipe-comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.recipe-comment-text {
+  margin: 0.75rem 0 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.recipe-comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.recipe-comment-form mat-form-field {
+  width: 100%;
+}
+
+.recipe-comment-form-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.recipe-comment-form-content app-recipe-rating {
+  flex-shrink: 0;
+}
+
+.recipe-comment-form-content mat-form-field {
+  flex: 1;
+}
+
+.recipe-comment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 960px) {
+  .recipe-detail {
+    padding: 0.5rem;
+  }
+}
