@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { ListModel, ListPatchItem, ListStatusItem } from '../../../models/lists';
-import { NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -8,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-list-item',
-  imports: [NgStyle, MatIconModule, MatButtonModule, MatInputModule, FormsModule],
+  imports: [MatIconModule, MatButtonModule, MatInputModule, FormsModule],
   templateUrl: './list-item.html',
   styleUrl: './list-item.css',
 })

@@ -17,13 +17,13 @@
           @if (ingredient.packaging || ingredient.unit_size !== null) {
             <span>
               {{ ingredient.packaging }} · {{ formatAmount(ingredient.unit_size || 0) }}
-              {{ ingredient.reference_format }}
+              {{ formatUnit(ingredient.reference_format || "") }}
             </span>
           }
 
           @if (ingredient.reference_price !== null && ingredient.reference_format) {
             <span>
-              {{ formatPrice(ingredient.reference_price) }}/{{ ingredient.reference_format }}
+              {{ formatPrice(ingredient.reference_price) }}/{{ formatUnit(ingredient.reference_format || "") }}
             </span>
           }
         </div>

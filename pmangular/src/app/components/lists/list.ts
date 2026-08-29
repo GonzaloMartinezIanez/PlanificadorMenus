@@ -11,6 +11,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { ConfirmDialog } from '../../core/confirm-dialog/confirm-dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-list',
@@ -21,6 +23,7 @@ import { MatInputModule } from '@angular/material/input';
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatTooltipModule,
   ],
   templateUrl: './list.html',
   styleUrl: './list.css',
@@ -66,6 +69,9 @@ export class List implements OnInit {
         this.selectedCategory()
       );
     });
+  });
+  boughtItems = computed(() => {
+    return this.list().filter((item) => item.bought).length;
   });
 
   selectedIngredient = signal<Ingredient | null>(null);
@@ -125,6 +131,23 @@ export class List implements OnInit {
     });
   }
 
+  openDeleteListDialog() {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Limpiar lista de la compra',
+          message: '¿Seguro que quieres eliminar todos los productos de la lista?',
+          confirmText: 'Limpiar lista',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.deleteList();
+        }
+      });
+  }
+
   changeItemStatus(event: ListStatusItem) {
     this.listService
       .changeStatusListItem(this.groupCode() || '', event.id_ingredient, event.bought)
@@ -164,6 +187,19 @@ export class List implements OnInit {
     return this.list().map((item) => item.ingredient.id_ingredient);
   }
 
+  formatPrice(price: number) {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(price);
+  }
+
+  formatAmount(amount: number) {
+    return new Intl.NumberFormat('es-ES', {
+      maximumFractionDigits: 3,
+    }).format(amount);
+  }
+
   addSelectedIngredient() {
     const ingredient = this.selectedIngredient();
 
@@ -191,5 +227,18 @@ export class List implements OnInit {
       if (this.activeCategories().some((cat) => cat.id_ingredient_category === id))
         this.selectedCategory.set(id);
     }
+  }
+
+  formatUnit(unit: string) {
+    if (unit === 'ud') {
+      return 'unidad';
+    }
+
+    // Tanto dc como dz representan docenas
+    if (unit === 'dc' || unit === 'dz') {
+      return 'docena';
+    }
+
+    return unit;
   }
 }

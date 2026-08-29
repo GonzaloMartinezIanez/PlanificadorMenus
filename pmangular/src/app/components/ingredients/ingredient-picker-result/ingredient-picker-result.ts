@@ -33,4 +33,17 @@ export class IngredientPickerResult {
       maximumFractionDigits: 3,
     }).format(amount);
   }
+
+  formatUnit(unit: string) {
+    if (unit === 'ud') {
+      return 'unidad';
+    }
+
+    // Tanto dc como dz representan docenas
+    if (unit === 'dc' || unit === 'dz') {
+      return 'docena';
+    }
+
+    return unit;
+  }
 }

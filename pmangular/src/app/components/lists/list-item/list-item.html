@@ -1,14 +1,15 @@
-<div style="display: flex; flex-direction: row">
+<div class="shopping-list-item" [class.shopping-list-item--bought]="item?.bought">
   @if (item?.bought) {
     <mat-icon
+      class="shopping-list-item-check shopping-list-item-check--bought"
       (click)="change(false)"
       aria-hidden="false"
       aria-label="Desmarcar un item"
       fontIcon="check"
-      [style.color]="'green'"
     ></mat-icon>
   } @else {
     <mat-icon
+      class="shopping-list-item-check"
       (click)="change(true)"
       aria-hidden="false"
       aria-label="Marcar un item"
@@ -16,12 +17,19 @@
     ></mat-icon>
   }
 
-  <img src="{{ item?.ingredient?.image }}" alt="{{ item?.ingredient?.name }}" />
-  <div style="display: flex; flex-direction: column">
-    <p [ngStyle]="item?.bought ? { 'text-decoration': 'line-through' } : {}">
-      <strong>{{ item?.ingredient?.name }}</strong> - {{ item?.amount }} {{ formatUnit() }}
+  <img
+    class="shopping-list-item-image"
+    [src]="item?.ingredient?.image"
+    [alt]="item?.ingredient?.name"
+    [width]="100"
+    [height]="100"
+  />
+  <div>
+    <p class="shopping-list-item-name">
+      <strong>{{ item?.ingredient?.name }}</strong>
+      <span>{{ item?.amount }} {{ formatUnit() }}</span>
     </p>
-    <p>
+    <p class="shopping-list-item-details">
       {{ item?.purchase_label }}
       @if (getItemPrice() !== null) {
         - Precio: {{ getItemPrice() }} €
@@ -30,23 +38,27 @@
   </div>
 
   @if (!editMode()) {
-    <button mat-button type="button" (click)="startEdit()">Editar</button>
+    <div class="shopping-list-item-actions">
+      <button mat-button type="button" (click)="startEdit()">Editar</button>
+    </div>
   } @else {
-    <mat-form-field>
-      <mat-label>Nueva cantidad</mat-label>
-      <input
-        matInput
-        type="number"
-        min="0.001"
-        step="0.001"
-        [ngModel]="editedAmount()"
-        (ngModelChange)="editedAmount.set($event)"
-      />
-    </mat-form-field>
+    <div class="shopping-list-item-edit">
+      <mat-form-field>
+        <mat-label>Nueva cantidad</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0.001"
+          step="0.001"
+          [ngModel]="editedAmount()"
+          (ngModelChange)="editedAmount.set($event)"
+        />
+      </mat-form-field>
 
-    <button mat-button type="button" (click)="editAmount()" [disabled]="editedAmount() < 0.001">
-      Guardar
-    </button>
-    <button mat-button type="button" (click)="editMode.set(false)">Volver</button>
+      <button mat-button type="button" (click)="editAmount()" [disabled]="editedAmount() < 0.001">
+        Guardar
+      </button>
+      <button mat-button type="button" (click)="editMode.set(false)">Volver</button>
+    </div>
   }
 </div>
