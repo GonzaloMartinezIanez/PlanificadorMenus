@@ -45,6 +45,7 @@ export class GroupJoin implements OnInit {
 
   groupCode = signal('');
   isLoading = signal(false);
+  hasRequestedJoin = signal(false);
 
   googleScript?: HTMLScriptElement;
   destroyed = false;
@@ -59,6 +60,7 @@ export class GroupJoin implements OnInit {
 
   async ngAfterViewInit() {
     if (this.authService.isAuthenticated()) {
+      this.redirectIfAlreadyMember();
       return;
     }
 
@@ -85,6 +87,7 @@ export class GroupJoin implements OnInit {
     this.groupService.joinGroup(this.groupCode()).subscribe({
       next: (res) => {
         this.showInfo(res.message);
+        this.hasRequestedJoin.set(true);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -106,7 +109,7 @@ export class GroupJoin implements OnInit {
     this.authService.login(response.credential).subscribe({
       next: () => {
         this.ngZone.run(() => {
-          this.isLoading.set(false);
+          this.joinAfterLogin();
         });
       },
       error: () => {
@@ -114,6 +117,79 @@ export class GroupJoin implements OnInit {
           this.showError('No se pudo iniciar sesión con Google en el backend.');
           this.isLoading.set(false);
         });
+      },
+    });
+  }
+
+  checkAccepted() {
+    const groupCode = this.groupCode();
+
+    if (!groupCode) {
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    this.groupService.getMyGroups().subscribe({
+      next: (groups) => {
+        const group = groups.find((item) => item.group_code === groupCode);
+        this.isLoading.set(false);
+
+        if (group) {
+          this.router.navigate(['/home', group.group_code]);
+          return;
+        }
+
+        this.showInfo('Tu solicitud está pendiente de aprobación.');
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.showError('No se pudo comprobar el estado de la solicitud.');
+      },
+    });
+  }
+
+  private joinAfterLogin() {
+    const groupCode = this.groupCode();
+
+    if (!groupCode) {
+      this.isLoading.set(false);
+      this.showError('El enlace de invitación no es válido.');
+      return;
+    }
+
+    this.groupService.getMyGroups().subscribe({
+      next: (groups) => {
+        const group = groups.find((item) => item.group_code === groupCode);
+
+        if (group) {
+          this.router.navigate(['/home', group.group_code]);
+          return;
+        }
+
+        this.joinGroup();
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.showError('No se pudo comprobar el grupo al que quieres unirte.');
+      },
+    });
+  }
+
+  private redirectIfAlreadyMember() {
+    const groupCode = this.groupCode();
+
+    if (!groupCode) {
+      return;
+    }
+
+    this.groupService.getMyGroups().subscribe({
+      next: (groups) => {
+        const group = groups.find((item) => item.group_code === groupCode);
+
+        if (group) {
+          this.router.navigate(['/home', group.group_code]);
+        }
       },
     });
   }
@@ -199,5 +275,9 @@ export class GroupJoin implements OnInit {
       verticalPosition: 'bottom',
       panelClass: ['snackbar-error'],
     });
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

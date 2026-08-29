@@ -25,7 +25,7 @@ body {
   --mat-button-outlined-state-layer-color: #b3261e;
 }
 
-.ingredient-dialog{
+.ingredient-dialog {
   width: 100%;
   height: 100%;
   display: flex;
@@ -34,14 +34,26 @@ body {
   overflow: hidden;
 }
 
-.ingredient-dialog-content{
+.ingredient-dialog-content {
   display: flex;
   flex: 1;
   min-width: 0;
   min-height: 0;
 }
 
-.ingredient-dialog-close-button{
+.ingredient-dialog-close-button {
   margin: 1rem 0 -1rem 0;
   flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  .landing-bullet .mdc-evolution-chip-set__chips {
+    flex-direction: column;
+    align-items: center;
+    margin-left: 0;
+  }
+
+  .landing-bullet .mdc-evolution-chip {
+    margin: 0.25rem 0;
+  }
 }

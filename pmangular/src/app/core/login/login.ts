@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { GroupService } from '../../services/group.service';
+import { MatChipsModule } from '@angular/material/chips';
 
 // Modelos que usa google
 interface GoogleCredentialResponse {
@@ -42,7 +43,7 @@ declare global {
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule],
+  imports: [CommonModule, MatChipsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

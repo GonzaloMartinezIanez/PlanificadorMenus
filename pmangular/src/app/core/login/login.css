@@ -1,0 +1,30 @@
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 2px 2px 1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.landing {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.landing-bullet {
+  justify-self: center;
+}
+
+.login-button {
+  margin-top: 2rem;
+  justify-self: center;
+}
+
+

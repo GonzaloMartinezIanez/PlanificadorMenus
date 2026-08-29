@@ -1,20 +1,39 @@
-<h1>Planificador de menús</h1>
+<header class="app-header">
+  <h1>Planificador de menús</h1>
 
-<p>Solicita unirte al grupo {{ groupCode() }}</p>
+  @if(authService.isAuthenticated()){
+    <button mat-raised-button class="button-logout" type="button" (click)="logout()" [disabled]="isLoading()">
+      Cerrar sesión
+    </button>
+  }
+</header>
 
-@if (!authService.isAuthenticated()) {
-  <p>Debes iniciar sesión para unirte a este grupo.</p>
-  <div #googleButton></div>
-} @else {
-  <button mat-raised-button type="button" (click)="joinGroup()" [disabled]="isLoading()">
-    Solicitar unirme al grupo
-  </button>
-}
+<main class="page-content">
+  <p>Solicita unirte al grupo {{ groupCode() }}</p>
 
-<br />
+  @if (!authService.isAuthenticated()) {
+    <p>Debes iniciar sesión para unirte a este grupo.</p>
+    <div #googleButton></div>
+  } @else {
+    @if (hasRequestedJoin()) {
+      <p>Tu solicitud está pendiente de aprobación.</p>
+      <button mat-button type="button" (click)="checkAccepted()" [disabled]="isLoading()">
+        Comprobar si me han aceptado
+      </button>
+    } @else {
+      <button mat-raised-button type="button" (click)="joinGroup()" [disabled]="isLoading()">
+        Solicitar unirme al grupo
+      </button>
+    }
+  }
 
-@if (!authService.isAuthenticated()) {
-  <a routerLink="/group-onboarding">Crea un nuevo grupo o únete a otro.</a>
-} @else {
-  <a routerLink="/groups/access">Crea un nuevo grupo o únete a otro.</a>
-}
+  @if (!authService.isAuthenticated()) {
+    <button mat-button [routerLink]="['/group-onboarding']">
+      Crea un nuevo grupo o únete a otro.
+    </button>
+  } @else {
+    <button mat-button [routerLink]="['/groups/access']">
+      Crea un nuevo grupo o únete a otro.
+    </button>
+  }
+</main>

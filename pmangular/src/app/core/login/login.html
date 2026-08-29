@@ -1,13 +1,31 @@
-<div style="display: flex; flex-direction: column; align-items: center;">
+<header class="app-header">
   <h1>Planificador de Menús</h1>
+</header>
 
-  <div #googleButton class="google-button-host"></div>
+<main class="landing">
+  <section>
+    <h2>Planifica el menú de tu grupo sin perder tiempo</h2>
+    <p>
+      Crea recetas, organiza las comidas de la semana y gestiona una lista de la compra autogenerada
+    </p>
 
-  @if (isLoading()) {
-  <p class="status-message">Conectando con el backend...</p>
-  }
+    <mat-chip-set class="landing-bullet" aria-label="Beneficios de la aplicación">
+      <mat-chip>Planifica por días</mat-chip>
+      <mat-chip>Comparte con tu grupo</mat-chip>
+      <mat-chip>Compra solo lo necesario</mat-chip>
+      <mat-chip>La lista se generada automáticamente</mat-chip>
+    </mat-chip-set>
 
-  @if (errorMessage()) {
-  <p class="error-message">{{ errorMessage() }}</p>
-  }
-</div>
+    <p>¡No pierdas tiempo y crea una cuenta!</p>
+
+    <div #googleButton class="google-button-host login-button"></div>
+
+    @if (isLoading()) {
+      <p class="status-message">Conectando con el servidor...</p>
+    }
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </section>
+</main>
