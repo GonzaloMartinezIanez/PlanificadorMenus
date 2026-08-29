@@ -1,14 +1,35 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, EventEmitter, inject, Input, OnDestroy, OnInit, Output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Ingredient, IngredientCategory } from '../../../models/ingredient';
 import { IngredientService } from '../../../services/ingredient.service';
+import { IngredientPickerResult } from '../ingredient-picker-result/ingredient-picker-result';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-ingredient-picker',
-  imports: [CommonModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    IngredientPickerResult,
+    MatIconModule,
+  ],
   templateUrl: './ingredient-picker.html',
   styleUrl: './ingredient-picker.css',
 })
@@ -27,6 +48,7 @@ export class IngredientPicker implements OnInit {
   isLoadingSearchResults = signal(false);
   isLoadingCategoryIngredients = signal(false);
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
+  categoryRequestId = 0;
 
   mainCategories = computed(() =>
     this.allCategories().filter((category) => category.primary_category === null),
@@ -96,6 +118,7 @@ export class IngredientPicker implements OnInit {
   }
 
   selectMainCategory(category: IngredientCategory) {
+    this.categoryRequestId++;
     this.selectedMainCategory.set(category);
     this.selectedSubcategory.set(null);
     this.categoryIngredients.set([]);
@@ -104,15 +127,24 @@ export class IngredientPicker implements OnInit {
   }
 
   selectSubcategory(category: IngredientCategory) {
+    const requestId = ++this.categoryRequestId; // Evitar que se puedan mandar dos peticiones
     this.selectedSubcategory.set(category);
-    this.isLoadingCategoryIngredients.set(true);
+    this.isLoadingCategoryIngredients.set(this.categoryIngredients().length === 0);
 
     this.ingredientService.getIngredientsByCategory(category.id_ingredient_category).subscribe({
       next: (ingredients) => {
+        if (requestId !== this.categoryRequestId) {
+          return;
+        }
+
         this.categoryIngredients.set(ingredients);
         this.isLoadingCategoryIngredients.set(false);
       },
       error: () => {
+        if (requestId !== this.categoryRequestId) {
+          return;
+        }
+
         this.categoryIngredients.set([]);
         this.isLoadingCategoryIngredients.set(false);
       },

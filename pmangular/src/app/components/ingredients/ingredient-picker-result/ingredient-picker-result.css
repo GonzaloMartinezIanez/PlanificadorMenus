@@ -1,0 +1,44 @@
+.ingredient-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+}
+
+.ingredient-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.ingredient-card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ingredient-card-info-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.ingredient-card-info-image {
+  flex: 0 0 100px;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  gap: 0.75rem;
+}

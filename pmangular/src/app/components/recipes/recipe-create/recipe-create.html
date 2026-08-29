@@ -1,5 +1,5 @@
 @if (isLoading()) {
-  <p>Cargando receta...</p>
+  <h2>Cargando receta...</h2>
 } @else {
   <h1>{{ getTitle() }}</h1>
 
@@ -22,8 +22,8 @@
     <mat-form-field>
       <mat-label>Visibilidad</mat-label>
       <mat-select formControlName="visibility">
-        <mat-option value="PUBLIC">PUBLIC</mat-option>
-        <mat-option value="PRIVATE">PRIVATE</mat-option>
+        <mat-option value="PUBLIC">Pública</mat-option>
+        <mat-option value="PRIVATE">Privada</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -60,11 +60,22 @@
 
     <h2>Ingredientes</h2>
 
-    <app-ingredient-picker
-      [selectedIngredientIds]="getSelectedIngredientIds()"
-      (ingredientSelected)="addIngredient($event)"
-    >
-    </app-ingredient-picker>
+    <button mat-stroked-button type="button" (click)="openIngredientPicker()">
+      Añadir ingrediente
+    </button>
+
+    <ng-template #ingredientPickerDialog>
+      <div class="ingredient-dialog">
+
+        <app-ingredient-picker class="ingredient-dialog-content"
+          [selectedIngredientIds]="getSelectedIngredientIds()"
+          (ingredientSelected)="selectIngredient($event)"
+        />
+
+        <button class="ingredient-dialog-close-button" mat-button type="button" (click)="dialog.closeAll()">Cerrar</button>
+      </div>
+      >
+    </ng-template>
 
     <div formArrayName="ingredients">
       @for (ingredient of ingredients().controls; track $index) {
@@ -94,7 +105,7 @@
     </div>
 
     <p>
-      <button mat-button type="submit" [disabled]="recipeForm.invalid || isSaving()">
+      <button mat-flat-button type="submit" [disabled]="recipeForm.invalid || isSaving()">
         Guardar receta
       </button>
     </p>

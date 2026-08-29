@@ -149,8 +149,10 @@ export class List implements OnInit {
     this.selectedIngredient.set(null);
     this.ingredientAmount.set(1);
     this.dialog.open(this.ingredientPickerDialog, {
-      width: '95vw',
-      maxWidth: '95vw',
+      width: '80vw',
+      maxWidth: '80vw',
+      height: '95vh',
+      maxHeight: '95vh',
     });
   }
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,8 @@ import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeCategory } from '../../../models/recipe';
 import { Ingredient } from '../../../models/ingredient';
 import { IngredientPicker } from '../../ingredients/ingredient-picker/ingredient-picker';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-recipe-create',
@@ -23,16 +25,20 @@ import { IngredientPicker } from '../../ingredients/ingredient-picker/ingredient
     MatSelectModule,
     MatSnackBarModule,
     IngredientPicker,
+    MatIconModule
   ],
   templateUrl: './recipe-create.html',
   styleUrl: './recipe-create.css',
 })
 export class RecipeCreate implements OnInit {
+  @ViewChild('ingredientPickerDialog') ingredientPickerDialog!: TemplateRef<unknown>;
+
   route = inject(ActivatedRoute);
   router = inject(Router);
   fb = inject(FormBuilder);
   recipeService = inject(RecipeService);
   snackBar = inject(MatSnackBar);
+  dialog = inject(MatDialog);
 
   recipeCategories = signal<RecipeCategory[]>([]);
   isLoading = signal(false);
@@ -196,6 +202,20 @@ export class RecipeCreate implements OnInit {
         unit: [ingredient.reference_format, Validators.required],
       }),
     );
+  }
+
+  openIngredientPicker() {
+    this.dialog.open(this.ingredientPickerDialog, {
+      width: '80vw',
+      maxWidth: '80vw',
+      height: '95vh',
+      maxHeight: '95vh',
+    });
+  }
+
+  selectIngredient(ingredient: Ingredient) {
+    this.addIngredient(ingredient);
+    this.dialog.closeAll();
   }
 
   removeIngredient(index: number) {

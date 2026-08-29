@@ -24,3 +24,24 @@ body {
   --mat-button-outlined-label-text-color: #b3261e;
   --mat-button-outlined-state-layer-color: #b3261e;
 }
+
+.ingredient-dialog{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.ingredient-dialog-content{
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ingredient-dialog-close-button{
+  margin: 1rem 0 -1rem 0;
+  flex-shrink: 0;
+}

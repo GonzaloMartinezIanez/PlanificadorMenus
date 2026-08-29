@@ -1,0 +1,47 @@
+@if (ingredient) {
+  <mat-card appearance="outlined" class="ingredient-card">
+    <mat-card-header>
+      <mat-card-title class="ingredient-card-title" [matTooltip]="ingredient.name">
+        {{ ingredient.name }}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="ingredient-card-info">
+        <div class="ingredient-card-info-details">
+          @if (ingredient.unit_price !== null) {
+            <strong>
+              {{ formatPrice(ingredient.unit_price) }}
+            </strong>
+          }
+
+          @if (ingredient.packaging || ingredient.unit_size !== null) {
+            <span>
+              {{ ingredient.packaging }} · {{ formatAmount(ingredient.unit_size || 0) }}
+              {{ ingredient.reference_format }}
+            </span>
+          }
+
+          @if (ingredient.reference_price !== null && ingredient.reference_format) {
+            <span>
+              {{ formatPrice(ingredient.reference_price) }}/{{ ingredient.reference_format }}
+            </span>
+          }
+        </div>
+
+        @if (ingredient.image) {
+          <img
+            class="ingredient-card-info-image"
+            [src]="ingredient.image"
+            [alt]="ingredient.name"
+            width="100"
+            height="100"
+          />
+        }
+      </div>
+
+      <button mat-button type="button" [disabled]="selected" (click)="addIngredient()">
+        Añadir
+      </button>
+    </mat-card-content>
+  </mat-card>
+}
