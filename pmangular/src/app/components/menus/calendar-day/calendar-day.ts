@@ -4,7 +4,6 @@ import { MenuModel } from '../../../models/menu';
 import { Recipe } from '../../../models/recipe';
 import { DayMealtime } from './day-mealtime/day-mealtime';
 
-
 @Component({
   selector: 'app-calendar-day',
   imports: [CommonModule, DayMealtime],
@@ -14,6 +13,8 @@ import { DayMealtime } from './day-mealtime/day-mealtime';
 export class CalendarDay {
   @Input() menus: MenuModel[] = [];
   @Input() day: Date | null = null;
+  @Input() isPast: boolean = false;
+  @Input() isToday: boolean = false;
 
   @Output() addRecipe = new EventEmitter<{ date: string; time: string; recipe: Recipe }>();
   @Output() deleteRecipe = new EventEmitter<{ date: string; time: string; id_recipe: number }>();

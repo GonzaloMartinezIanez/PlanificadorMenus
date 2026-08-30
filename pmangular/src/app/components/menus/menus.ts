@@ -1,10 +1,9 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MenuService } from '../../services/menu.service';
 import { MenuModel, ShortMenuModel } from '../../models/menu';
 import { CalendarDay } from './calendar-day/calendar-day';
-import { Recipe } from '../../models/recipe';
 
 @Component({
   selector: 'app-menus',
@@ -12,7 +11,9 @@ import { Recipe } from '../../models/recipe';
   templateUrl: './menus.html',
   styleUrl: './menus.css',
 })
-export class Menus implements OnInit {
+export class Menus implements OnInit, AfterViewInit {
+  @ViewChild('weekContainer') weekContainer?: ElementRef<HTMLElement>; // Hacer scroll al día actual
+
   route = inject(ActivatedRoute);
   menuService = inject(MenuService);
 
@@ -54,6 +55,10 @@ export class Menus implements OnInit {
         this.loadMenus();
       },
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToToday();
   }
 
   loadMenus() {
@@ -125,6 +130,24 @@ export class Menus implements OnInit {
 
   isPastDay(day: Date) {
     return day.getTime() < this.todayStart().getTime();
+  }
+
+  isToday(day: Date) {
+    return day.getTime() === this.todayStart().getTime();
+  }
+
+  scrollToToday() {
+    setTimeout(() => {
+      const todayElement = this.weekContainer?.nativeElement.querySelector<HTMLElement>(
+        '[data-current-day="true"]',
+      );
+
+      todayElement?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    });
   }
 
   addRecipeToMenu(event: MenuModel) {

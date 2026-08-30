@@ -1,22 +1,42 @@
-<h3>{{ title }}</h3>
+<section class="day-mealtime">
+  <h3>{{ title }}</h3>
 
-@if (menus.length > 0) {
-  @for (menu of menus; track $index) {
-    <p>
-      <a [routerLink]="['/recipes', menu.recipe.id]">{{ menu.recipe.name }}</a>
+  @if (menus.length > 0) {
+    <div class="day-mealtime-recipes">
+      @for (menu of menus; track $index) {
+        <div class="day-mealtime-recipe">
+          <a [routerLink]="['/recipes', menu.recipe.id]">{{ menu.recipe.name }}</a>
 
-      <button mat-button type="button" (click)="onDeleteRecipe(menu.recipe.id)">Eliminar</button>
-    </p>
+          <button
+            mat-stroked-button
+            class="button-danger-outline"
+            type="button"
+            (click)="onDeleteRecipe(menu.recipe.id)"
+          >
+            Eliminar
+          </button>
+        </div>
+      }
+    </div>
   }
-}
 
-<button mat-button type="button" (click)="openRecipeSearch()">Añadir receta</button>
+  <button class="day-mealtime-add" mat-stroked-button type="button" (click)="openRecipeSearch()">
+    Añadir receta
+  </button>
+</section>
 
 <ng-template #recipeSearchDialog>
-  <app-recipe-search
-    [actionLabel]="'Añadir'"
-    (actionClicked)="selectRecipe($event)"
-    (detailsClicked)="closeRecipeSearch()">
-  </app-recipe-search>
-  <button mat-button type="button" (click)="dialog.closeAll()">Cerrar</button>
+  <section class="day-mealtime-dialog">
+    <div class="day-mealtime-search-dialog">
+      <app-recipe-search
+        [actionLabel]="'Añadir'"
+        (actionClicked)="selectRecipe($event)"
+        (detailsClicked)="closeRecipeSearch()"
+      />
+    </div>
+
+    <button class="day-mealtime-dialog-close" mat-button type="button" (click)="dialog.closeAll()">
+      Cerrar
+    </button>
+  </section>
 </ng-template>

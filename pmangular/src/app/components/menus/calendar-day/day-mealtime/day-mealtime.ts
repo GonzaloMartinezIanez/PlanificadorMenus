@@ -37,6 +37,8 @@ export class DayMealtime {
     const dialogRef = this.dialog.open(this.recipeSearchDialog, {
       width: '95vw',
       maxWidth: '95vw',
+      height: '90vh',
+      maxHeight: '90vh',
     });
 
     dialogRef.afterClosed().subscribe({

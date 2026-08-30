@@ -1,0 +1,30 @@
+.calendar-day {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0.75rem;
+  box-shadow: rgba(0, 0, 0, 0.25) 3px 3px 5px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.calendar-day h2 {
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.calendar-day--past {
+  background: #f4f5f4;
+}
+
+.calendar-day--today {
+  border: 2px solid #2f6b45;
+  background: #ebfbed;
+}
+
+.calendar-day-past-text {
+  margin: auto 0;
+  font-size: 1.5rem;
+  text-align: center;
+}

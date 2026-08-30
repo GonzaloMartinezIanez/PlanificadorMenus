@@ -1,17 +1,36 @@
-<div style="display: flex; flex-direction: columns; width: 100%; justify-content: space-around;">
-  @for (day of week(); track day.toISOString()) {
-    @if(!isPastDay(day)){
-    <app-calendar-day
-      [day]="day"
-      [menus]="getMenusByDay(day)"
-      (addRecipe)="addRecipeToMenu($event)"
-      (deleteRecipe)="deleteRecipeFromMenu($event)"
-    />
-    }
-  }
-</div>
+<section class="menu-calendar">
+  <header class="menu-calendar-header">
+    <h1>Calendario semanal</h1>
+    <p>Planifica desayunos, comidas y cenas</p>
 
-@if (canGoToPreviousWeek()) {
-  <button mat-button type="button" (click)="generatePreviousWeek()">Semana anterior</button>
-}
-<button mat-button type="button" (click)="generateNextWeek()">Semana siguiente</button>
+    <div class="menu-calendar-nav">
+      @if (canGoToPreviousWeek()) {
+        <button
+          class="menu-calendar-previous-week"
+          mat-stroked-button
+          type="button"
+          (click)="generatePreviousWeek()"
+        >
+          Semana anterior
+        </button>
+      }
+      <button class="menu-calendar-next-week" mat-stroked-button type="button" (click)="generateNextWeek()">
+        Semana siguiente
+      </button>
+    </div>
+  </header>
+
+  <section #weekContainer class="menu-calendar-week">
+    @for (day of week(); track day.toISOString()) {
+      <app-calendar-day
+        [day]="day"
+        [menus]="getMenusByDay(day)"
+        [isPast]="isPastDay(day)"
+        [isToday]="isToday(day)"
+        [attr.data-current-day]="isToday(day) ? 'true' : null"
+        (addRecipe)="addRecipeToMenu($event)"
+        (deleteRecipe)="deleteRecipeFromMenu($event)"
+      />
+    }
+  </section>
+</section>

@@ -1,0 +1,66 @@
+.day-mealtime {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: #f5f5f5;
+}
+
+.day-mealtime h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.day-mealtime-recipes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-mealtime-recipe {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.day-mealtime-recipe a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #1d4d30;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.day-mealtime-recipe a:hover {
+  text-decoration: underline;
+}
+
+.day-mealtime-add {
+  width: 100%;
+  margin-top: 0.5rem;
+  border: 1px solid #7b8794;
+  background-color: white;
+}
+
+.day-mealtime-search-dialog {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.day-mealtime-dialog {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 1rem;
+}
+
+.day-mealtime-dialog-close {
+  flex: 0 0 auto;
+  margin-top: 0.5rem;
+  text-align: center;
+}

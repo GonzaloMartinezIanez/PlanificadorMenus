@@ -143,6 +143,10 @@
   gap: 1rem;
 }
 
+.ingredient-dialog-close-button{
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 960px) {
   .shopping-list {
     padding: 1rem;

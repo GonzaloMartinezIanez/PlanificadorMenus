@@ -14,6 +14,10 @@
   padding: 0 2rem 0 2rem;
 }
 
+.page-content:has(app-menus) {
+  max-width: 1600px;
+}
+
 @media (max-width: 960px) {
   .page-content {
     padding: 1rem;

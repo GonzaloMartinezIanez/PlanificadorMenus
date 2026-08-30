@@ -1,27 +1,40 @@
 @if (day) {
-  <h2>{{ formatDayText(day) }}</h2>
+  <article
+    class="calendar-day"
+    [class.calendar-day--past]="isPast"
+    [class.calendar-day--today]="isToday"
+  >
+    <h2>{{ formatDayText(day) }}</h2>
 
-  <app-day-mealtime
-    [title]="'Desayuno'"
-    [time]="'BREAKFAST'"
-    [menus]="getMenusByTime('BREAKFAST')"
-    (addRecipe)="onRecipeSelected($event)"
-    (deleteRecipe)="onDeleteRecipe($event)">
-  </app-day-mealtime>
+    @if (!isPast) {
+      <app-day-mealtime
+        [title]="'Desayuno'"
+        [time]="'BREAKFAST'"
+        [menus]="getMenusByTime('BREAKFAST')"
+        (addRecipe)="onRecipeSelected($event)"
+        (deleteRecipe)="onDeleteRecipe($event)"
+      >
+      </app-day-mealtime>
 
-  <app-day-mealtime
-    [title]="'Comida'"
-    [time]="'LUNCH'"
-    [menus]="getMenusByTime('LUNCH')"
-    (addRecipe)="onRecipeSelected($event)"
-    (deleteRecipe)="onDeleteRecipe($event)">
-  </app-day-mealtime>
+      <app-day-mealtime
+        [title]="'Comida'"
+        [time]="'LUNCH'"
+        [menus]="getMenusByTime('LUNCH')"
+        (addRecipe)="onRecipeSelected($event)"
+        (deleteRecipe)="onDeleteRecipe($event)"
+      >
+      </app-day-mealtime>
 
-  <app-day-mealtime
-    [title]="'Cena'"
-    [time]="'DINNER'"
-    [menus]="getMenusByTime('DINNER')"
-    (addRecipe)="onRecipeSelected($event)"
-    (deleteRecipe)="onDeleteRecipe($event)">
-  </app-day-mealtime>
+      <app-day-mealtime
+        [title]="'Cena'"
+        [time]="'DINNER'"
+        [menus]="getMenusByTime('DINNER')"
+        (addRecipe)="onRecipeSelected($event)"
+        (deleteRecipe)="onDeleteRecipe($event)"
+      >
+      </app-day-mealtime>
+    } @else {
+      <p class="calendar-day-past-text">Día pasado</p>
+    }
+  </article>
 }
