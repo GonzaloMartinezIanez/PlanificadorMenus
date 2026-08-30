@@ -1,5 +1,15 @@
 <header class="app-header">
   <h1>Planificador de menús</h1>
+  @if (authService.isAuthenticated()) {
+    <button
+      mat-raised-button
+      class="button-logout"
+      type="button"
+      (click)="logout()"
+    >
+      Cerrar sesión
+    </button>
+  }
 </header>
 
 <main class="page-content">

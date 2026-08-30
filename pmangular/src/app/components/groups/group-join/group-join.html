@@ -1,8 +1,14 @@
 <header class="app-header">
   <h1>Planificador de menús</h1>
 
-  @if(authService.isAuthenticated()){
-    <button mat-raised-button class="button-logout" type="button" (click)="logout()" [disabled]="isLoading()">
+  @if (authService.isAuthenticated()) {
+    <button
+      mat-raised-button
+      class="button-logout"
+      type="button"
+      (click)="authService.logout()"
+      [disabled]="isLoading()"
+    >
       Cerrar sesión
     </button>
   }
@@ -13,26 +19,26 @@
 
   @if (!authService.isAuthenticated()) {
     <p>Debes iniciar sesión para unirte a este grupo.</p>
-    <div #googleButton></div>
+    <div #googleButton class="google-button-container"></div>
   } @else {
     @if (hasRequestedJoin()) {
       <p>Tu solicitud está pendiente de aprobación.</p>
-      <button mat-button type="button" (click)="checkAccepted()" [disabled]="isLoading()">
+      <button mat-stroked-button type="button" class="join-button" (click)="checkAccepted()" [disabled]="isLoading()">
         Comprobar si me han aceptado
       </button>
     } @else {
-      <button mat-raised-button type="button" (click)="joinGroup()" [disabled]="isLoading()">
+      <button mat-raised-button type="button" class="join-button" (click)="joinGroup()" [disabled]="isLoading()">
         Solicitar unirme al grupo
       </button>
     }
   }
 
   @if (!authService.isAuthenticated()) {
-    <button mat-button [routerLink]="['/group-onboarding']">
+    <button mat-button [routerLink]="['/group-onboarding']" class="redirect-button">
       Crea un nuevo grupo o únete a otro.
     </button>
   } @else {
-    <button mat-button [routerLink]="['/groups/access']">
+    <button mat-button [routerLink]="['/groups/access']" class="redirect-button">
       Crea un nuevo grupo o únete a otro.
     </button>
   }

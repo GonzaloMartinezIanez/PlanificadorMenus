@@ -276,8 +276,4 @@ export class GroupJoin implements OnInit {
       panelClass: ['snackbar-error'],
     });
   }
-
-  logout() {
-    this.authService.logout();
-  }
 }
