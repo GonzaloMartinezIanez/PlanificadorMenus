@@ -46,6 +46,11 @@ body {
   flex-shrink: 0;
 }
 
+.mat-mdc-form-field {
+  --mat-form-field-filled-container-color: transparent;
+  --mat-form-field-filled-hover-container-color: transparent;
+}
+
 @media (max-width: 960px) {
   .landing-bullet .mdc-evolution-chip-set__chips {
     flex-direction: column;

@@ -20,14 +20,14 @@ export const authGuard: CanActivateFn = async (route, state) => {
 
       // Si después del refresh sigue sin haber token, logout
       if (!authService.getAccessToken()) {
-        authService.logout();
+        authService.clearSession();
         router.navigate(['/login']);
         return false;
       }
 
       return true;
     } catch {
-      authService.logout();
+      authService.clearSession();
       router.navigate(['/login']);
       return false;
     }

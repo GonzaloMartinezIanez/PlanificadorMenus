@@ -30,10 +30,7 @@ declare global {
             client_id: string;
             callback: (response: GoogleCredentialResponse) => void;
           }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: Record<string, string | number>,
-          ) => void;
+          renderButton: (parent: HTMLElement, options: Record<string, string | number>) => void;
           prompt: () => void;
         };
       };
@@ -178,7 +175,11 @@ export class Login implements AfterViewInit, OnDestroy {
           this.isLoading.set(false);
 
           if (groups.length > 0) {
-            this.router.navigate([`/home/${groups[0].group_code}`]);
+            const savedGroupCode = localStorage.getItem(environment.ACTIVE_GROUP_KEY);
+            const savedGroup = groups.find((group) => group.group_code === savedGroupCode);
+            const selectedGroup = savedGroup ?? groups[0];
+
+            this.router.navigate([`/home/${selectedGroup.group_code}`]);
           } else {
             this.router.navigate(['/group-onboarding']);
           }

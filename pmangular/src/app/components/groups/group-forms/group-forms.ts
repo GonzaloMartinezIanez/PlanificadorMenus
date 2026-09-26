@@ -87,7 +87,7 @@ export class GroupForms {
         const acceptedGroup = res.find((group) => group.group_code === this.requestedGroupCode());
 
         if (acceptedGroup) {
-          this.router.navigate([`/home/${res[0].group_code}`]);
+          this.router.navigate([`/home/${acceptedGroup.group_code}`]);
           return;
         }
 

@@ -19,4 +19,11 @@ describe('NotFound', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render a not found message', () => {
+    fixture.detectChanges();
+    const heading = fixture.nativeElement.querySelector('h1') as HTMLHeadingElement;
+
+    expect(heading.textContent?.trim()).not.toBe('');
+  });
 });

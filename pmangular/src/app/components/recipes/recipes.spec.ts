@@ -20,4 +20,12 @@ describe('Recipes', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render the recipe search and create recipe link', () => {
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('app-recipe-search')).toBeTruthy();
+    expect(element.querySelector<HTMLAnchorElement>('[routerLink="/recipes/create"]')).toBeTruthy();
+  });
 });

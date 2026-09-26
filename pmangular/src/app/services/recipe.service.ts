@@ -49,10 +49,6 @@ export class RecipeService {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/recipes/${id}/`);
   }
 
-  searchIngredientsByName(name: string): Observable<IngredientOption[]> {
-    return this.http.get<IngredientOption[]>(`${environment.apiUrl}/ingredient_by_name/?name=${encodeURIComponent(name)}`);
-  }
-
   getCommentsByRecipeId(id: number): Observable<RecipeComment[]> {
     return this.http.get<RecipeComment[]>(`${environment.apiUrl}/comments/${id}/`);
   }

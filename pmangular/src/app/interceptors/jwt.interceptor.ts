@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { inject } from '@angular/core';
-import { switchMap } from 'rxjs';
+import { catchError, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
@@ -31,7 +31,12 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         })
 
         return next(newReq);
-      })
+      }),
+      catchError(() => {
+        // Si no se puede renovar, las rutas públicas deben poder cargarse como anónimas.
+        authService.clearSession();
+        return next(req);
+      }),
     )
   }
 

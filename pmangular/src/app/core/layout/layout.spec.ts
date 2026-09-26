@@ -19,4 +19,13 @@ describe('Layout', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render the header, page content, and footer', () => {
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('app-header')).toBeTruthy();
+    expect(element.querySelector('main.page-content')).toBeTruthy();
+    expect(element.querySelector('app-footer')).toBeTruthy();
+  });
 });

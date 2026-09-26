@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { tap } from 'rxjs';
+import { finalize, Observable, shareReplay, tap, throwError } from 'rxjs';
 import { AuthUser } from '../models/auth-user';
 import { AuthResponse } from '../models/auth-response';
 import { environment } from '../../environments/environment';
@@ -14,6 +14,7 @@ export class AuthService {
   private accessToken = signal<string | null>(localStorage.getItem(environment.ACCESS_TOKEN_KEY));
   private refreshToken = signal<string | null>(localStorage.getItem(environment.REFRESH_TOKEN_KEY));
   private user = signal<AuthUser | null>(this.loadStoredUser());
+  private refreshRequest?: Observable<AuthResponse>;
 
   currentUser = this.user.asReadonly();
   currentUserId = computed(() => this.user()?.id ?? null);
@@ -42,29 +43,51 @@ export class AuthService {
   refresh() {
     const refresh = this.refreshToken();
 
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh/`, { refresh }).pipe(
-      tap((res) => {
-        // Comprobar que el refresh token es correcto y si lo es actualizar el access token y el refresh token
-        if (!res.access || !res.refresh) {
-          this.logout();
-          return;
-        }
+    if (!refresh) {
+      return throwError(() => new Error('No hay token de renovación.'));
+    }
 
-        this.accessToken.set(res.access);
-        this.refreshToken.set(res.refresh);
+    if (this.refreshRequest) {
+      return this.refreshRequest;
+    }
 
-        localStorage.setItem(environment.ACCESS_TOKEN_KEY, res.access);
-        localStorage.setItem(environment.REFRESH_TOKEN_KEY, res.refresh);
-      })
-    );
+    this.refreshRequest = this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh/`, { refresh })
+      .pipe(
+        tap((res) => {
+          // Comprobar que el refresh token es correcto y si lo es actualizar el access token y el refresh token
+          if (!res.access || !res.refresh) {
+            this.clearSession();
+            throw new Error('La respuesta de renovación no es válida.');
+          }
+
+          this.accessToken.set(res.access);
+          this.refreshToken.set(res.refresh);
+
+          localStorage.setItem(environment.ACCESS_TOKEN_KEY, res.access);
+          localStorage.setItem(environment.REFRESH_TOKEN_KEY, res.refresh);
+        }),
+        finalize(() => {
+          this.refreshRequest = undefined;
+        }),
+        shareReplay(1), // Si se llaman multiples veces a esta función, solo se devuelve una
+      );
+
+    return this.refreshRequest;
   }
 
   // Borra las cookies y pasa el refresh token al backend para que lo inhabilite
   logout() {
     if (this.accessToken() != null) {
-      this.http.post(`${environment.apiUrl}/auth/logout/`, { "refresh": this.refreshToken() }).subscribe()
+      this.http
+        .post(`${environment.apiUrl}/auth/logout/`, { refresh: this.refreshToken() })
+        .subscribe();
     }
 
+    this.clearSession();
+  }
+
+  clearSession() {
     this.accessToken.set(null);
     this.refreshToken.set(null);
     this.user.set(null);
@@ -90,14 +113,14 @@ export class AuthService {
   }
 
   checkJWTExpired(): boolean {
-    const token = this.accessToken()
+    const token = this.accessToken();
     if (!token) {
       return true;
     }
 
     try {
       // JWT = cabecera.body.firma
-      const jwtBody = JSON.parse(atob(token.split(".")[1])); // Con atob se decodifica el body
+      const jwtBody = JSON.parse(atob(token.split('.')[1])); // Con atob se decodifica el body
       const expiration_date = jwtBody.exp;
 
       // Dar un margen de 30 segundos para invalidar el token

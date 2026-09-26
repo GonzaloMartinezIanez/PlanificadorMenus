@@ -196,8 +196,8 @@
         }
       </section>
     } @else {
-      <section>
-        <p>Inicia sesión para ver y escribir comentarios.</p>
+      <section class="no-auth-section">
+        <p><a [routerLink]="['/login']">Inicia sesión</a> para ver y escribir comentarios.</p>
       </section>
     }
   }

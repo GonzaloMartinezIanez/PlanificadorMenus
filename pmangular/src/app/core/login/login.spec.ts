@@ -19,4 +19,10 @@ describe('Login', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should mark the component as destroyed on destroy', () => {
+    component.ngOnDestroy();
+
+    expect(component.destroyed).toBe(true);
+  });
 });

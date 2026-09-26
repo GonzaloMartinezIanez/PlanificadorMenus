@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { filter } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -34,9 +35,13 @@ export class Header implements OnInit {
   route = inject(ActivatedRoute);
 
   myGroups = signal<GroupModel[]>([]);
-  selectedGroupCode = signal('');
+  selectedGroupCode = signal(localStorage.getItem(environment.ACTIVE_GROUP_KEY) ?? '');
+  isGroupRoute = signal(false);
+  avatarFailed = signal(false);
   currentUser = this.authService.currentUser;
   userInitialLetter = computed(() => this.currentUser()?.username?.charAt(0).toUpperCase() ?? 'U');
+  showGroupSelect = computed(() => this.isGroupRoute() && this.myGroups().length > 1);
+  showAvatar = computed(() => !!this.currentUser()?.profile_picture && !this.avatarFailed());
 
   ngOnInit(): void {
     // Guardar el código del grupo en selectedGroupCode
@@ -58,8 +63,11 @@ export class Header implements OnInit {
     }
 
     const groupCode = currentRoute.snapshot.paramMap.get('group_code');
+    this.isGroupRoute.set(!!groupCode);
+
     if (groupCode) {
       this.selectedGroupCode.set(groupCode);
+      localStorage.setItem(environment.ACTIVE_GROUP_KEY, groupCode);
     }
   }
 
@@ -73,6 +81,15 @@ export class Header implements OnInit {
     this.groupService.getMyGroups().subscribe({
       next: (groups) => {
         this.myGroups.set(groups);
+
+        const selectedGroupExists = groups.some(
+          (group) => group.group_code === this.selectedGroupCode(),
+        );
+
+        if (!selectedGroupExists && groups.length > 0) {
+          this.selectedGroupCode.set(groups[0].group_code);
+          localStorage.setItem(environment.ACTIVE_GROUP_KEY, groups[0].group_code);
+        }
       },
     });
   }
@@ -85,11 +102,16 @@ export class Header implements OnInit {
     }
 
     this.selectedGroupCode.set(groupCode);
+    localStorage.setItem(environment.ACTIVE_GROUP_KEY, groupCode);
     this.router.navigateByUrl(this.router.url.replace(`/${currentGroupCode}`, `/${groupCode}`));
   }
 
   logout() {
     this.authService.logout();
     this.router.navigate(['']);
+  }
+
+  onAvatarError() {
+    this.avatarFailed.set(true);
   }
 }

@@ -28,4 +28,13 @@ describe('ConfirmDialog', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render the dialog data and both actions', () => {
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.textContent).toContain(component.data.title);
+    expect(element.textContent).toContain(component.data.message);
+    expect(element.querySelectorAll('button')).toHaveLength(2);
+  });
 });

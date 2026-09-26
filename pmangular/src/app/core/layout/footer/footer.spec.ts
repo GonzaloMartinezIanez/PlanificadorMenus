@@ -19,4 +19,11 @@ describe('Footer', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render the application footer text', () => {
+    fixture.detectChanges();
+    const footer = fixture.nativeElement.querySelector('footer') as HTMLElement;
+
+    expect(footer.textContent?.trim()).not.toBe('');
+  });
 });
