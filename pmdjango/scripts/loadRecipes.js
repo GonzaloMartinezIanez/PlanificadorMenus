@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const apiUrl = "http://localhost:8000/api/recipes/"; // Por ejemplo: https://planificadormenus.es/api/recipes/
-const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzkwNTI3NTk0LCJpYXQiOjE3OTA0NDExOTQsImp0aSI6IjQ2MjJmMjY3MGVlZTQ4ZTI5NGU5MjM2ODU0YzY3OGQ3IiwidXNlcl9pZCI6IjEifQ.8rXfsPSt0ToBNd2CnH_oxhAYRyiYZ7Ll51NH3KJMK6s"; // Pega aquí tu access token
+const accessToken = ""; // Pega aquí tu access token
 const requestDelayMs = 50;
 
 const __filename = fileURLToPath(import.meta.url);

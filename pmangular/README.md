@@ -1,59 +1,55 @@
-# Pmangular
+# Frontend Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+Cliente web de Planificador de menús, desarrollado con Angular 21 y Angular Material.
 
-## Development server
+Para una descripción general del proyecto y el despliegue, consulta el [README principal](../README.md).
 
-To start a local development server, run:
+## Requisitos
 
-```bash
+- Node.js 22.
+- npm 11 o compatible.
+
+## Instalación y ejecución
+
+```powershell
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+La aplicación de desarrollo se inicia en `http://localhost:4200` y usa la API configurada en `src/environments/environment.development.ts`.
 
-## Code scaffolding
+## Comandos
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+```powershell
+# Ejecutar tests una vez
+ng test -- --watch=false
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
+# Generar el build de producción
 ng build
+
+# Comprobar formato sin modificar archivos
+npx prettier --check "src/**/*.{ts,html,css,scss,json}"
+
+# Aplicar formato
+npx prettier --write "src/**/*.{ts,html,css,scss,json}"
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+La configuración de Prettier se encuentra en `.prettierrc`.
 
-## Running unit tests
+## Estructura
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```text
+src/app/
+|- components/     # Pantallas y componentes reutilizables
+|- core/           # Login, layout, header, footer y diálogos
+|- guards/         # Protección de rutas autenticadas y de grupos
+|- interceptors/   # Adjunta y renueva el JWT
+|- models/         # Interfaces TypeScript
+|- services/       # Comunicación con la API
 ```
 
-## Running end-to-end tests
+## Configuración
 
-For end-to-end (e2e) testing, run:
+`src/environments/environment.ts` contiene la configuración de producción y `environment.development.ts` la de desarrollo. Ambas definen la URL de la API y el Client ID público de Google OAuth.
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+No incluyas tokens de acceso ni secretos en estos ficheros.
