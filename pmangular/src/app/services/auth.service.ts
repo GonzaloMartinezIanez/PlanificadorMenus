@@ -51,27 +51,25 @@ export class AuthService {
       return this.refreshRequest;
     }
 
-    this.refreshRequest = this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh/`, { refresh })
-      .pipe(
-        tap((res) => {
-          // Comprobar que el refresh token es correcto y si lo es actualizar el access token y el refresh token
-          if (!res.access || !res.refresh) {
-            this.clearSession();
-            throw new Error('La respuesta de renovación no es válida.');
-          }
+    this.refreshRequest = this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh/`, { refresh }).pipe(
+      tap((res) => {
+        // Comprobar que el refresh token es correcto y si lo es actualizar el access token y el refresh token
+        if (!res.access || !res.refresh) {
+          this.clearSession();
+          throw new Error('La respuesta de renovación no es válida.');
+        }
 
-          this.accessToken.set(res.access);
-          this.refreshToken.set(res.refresh);
+        this.accessToken.set(res.access);
+        this.refreshToken.set(res.refresh);
 
-          localStorage.setItem(environment.ACCESS_TOKEN_KEY, res.access);
-          localStorage.setItem(environment.REFRESH_TOKEN_KEY, res.refresh);
-        }),
-        finalize(() => {
-          this.refreshRequest = undefined;
-        }),
-        shareReplay(1), // Si se llaman multiples veces a esta función, solo se devuelve una
-      );
+        localStorage.setItem(environment.ACCESS_TOKEN_KEY, res.access);
+        localStorage.setItem(environment.REFRESH_TOKEN_KEY, res.refresh);
+      }),
+      finalize(() => {
+        this.refreshRequest = undefined;
+      }),
+      shareReplay(1), // Si se llaman multiples veces a esta función, solo se devuelve una
+    );
 
     return this.refreshRequest;
   }
@@ -79,9 +77,7 @@ export class AuthService {
   // Borra las cookies y pasa el refresh token al backend para que lo inhabilite
   logout() {
     if (this.accessToken() != null) {
-      this.http
-        .post(`${environment.apiUrl}/auth/logout/`, { refresh: this.refreshToken() })
-        .subscribe();
+      this.http.post(`${environment.apiUrl}/auth/logout/`, { refresh: this.refreshToken() }).subscribe();
     }
 
     this.clearSession();

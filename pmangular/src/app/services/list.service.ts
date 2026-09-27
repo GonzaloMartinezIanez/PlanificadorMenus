@@ -25,21 +25,13 @@ export class ListService {
     id_ingredient: string,
     patchItem: { amount?: number; unit?: string },
   ): Observable<MessageModel> {
-    return this.http.patch<MessageModel>(
-      `${environment.apiUrl}/lists/${group_code}/${id_ingredient}/`,
-      patchItem,
-    );
+    return this.http.patch<MessageModel>(`${environment.apiUrl}/lists/${group_code}/${id_ingredient}/`, patchItem);
   }
 
-  changeStatusListItem(
-    group_code: string,
-    id_ingredient: string,
-    status: boolean,
-  ): Observable<MessageModel> {
-    return this.http.patch<MessageModel>(
-      `${environment.apiUrl}/lists/${group_code}/${id_ingredient}/`,
-      { bought: status },
-    );
+  changeStatusListItem(group_code: string, id_ingredient: string, status: boolean): Observable<MessageModel> {
+    return this.http.patch<MessageModel>(`${environment.apiUrl}/lists/${group_code}/${id_ingredient}/`, {
+      bought: status,
+    });
   }
 
   deleteList(group_code: string): Observable<MessageModel> {

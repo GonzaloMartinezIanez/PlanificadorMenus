@@ -7,8 +7,7 @@ import { AuthService } from '../services/auth.service';
 import { jwtInterceptor } from './jwt.interceptor';
 
 describe('jwtInterceptor', () => {
-  const interceptor: HttpInterceptorFn = (req, next) =>
-    TestBed.runInInjectionContext(() => jwtInterceptor(req, next));
+  const interceptor: HttpInterceptorFn = (req, next) => TestBed.runInInjectionContext(() => jwtInterceptor(req, next));
   const authService = {
     getAccessToken: vi.fn(),
     checkJWTExpired: vi.fn(),

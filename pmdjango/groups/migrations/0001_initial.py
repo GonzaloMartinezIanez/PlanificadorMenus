@@ -15,27 +15,61 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Group',
+            name="Group",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('group_code', models.CharField(max_length=8, unique=True)),
-                ('group_name', models.CharField(max_length=100)),
-                ('group_description', models.TextField(blank=True, null=True)),
-                ('creation_date', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("group_code", models.CharField(max_length=8, unique=True)),
+                ("group_name", models.CharField(max_length=100)),
+                ("group_description", models.TextField(blank=True, null=True)),
+                ("creation_date", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='GroupMember',
+            name="GroupMember",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('ADMIN', 'ADMIN'), ('MEMBER', 'MEMBER')], default='MEMBER', max_length=10)),
-                ('joining_date', models.DateTimeField(auto_now_add=True)),
-                ('accepted', models.BooleanField(default=False)),
-                ('group_code', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.group')),
-                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[("ADMIN", "ADMIN"), ("MEMBER", "MEMBER")],
+                        default="MEMBER",
+                        max_length=10,
+                    ),
+                ),
+                ("joining_date", models.DateTimeField(auto_now_add=True)),
+                ("accepted", models.BooleanField(default=False)),
+                (
+                    "group_code",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="groups.group"
+                    ),
+                ),
+                (
+                    "user_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('user_id', 'group_code')},
+                "unique_together": {("user_id", "group_code")},
             },
         ),
     ]

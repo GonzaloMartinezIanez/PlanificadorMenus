@@ -2,9 +2,7 @@
   <header class="shopping-list-header">
     <h1>Lista de la compra</h1>
 
-    <button mat-stroked-button type="button" (click)="openIngredientPicker()">
-      Añadir producto
-    </button>
+    <button mat-stroked-button type="button" (click)="openIngredientPicker()">Añadir producto</button>
   </header>
 
   <ng-template #ingredientPickerDialog>
@@ -19,7 +17,7 @@
         <div class="ingredient-dialog-content shopping-list-add-product">
           <div class="shopping-list-add-product-header">
             @if (selectedIngredient()!.image) {
-              <img [src]="selectedIngredient()!.image" [alt]="selectedIngredient()!.name"/>
+              <img [src]="selectedIngredient()!.image" [alt]="selectedIngredient()!.name" />
             }
             <h2>{{ selectedIngredient()!.name }}</h2>
           </div>
@@ -28,24 +26,19 @@
             @if (selectedIngredient()!.packaging) {
               <span>{{ selectedIngredient()!.packaging }}</span>
             }
-            @if (
-              selectedIngredient()!.unit_size !== null && selectedIngredient()!.reference_format
-            ) {
+            @if (selectedIngredient()!.unit_size !== null && selectedIngredient()!.reference_format) {
               <span>
                 {{ formatAmount(selectedIngredient()!.unit_size!) }}
-                {{ formatUnit(selectedIngredient()!.reference_format || "") }}
+                {{ formatUnit(selectedIngredient()!.reference_format || '') }}
               </span>
             }
             @if (selectedIngredient()!.unit_price !== null) {
               <strong>{{ formatPrice(selectedIngredient()!.unit_price!) }}</strong>
             }
-            @if (
-              selectedIngredient()!.reference_price !== null &&
-              selectedIngredient()!.reference_format
-            ) {
+            @if (selectedIngredient()!.reference_price !== null && selectedIngredient()!.reference_format) {
               <span>
                 {{ formatPrice(selectedIngredient()!.reference_price!) }}/{{
-                  formatUnit(selectedIngredient()!.reference_format || "")
+                  formatUnit(selectedIngredient()!.reference_format || '')
                 }}
               </span>
             }
@@ -64,7 +57,7 @@
               />
             </mat-form-field>
 
-            <span>{{ formatUnit(selectedIngredient()!.reference_format || "") }}</span>
+            <span>{{ formatUnit(selectedIngredient()!.reference_format || '') }}</span>
           </div>
 
           <div class="shopping-list-add-product-actions">
@@ -81,12 +74,7 @@
         </div>
       }
 
-      <button
-        mat-button
-        class="ingredient-dialog-close-button"
-        type="button"
-        (click)="dialog.closeAll()"
-      >
+      <button mat-button class="ingredient-dialog-close-button" type="button" (click)="dialog.closeAll()">
         Cerrar
       </button>
     </div>
@@ -116,9 +104,7 @@
           mat-button
           type="button"
           class="shopping-list-category"
-          [class.shopping-list-category--selected]="
-            selectedCategory() === cat.id_ingredient_category
-          "
+          [class.shopping-list-category--selected]="selectedCategory() === cat.id_ingredient_category"
           [attr.aria-label]="cat.name"
           [matTooltip]="cat.name"
           (click)="changeSelectedCategory(cat.id_ingredient_category)"

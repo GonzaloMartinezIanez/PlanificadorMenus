@@ -11,14 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-group-forms',
-  imports: [
-    ReactiveFormsModule,
-    CommonModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSnackBarModule,
-  ],
+  imports: [ReactiveFormsModule, CommonModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSnackBarModule],
   templateUrl: './group-forms.html',
   styleUrl: './group-forms.css',
 })

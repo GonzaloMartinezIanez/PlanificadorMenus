@@ -18,7 +18,7 @@ describe('ListService', () => {
 
   afterEach(() => http.verify());
 
-  it('should get the group\'s grocery list', () => {
+  it("should get the group's grocery list", () => {
     service.getLists('ABC123').subscribe();
 
     const request = http.expectOne(`${environment.apiUrl}/lists/ABC123/`);
@@ -54,7 +54,7 @@ describe('ListService', () => {
     request.flush({ message: 'Actualizado' });
   });
 
-  it('should clear the group\'s grocery list', () => {
+  it("should clear the group's grocery list", () => {
     service.deleteList('ABC123').subscribe();
 
     const request = http.expectOne(`${environment.apiUrl}/lists/ABC123/`);

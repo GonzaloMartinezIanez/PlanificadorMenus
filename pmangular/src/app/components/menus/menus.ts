@@ -138,9 +138,7 @@ export class Menus implements OnInit, AfterViewInit {
 
   scrollToToday() {
     setTimeout(() => {
-      const todayElement = this.weekContainer?.nativeElement.querySelector<HTMLElement>(
-        '[data-current-day="true"]',
-      );
+      const todayElement = this.weekContainer?.nativeElement.querySelector<HTMLElement>('[data-current-day="true"]');
 
       todayElement?.scrollIntoView({
         behavior: 'smooth',

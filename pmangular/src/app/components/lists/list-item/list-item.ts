@@ -72,7 +72,7 @@ export class ListItem {
       id_ingredient: this.item.ingredient.id_ingredient,
       amount: this.editedAmount(),
     });
-    
+
     this.editMode.set(false);
   }
 }

@@ -15,9 +15,9 @@ export class Home {
 
   accessToken = signal<string | null>(localStorage.getItem(environment.ACCESS_TOKEN_KEY));
   refreshToken = signal<string | null>(localStorage.getItem(environment.REFRESH_TOKEN_KEY));
-  
-  logout(){
+
+  logout() {
     this.authService.logout();
-    this.router.navigate([''])
+    this.router.navigate(['']);
   }
 }

@@ -41,16 +41,13 @@
         <small>El código es obligatorio.</small>
       }
       @if (
-        joinGroupForm.get('group_code')?.errors?.['minlength'] ||
-        joinGroupForm.get('group_code')?.errors?.['maxlength']
+        joinGroupForm.get('group_code')?.errors?.['minlength'] || joinGroupForm.get('group_code')?.errors?.['maxlength']
       ) {
         <small>El código debe tener 8 caracteres alfanuméricos.</small>
       }
     }
 
-    <button mat-raised-button [disabled]="joinGroupForm.invalid" type="submit">
-      Solicitar unirse al grupo
-    </button>
+    <button mat-raised-button [disabled]="joinGroupForm.invalid" type="submit">Solicitar unirse al grupo</button>
   </form>
 
   @if (showCheckAcceptedButton()) {

@@ -9,20 +9,39 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('groups', '0003_rename_group_code_groupmember_group_and_more'),
-        ('ingredients', '0001_initial'),
+        ("groups", "0003_rename_group_code_groupmember_group_and_more"),
+        ("ingredients", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='List',
+            name="List",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=3, max_digits=10)),
-                ('unit', models.CharField(max_length=30)),
-                ('bought', models.BooleanField(default=False)),
-                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.group')),
-                ('ingredient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='ingredients.ingredient')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=3, max_digits=10)),
+                ("unit", models.CharField(max_length=30)),
+                ("bought", models.BooleanField(default=False)),
+                (
+                    "group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="groups.group"
+                    ),
+                ),
+                (
+                    "ingredient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="ingredients.ingredient",
+                    ),
+                ),
             ],
         ),
     ]

@@ -9,19 +9,47 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('groups', '0003_rename_group_code_groupmember_group_and_more'),
-        ('recipes', '0002_remove_recipe_recipe_category_and_more'),
+        ("groups", "0003_rename_group_code_groupmember_group_and_more"),
+        ("recipes", "0002_remove_recipe_recipe_category_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Menu',
+            name="Menu",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField()),
-                ('time', models.CharField(choices=[('BREAKFAST', 'BREAKFAST'), ('LUNCH', 'LUNCH'), ('DINNER', 'DINNER')], max_length=10)),
-                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.group')),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.recipe')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField()),
+                (
+                    "time",
+                    models.CharField(
+                        choices=[
+                            ("BREAKFAST", "BREAKFAST"),
+                            ("LUNCH", "LUNCH"),
+                            ("DINNER", "DINNER"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="groups.group"
+                    ),
+                ),
+                (
+                    "recipe",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="recipes.recipe"
+                    ),
+                ),
             ],
         ),
     ]

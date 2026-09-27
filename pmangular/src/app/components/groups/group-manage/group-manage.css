@@ -34,7 +34,7 @@
   margin: 0.5rem 0;
 }
 
-.save-button{
+.save-button {
   margin-top: 1rem;
   width: 100%;
 }
@@ -50,12 +50,12 @@ td {
   overflow-wrap: anywhere;
 }
 
-.invitation{
+.invitation {
   display: flex;
   flex-direction: column;
 }
 
-.qr{
+.qr {
   align-self: center;
   width: 40%;
   height: 40%;

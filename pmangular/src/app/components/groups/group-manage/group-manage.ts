@@ -59,9 +59,7 @@ export class GroupManage implements OnInit {
   groupMembers = signal<GroupMember[]>([]);
 
   currentUserId = this.authService.currentUserId;
-  currentMembership = computed(() =>
-    this.groupMembers().find((member) => member.user_id === this.currentUserId()),
-  );
+  currentMembership = computed(() => this.groupMembers().find((member) => member.user_id === this.currentUserId()));
   isAdmin = computed(() => this.currentMembership()?.role === 'ADMIN');
 
   acceptedMembers = computed(() => this.groupMembers().filter((member) => member.accepted));
@@ -123,9 +121,7 @@ export class GroupManage implements OnInit {
     this.groupService.updateGroup(this.selectedGroupCode(), this.groupForm.value).subscribe({
       next: (res) => {
         this.myGroups.update((groups) =>
-          groups.map((group) =>
-            group.group_code === this.selectedGroupCode() ? res.message : group,
-          ),
+          groups.map((group) => (group.group_code === this.selectedGroupCode() ? res.message : group)),
         );
         this.syncGroupForm();
         this.showInfo('Grupo actualizado correctamente.');
@@ -176,9 +172,7 @@ export class GroupManage implements OnInit {
 
     this.groupService.deleteGroup(this.selectedGroupCode()).subscribe({
       next: () => {
-        const remainingGroups = this.myGroups().filter(
-          (group) => group.group_code !== this.selectedGroupCode(),
-        );
+        const remainingGroups = this.myGroups().filter((group) => group.group_code !== this.selectedGroupCode());
         this.myGroups.set(remainingGroups);
         this.showInfo('Grupo eliminado correctamente.');
 
@@ -197,9 +191,7 @@ export class GroupManage implements OnInit {
   leaveGroup() {
     this.groupService.leaveGroup(this.selectedGroupCode(), this.currentUserId() || -1).subscribe({
       next: () => {
-        const remainingGroups = this.myGroups().filter(
-          (group) => group.group_code !== this.selectedGroupCode(),
-        );
+        const remainingGroups = this.myGroups().filter((group) => group.group_code !== this.selectedGroupCode());
         this.myGroups.set(remainingGroups);
         this.showInfo('Has abandonado el grupo.');
 
@@ -301,9 +293,7 @@ export class GroupManage implements OnInit {
     this.groupService.updatePendingMember(this.selectedGroupCode(), user_id, accepted).subscribe({
       next: () => {
         this.loadGroupMembers();
-        this.showInfo(
-          accepted ? 'Usuario aceptado correctamente.' : 'Solicitud rechazada correctamente.',
-        );
+        this.showInfo(accepted ? 'Usuario aceptado correctamente.' : 'Solicitud rechazada correctamente.');
       },
       error: (err) => {
         this.showError(err.error.error ?? 'No se pudo actualizar la solicitud.');

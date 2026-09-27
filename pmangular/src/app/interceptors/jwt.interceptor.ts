@@ -17,8 +17,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  if (!authService.getAccessToken())
-    return next(req);
+  if (!authService.getAccessToken()) return next(req);
 
   if (authService.checkJWTExpired()) {
     return authService.refresh().pipe(
@@ -27,8 +26,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         const newReq = req.clone({
           setHeaders: {
             Authorization: `Bearer ${authService.getAccessToken()}`,
-          }
-        })
+          },
+        });
 
         return next(newReq);
       }),
@@ -37,7 +36,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         authService.clearSession();
         return next(req);
       }),
-    )
+    );
   }
 
   // Añadir el token a la cabecera
@@ -52,4 +51,4 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   return next(req);
-}
+};

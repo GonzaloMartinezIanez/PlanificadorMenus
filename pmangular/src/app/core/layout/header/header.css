@@ -14,7 +14,7 @@
   box-shadow: 0 2px 2px 1px rgba(0, 0, 0, 0.1);
 }
 
-.no-auth-header{
+.no-auth-header {
   flex-direction: row;
   justify-content: space-between;
 }

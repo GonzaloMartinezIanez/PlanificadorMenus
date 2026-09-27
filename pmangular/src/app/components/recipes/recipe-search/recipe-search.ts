@@ -1,14 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  computed,
-  EventEmitter,
-  inject,
-  Input,
-  OnInit,
-  Output,
-  signal,
-} from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeCategory } from '../../../models/recipe';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,9 +35,7 @@ export class RecipeSearch implements OnInit {
 
   searchName = signal('');
   selectedCategoryIds = signal<number[]>([]);
-  showingTopRecipes = computed(
-    () => this.searchName().trim() === '' && this.selectedCategoryIds().length === 0,
-  );
+  showingTopRecipes = computed(() => this.searchName().trim() === '' && this.selectedCategoryIds().length === 0);
 
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
 

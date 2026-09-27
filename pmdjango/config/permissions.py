@@ -1,10 +1,11 @@
 from django.conf import settings
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+
 class IsEmailAuthorizedOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         # Permitir siempre para GET/HEAD/OPTIONS
-        if request.method in SAFE_METHODS: 
+        if request.method in SAFE_METHODS:
             return True
 
         # Hace falta estar autenticado

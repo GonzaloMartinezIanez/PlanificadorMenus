@@ -5,12 +5,7 @@
 
     <div class="menu-calendar-nav">
       @if (canGoToPreviousWeek()) {
-        <button
-          class="menu-calendar-previous-week"
-          mat-stroked-button
-          type="button"
-          (click)="generatePreviousWeek()"
-        >
+        <button class="menu-calendar-previous-week" mat-stroked-button type="button" (click)="generatePreviousWeek()">
           Semana anterior
         </button>
       }

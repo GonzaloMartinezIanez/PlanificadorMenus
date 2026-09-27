@@ -27,21 +27,11 @@ export class GroupService {
     return this.http.get<GroupMember[]>(`${environment.apiUrl}/groups/${group_code}/`);
   }
 
-  updateGroup(
-    group_code: string,
-    group_info: GroupShortModel,
-  ): Observable<{ message: GroupModel }> {
-    return this.http.patch<{ message: GroupModel }>(
-      `${environment.apiUrl}/groups/${group_code}/`,
-      group_info,
-    );
+  updateGroup(group_code: string, group_info: GroupShortModel): Observable<{ message: GroupModel }> {
+    return this.http.patch<{ message: GroupModel }>(`${environment.apiUrl}/groups/${group_code}/`, group_info);
   }
 
-  updatePendingMember(
-    group_code: string,
-    user_id: number,
-    accepted: boolean,
-  ): Observable<MessageModel> {
+  updatePendingMember(group_code: string, user_id: number, accepted: boolean): Observable<MessageModel> {
     return this.http.patch<MessageModel>(`${environment.apiUrl}/groups/${group_code}/join/`, {
       user_id,
       accepted,
@@ -63,7 +53,7 @@ export class GroupService {
     return this.http.delete<MessageModel>(`${environment.apiUrl}/groups/${group_code}/`);
   }
 
-  leaveGroup(groupCode: string, userId: number): Observable<MessageModel>{
+  leaveGroup(groupCode: string, userId: number): Observable<MessageModel> {
     return this.removeMember(groupCode, userId);
   }
 }

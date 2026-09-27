@@ -9,5 +9,4 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './recipes.html',
   styleUrl: './recipes.css',
 })
-export class Recipes {
-}
+export class Recipes {}

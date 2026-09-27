@@ -82,9 +82,7 @@ export class Header implements OnInit {
       next: (groups) => {
         this.myGroups.set(groups);
 
-        const selectedGroupExists = groups.some(
-          (group) => group.group_code === this.selectedGroupCode(),
-        );
+        const selectedGroupExists = groups.some((group) => group.group_code === this.selectedGroupCode());
 
         if (!selectedGroupExists && groups.length > 0) {
           this.selectedGroupCode.set(groups[0].group_code);

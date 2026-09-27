@@ -47,27 +47,20 @@ export class List implements OnInit {
 
       if (!usedCategories.some((cat) => cat.id_ingredient_category === mainCategory)) {
         usedCategories.push(
-          this.categories().find(
-            (cat) => cat.id_ingredient_category === mainCategory,
-          ) as IngredientCategory,
+          this.categories().find((cat) => cat.id_ingredient_category === mainCategory) as IngredientCategory,
         );
       }
     });
 
     // Devolverlos siempre en el mismo orden independientemente de como venga la lista
-    return usedCategories.sort((a, b) =>
-      a.id_ingredient_category < b.id_ingredient_category ? -1 : 1,
-    );
+    return usedCategories.sort((a, b) => (a.id_ingredient_category < b.id_ingredient_category ? -1 : 1));
   });
   selectedCategory = signal<number | null>(null);
   filteredList = computed(() => {
     if (!this.selectedCategory()) return this.list();
 
     return this.list().filter((item) => {
-      return (
-        this.getMainCategory(item.ingredient.id_ingredient_categories[0]) ===
-        this.selectedCategory()
-      );
+      return this.getMainCategory(item.ingredient.id_ingredient_categories[0]) === this.selectedCategory();
     });
   });
   boughtItems = computed(() => {
@@ -149,13 +142,11 @@ export class List implements OnInit {
   }
 
   changeItemStatus(event: ListStatusItem) {
-    this.listService
-      .changeStatusListItem(this.groupCode() || '', event.id_ingredient, event.bought)
-      .subscribe({
-        next: () => {
-          this.loadList();
-        },
-      });
+    this.listService.changeStatusListItem(this.groupCode() || '', event.id_ingredient, event.bought).subscribe({
+      next: () => {
+        this.loadList();
+      },
+    });
   }
 
   changeItemAmount(event: ListPatchItem) {
@@ -224,8 +215,7 @@ export class List implements OnInit {
   changeSelectedCategory(id: number) {
     if (id === this.selectedCategory()) this.selectedCategory.set(null);
     else {
-      if (this.activeCategories().some((cat) => cat.id_ingredient_category === id))
-        this.selectedCategory.set(id);
+      if (this.activeCategories().some((cat) => cat.id_ingredient_category === id)) this.selectedCategory.set(id);
     }
   }
 

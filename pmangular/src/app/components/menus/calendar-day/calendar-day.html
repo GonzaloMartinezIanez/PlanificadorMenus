@@ -1,9 +1,5 @@
 @if (day) {
-  <article
-    class="calendar-day"
-    [class.calendar-day--past]="isPast"
-    [class.calendar-day--today]="isToday"
-  >
+  <article class="calendar-day" [class.calendar-day--past]="isPast" [class.calendar-day--today]="isToday">
     <h2>{{ formatDayText(day) }}</h2>
 
     @if (!isPast) {

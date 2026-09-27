@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {Layout} from "./layout"
+import { Layout } from './layout';
 import { defaultTestProviders } from '../../testing/test-providers';
 
 describe('Layout', () => {

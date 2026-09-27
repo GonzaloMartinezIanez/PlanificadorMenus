@@ -11,8 +11,8 @@
           <h3>Autor: {{ recipe()!.author }}</h3>
           @if (recipe()!.visibility === 'PRIVATE') {
             <p>
-              Esta receta es privada. Las recetas privadas solo la pueden ver los usuarios que
-              tienen un grupo en común con el Autor
+              Esta receta es privada. Las recetas privadas solo la pueden ver los usuarios que tienen un grupo en común
+              con el Autor
             </p>
           }
         </div>
@@ -46,15 +46,8 @@
           Crear nueva receta a partir de esta
         </button>
         @if (isRecipeOwner()) {
-          <button mat-button [routerLink]="['/recipes', recipe()!.id, 'edit']">
-            Editar receta
-          </button>
-          <button
-            class="button-danger button-delete"
-            mat-flat-button
-            type="button"
-            (click)="opendDeleteDialog()"
-          >
+          <button mat-button [routerLink]="['/recipes', recipe()!.id, 'edit']">Editar receta</button>
+          <button class="button-danger button-delete" mat-flat-button type="button" (click)="opendDeleteDialog()">
             Borrar receta
           </button>
         }
@@ -104,11 +97,7 @@
             }
 
             @if (isEditingMyComment()) {
-              <form
-                class="recipe-comment-form"
-                [formGroup]="commentForm"
-                (ngSubmit)="updateMyComment()"
-              >
+              <form class="recipe-comment-form" [formGroup]="commentForm" (ngSubmit)="updateMyComment()">
                 <div class="recipe-comment-form-content">
                   <app-recipe-rating
                     [score]="commentForm.get('score')?.value ?? 0"
@@ -123,31 +112,21 @@
                 </div>
 
                 <div class="recipe-comment-actions">
-                  <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
-                    Guardar cambios
-                  </button>
+                  <button mat-raised-button type="submit" [disabled]="commentForm.invalid">Guardar cambios</button>
                   <button mat-button type="button" (click)="cancelEditMyComment()">Cancelar</button>
                 </div>
               </form>
             } @else {
               <div class="recipe-comment-actions">
-                <button mat-button type="button" (click)="startEditMyComment()">
-                  Modificar mi comentario
-                </button>
-                <button mat-button type="button" (click)="deleteMyComment()">
-                  Borrar mi comentario
-                </button>
+                <button mat-button type="button" (click)="startEditMyComment()">Modificar mi comentario</button>
+                <button mat-button type="button" (click)="deleteMyComment()">Borrar mi comentario</button>
               </div>
             }
           </article>
         } @else {
           <article class="recipe-comment recipe-comment--form">
             <h3>Deja tu valoración y/o comentario</h3>
-            <form
-              class="recipe-comment-form"
-              [formGroup]="commentForm"
-              (ngSubmit)="submitComment()"
-            >
+            <form class="recipe-comment-form" [formGroup]="commentForm" (ngSubmit)="submitComment()">
               <div class="recipe-comment-form-content">
                 <app-recipe-rating
                   [score]="commentForm.get('score')?.value ?? 0"
@@ -161,9 +140,7 @@
                 </mat-form-field>
               </div>
 
-              <button mat-raised-button type="submit" [disabled]="commentForm.invalid">
-                Enviar comentario
-              </button>
+              <button mat-raised-button type="submit" [disabled]="commentForm.invalid">Enviar comentario</button>
             </form>
           </article>
         }

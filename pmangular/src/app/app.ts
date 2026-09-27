@@ -6,8 +6,8 @@ import { HttpClient } from '@angular/common/http';
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App{
-  constructor(){}
+export class App {
+  constructor() {}
 }

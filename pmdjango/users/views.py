@@ -9,15 +9,19 @@ from django.conf import settings
 from .models import User
 from .serializers import UserSerializer
 
+
 # El frontend debe pasar un google_id válido, si este usuario no está en el sistema se creará.
 # Devuelve un access_token y un refresh token
 class GoogleLoginView(APIView):
     permission_classes = []
 
     def post(self, request):
-        token = request.data.get("token") # Token del body
+        token = request.data.get("token")  # Token del body
         if not token:
-            return Response({"error": "Falta el token de Google"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Falta el token de Google"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Comprobar que es un id válido y obtener información del usuario
         try:
@@ -27,8 +31,10 @@ class GoogleLoginView(APIView):
                 settings.GOOGLE_CLIENT_ID,
             )
         except ValueError:
-            return Response({"error": "Token de Google inválido"}, status=status.HTTP_401_UNAUTHORIZED)
-
+            return Response(
+                {"error": "Token de Google inválido"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         google_id = idinfo["sub"]
         email = idinfo.get("email")
@@ -52,11 +58,13 @@ class GoogleLoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response({
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "user": UserSerializer(user).data,
-        })
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": UserSerializer(user).data,
+            }
+        )
 
     def check_username(self, base_name):
         username = base_name

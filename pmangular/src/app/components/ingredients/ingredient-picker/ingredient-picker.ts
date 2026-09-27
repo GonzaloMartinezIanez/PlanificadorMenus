@@ -1,15 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  computed,
-  EventEmitter,
-  inject,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  signal,
-} from '@angular/core';
+import { Component, computed, EventEmitter, inject, Input, OnDestroy, OnInit, Output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -50,9 +40,7 @@ export class IngredientPicker implements OnInit {
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
   categoryRequestId = 0;
 
-  mainCategories = computed(() =>
-    this.allCategories().filter((category) => category.primary_category === null),
-  );
+  mainCategories = computed(() => this.allCategories().filter((category) => category.primary_category === null));
 
   subcategories = computed(() => {
     const selectedMainCategory = this.selectedMainCategory();

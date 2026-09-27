@@ -11,7 +11,7 @@ export interface GroupShortModel {
   group_description: string;
 }
 
-export interface GroupMember{
+export interface GroupMember {
   user_id: number;
   username: string;
   profile_picture: string;

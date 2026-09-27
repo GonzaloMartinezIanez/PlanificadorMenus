@@ -18,7 +18,7 @@ describe('GroupService', () => {
 
   afterEach(() => http.verify());
 
-  it('should get user\' groups', () => {
+  it("should get user' groups", () => {
     service.getMyGroups().subscribe();
 
     const request = http.expectOne(`${environment.apiUrl}/groups/`);

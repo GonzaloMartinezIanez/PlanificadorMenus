@@ -16,11 +16,9 @@ export class RecipeService {
 
   searchRecipes(name: string, categoryIds: number[]): Observable<Recipe[]> {
     let url = `${environment.apiUrl}/recipes/search/?`;
-    if(name)
-      url += `name=${name}&`
+    if (name) url += `name=${name}&`;
 
-    if(categoryIds.length > 0)
-      url += `categories=${categoryIds.join(',')}`
+    if (categoryIds.length > 0) url += `categories=${categoryIds.join(',')}`;
 
     return this.http.get<Recipe[]>(url);
   }
@@ -54,9 +52,7 @@ export class RecipeService {
   }
 
   getMyCommentByRecipeId(id: number): Observable<RecipeComment | { comment: null }> {
-    return this.http.get<RecipeComment | { comment: null }>(
-      `${environment.apiUrl}/comments/${id}/mine/`,
-    );
+    return this.http.get<RecipeComment | { comment: null }>(`${environment.apiUrl}/comments/${id}/mine/`);
   }
 
   createComment(id: number, score: number, comment: string) {
@@ -74,8 +70,6 @@ export class RecipeService {
   }
 
   deleteComment(id_recipe: number, id_user: number) {
-    return this.http.delete<{ message: string }>(
-      `${environment.apiUrl}/comments/${id_recipe}/${id_user}/`,
-    );
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/comments/${id_recipe}/${id_user}/`);
   }
 }

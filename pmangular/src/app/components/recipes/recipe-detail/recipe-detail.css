@@ -118,13 +118,13 @@
   margin-top: 1rem;
 }
 
-.no-auth-section{
+.no-auth-section {
   font-size: larger;
   margin: 2rem 0 -2rem 0;
   text-align: center;
 }
 
-.no-auth-section a{
+.no-auth-section a {
   text-decoration: none;
 }
 

@@ -2,11 +2,7 @@
   <div class="recipe-rating-stars" (mouseleave)="clearHoveredScore()">
     @for (star of stars; track star) {
       @if (editable) {
-        <mat-icon
-          class="recipe-rating-star"
-          (mouseenter)="setHoveredScore(star)"
-          (click)="selectScore(star)"
-        >
+        <mat-icon class="recipe-rating-star" (mouseenter)="setHoveredScore(star)" (click)="selectScore(star)">
           {{ getStarIcon(star) }}
         </mat-icon>
       } @else {

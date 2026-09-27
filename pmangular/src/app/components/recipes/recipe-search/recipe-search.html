@@ -10,10 +10,7 @@
 
   <mat-chip-listbox class="recipe-search-categories" multiple aria-label="Filtrar por categorías">
     @for (cat of recipeCategories(); track cat.id) {
-      <mat-chip-option
-        [selected]="isCategorySelected(cat.id)"
-        (selectionChange)="toggleCategory(cat.id)"
-      >
+      <mat-chip-option [selected]="isCategorySelected(cat.id)" (selectionChange)="toggleCategory(cat.id)">
         {{ cat.name }}
       </mat-chip-option>
     }

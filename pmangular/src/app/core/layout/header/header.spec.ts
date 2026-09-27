@@ -55,8 +55,7 @@ describe('Header', () => {
     component.selectedGroupCode.set('INVALID');
     authService.isAuthenticated.mockReturnValue(true);
     groupService.getMyGroups.mockReturnValue({
-      subscribe: ({ next }: { next: (groups: { group_code: string }[]) => void }) =>
-        next([{ group_code: 'GROUP001' }]),
+      subscribe: ({ next }: { next: (groups: { group_code: string }[]) => void }) => next([{ group_code: 'GROUP001' }]),
     });
 
     component.loadMyGroups();

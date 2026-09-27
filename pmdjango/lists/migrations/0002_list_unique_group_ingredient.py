@@ -6,12 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lists', '0001_initial'),
+        ("lists", "0001_initial"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='list',
-            constraint=models.UniqueConstraint(fields=('group', 'ingredient'), name='unique_group_ingredient_list_item'),
+            model_name="list",
+            constraint=models.UniqueConstraint(
+                fields=("group", "ingredient"), name="unique_group_ingredient_list_item"
+            ),
         ),
     ]

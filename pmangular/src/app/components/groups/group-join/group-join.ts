@@ -15,10 +15,7 @@ declare global {
     google?: {
       accounts: {
         id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: GoogleCredentialResponse) => void;
-          }) => void;
+          initialize: (config: { client_id: string; callback: (response: GoogleCredentialResponse) => void }) => void;
           renderButton: (parent: HTMLElement, options: Record<string, string | number>) => void;
           prompt: () => void;
         };

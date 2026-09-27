@@ -1,5 +1,9 @@
 from .models import Recipe, RecipeCategory, IngredientInRecipe
-from .serializers import RecipeCategorySerializer, RecipeOutputSerializer, RecipeInputSerializer
+from .serializers import (
+    RecipeCategorySerializer,
+    RecipeOutputSerializer,
+    RecipeInputSerializer,
+)
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,233 +16,306 @@ from config.permissions import IsEmailAuthorizedOrReadOnly
 
 # CRUD de Categorias de recetas
 class RecipeCategoryViewSet(viewsets.ModelViewSet):
-  permission_classes = [IsEmailAuthorizedOrReadOnly]
-  queryset = RecipeCategory.objects.all()
-  serializer_class = RecipeCategorySerializer
+    permission_classes = [IsEmailAuthorizedOrReadOnly]
+    queryset = RecipeCategory.objects.all()
+    serializer_class = RecipeCategorySerializer
+
 
 # GET recetas por categoría
 class RecipeCategoryRecipesApiView(APIView):
-  permission_classes = []
+    permission_classes = []
 
-  def get(self, request, id_recipe_category):
-    if not RecipeCategory.objects.filter(id = id_recipe_category).exists():
-      return Response({"error": "La categoría no existe."}, status = status.HTTP_404_NOT_FOUND)
+    def get(self, request, id_recipe_category):
+        if not RecipeCategory.objects.filter(id=id_recipe_category).exists():
+            return Response(
+                {"error": "La categoría no existe."}, status=status.HTTP_404_NOT_FOUND
+            )
 
-    recipes = get_my_visible_recipes(request).filter(recipe_categories__id = id_recipe_category)
+        recipes = get_my_visible_recipes(request).filter(
+            recipe_categories__id=id_recipe_category
+        )
 
-    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
+        serializer = RecipeOutputSerializer(
+            recipes, many=True, context={"request": request}
+        )
 
-    return Response(serializer.data, status = status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # GET todas y añadir nueva
 class RecipeApiView(APIView):
-  permission_classes = []
+    permission_classes = []
 
-  def get(self, request):
-    recipes = get_my_visible_recipes(request)
-    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
-
-    return Response(serializer.data, status = status.HTTP_200_OK)
-
-  def post(self, request):
-    if not request.user.is_authenticated:
-      return Response({"error": "Necesitas autenticación."}, status = status.HTTP_401_UNAUTHORIZED)
-
-    serializer = RecipeInputSerializer(data = request.data)
-    serializer.is_valid(raise_exception = True)
-
-    # Si un paso falla, se deshacen todos los cambios en la base de datos
-    try:
-      with transaction.atomic():
-        # Crear la receta (num_valorations y avg_score default = 0)
-        recipe = Recipe.objects.create(
-          user = request.user,
-          name = serializer.validated_data["name"],
-          description = serializer.validated_data.get("description", ""),
-          preparation_time = serializer.validated_data.get("preparation_time"),
-          steps = serializer.validated_data.get("steps"),
-          visibility = serializer.validated_data["visibility"],
+    def get(self, request):
+        recipes = get_my_visible_recipes(request)
+        serializer = RecipeOutputSerializer(
+            recipes, many=True, context={"request": request}
         )
 
-        # Añadir las categorías
-        recipe.recipe_categories.set(serializer.validated_data["recipe_categories"])
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        # Recorrer los ingredientes y guardarlos en la tabla
-        for ingredient_data in serializer.validated_data.get("ingredients", []):
-          ingredient = Ingredient.objects.get(id_ingredient = ingredient_data["id_ingredient"])
-          IngredientInRecipe.objects.create(
-            recipe = recipe,
-            ingredient = ingredient,
-            amount = ingredient_data["amount"],
-            unit = ingredient_data["unit"],
-          )
-    except Exception as e:
-      return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "Necesitas autenticación."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-    output_serializer = RecipeOutputSerializer(recipe, context = {"request": request})
-    return Response(output_serializer.data, status = status.HTTP_201_CREATED)
+        serializer = RecipeInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Si un paso falla, se deshacen todos los cambios en la base de datos
+        try:
+            with transaction.atomic():
+                # Crear la receta (num_valorations y avg_score default = 0)
+                recipe = Recipe.objects.create(
+                    user=request.user,
+                    name=serializer.validated_data["name"],
+                    description=serializer.validated_data.get("description", ""),
+                    preparation_time=serializer.validated_data.get("preparation_time"),
+                    steps=serializer.validated_data.get("steps"),
+                    visibility=serializer.validated_data["visibility"],
+                )
+
+                # Añadir las categorías
+                recipe.recipe_categories.set(
+                    serializer.validated_data["recipe_categories"]
+                )
+
+                # Recorrer los ingredientes y guardarlos en la tabla
+                for ingredient_data in serializer.validated_data.get("ingredients", []):
+                    ingredient = Ingredient.objects.get(
+                        id_ingredient=ingredient_data["id_ingredient"]
+                    )
+                    IngredientInRecipe.objects.create(
+                        recipe=recipe,
+                        ingredient=ingredient,
+                        amount=ingredient_data["amount"],
+                        unit=ingredient_data["unit"],
+                    )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        output_serializer = RecipeOutputSerializer(recipe, context={"request": request})
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
 
 class RecipeSearchApiView(APIView):
-  permission_classes = []
+    permission_classes = []
 
-  def get(self, request):
-    recipes = get_my_visible_recipes(request)
+    def get(self, request):
+        recipes = get_my_visible_recipes(request)
 
-    name = request.GET.get("name", "").strip()
-    categories = request.GET.get("categories", "").strip()
+        name = request.GET.get("name", "").strip()
+        categories = request.GET.get("categories", "").strip()
 
-    # Primero filtrar por nombre
-    if name:
-      recipes = recipes.filter(name__icontains = name)
+        # Primero filtrar por nombre
+        if name:
+            recipes = recipes.filter(name__icontains=name)
 
-    if categories:
-      categories_ids = []
+        if categories:
+            categories_ids = []
 
-      for category_id in categories.split(","):
-        category_id = category_id.strip()
+            for category_id in categories.split(","):
+                category_id = category_id.strip()
 
-        if not category_id:
-          continue
+                if not category_id:
+                    continue
 
-        if not category_id.isdigit():
-          return Response({"error": "Las categorías deben ser ids numéricos separados por comas."}, status = status.HTTP_400_BAD_REQUEST)
+                if not category_id.isdigit():
+                    return Response(
+                        {
+                            "error": "Las categorías deben ser ids numéricos separados por comas."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
-        categories_ids.append(int(category_id))
+                categories_ids.append(int(category_id))
 
-      # Este filtro es un OR
-      if categories_ids:
-        recipes = recipes.filter(recipe_categories__id__in = categories_ids).distinct() # Sin distinct se repite la misma si pertenece a las dos categorías
+            # Este filtro es un OR
+            if categories_ids:
+                recipes = recipes.filter(
+                    recipe_categories__id__in=categories_ids
+                ).distinct()  # Sin distinct se repite la misma si pertenece a las dos categorías
 
-    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
-    return Response(serializer.data, status = status.HTTP_200_OK)
+        serializer = RecipeOutputSerializer(
+            recipes, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class RecipeTopApiView(APIView):
-  permission_classes = []
+    permission_classes = []
 
-  def get(self, request):
-    recipes = get_my_visible_recipes(request).filter(num_valorations__gt = 0).order_by("-num_valorations", "-avg_score")[:10] # Las diez con más valoraciones
+    def get(self, request):
+        recipes = (
+            get_my_visible_recipes(request)
+            .filter(num_valorations__gt=0)
+            .order_by("-num_valorations", "-avg_score")[:10]
+        )  # Las diez con más valoraciones
 
-    serializer = RecipeOutputSerializer(recipes, many = True, context = {"request": request})
-    return Response(serializer.data, status = status.HTTP_200_OK)
+        serializer = RecipeOutputSerializer(
+            recipes, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # GET, PUT, PATCH, DELETE receta por id
 class RecipeIdApiView(APIView):
-  permission_classes = []
+    permission_classes = []
 
-  def get(self, request, id):
-    recipe = get_my_visible_recipes(request).filter(id = id).first()
-    if not recipe:
-      return Response({"error": "Receta no encontrada."}, status = status.HTTP_404_NOT_FOUND)
-
-    serializer = RecipeOutputSerializer(recipe, context = {"request": request})
-    return Response(serializer.data, status = status.HTTP_200_OK)
-
-  def put(self, request, id):
-    if not request.user.is_authenticated:
-      return Response({"error": "Necesitas autenticación."}, status = status.HTTP_401_UNAUTHORIZED)
-    
-    recipe = get_my_visible_recipes(request).filter(id = id).first()
-
-    if not recipe:
-      return Response({"error": "Receta no encontrada."}, status = status.HTTP_404_NOT_FOUND)
-
-    if recipe.user != request.user:
-      return Response({"error": "No tienes permiso para modificar esta receta."}, status = status.HTTP_403_FORBIDDEN)
-
-    serializer = RecipeInputSerializer(data = request.data)
-    serializer.is_valid(raise_exception = True)
-
-    # Si un paso falla, se deshacen todos los cambios en la base de datos
-    try:  
-      with transaction.atomic():
-        # Actualizar los campos de la receta
-        recipe.name = serializer.validated_data["name"]
-        recipe.description = serializer.validated_data.get("description", "")
-        recipe.preparation_time = serializer.validated_data.get("preparation_time")
-        recipe.steps = serializer.validated_data.get("steps")
-        recipe.visibility = serializer.validated_data["visibility"]
-        recipe.save()
-
-        # Actualizar las categorías
-        recipe.recipe_categories.set(serializer.validated_data["recipe_categories"])
-
-        # Actualizar los ingredientes
-        # Primero se eliminan los antiguos
-        IngredientInRecipe.objects.filter(recipe = recipe).delete()
-        # Luego se añaden los nuevos
-        for ingredient_data in serializer.validated_data.get("ingredients", []):
-          ingredient = Ingredient.objects.get(id_ingredient = ingredient_data["id_ingredient"])
-          IngredientInRecipe.objects.create(
-            recipe = recipe,
-            ingredient = ingredient,
-            amount = ingredient_data["amount"],
-            unit = ingredient_data["unit"],
-          )
-    except Exception as e:
-      return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
-
-    output_serializer = RecipeOutputSerializer(recipe, context = {"request": request})
-    return Response(output_serializer.data, status = status.HTTP_200_OK)
-
-  def patch(self, request, id):
-    if not request.user.is_authenticated:
-      return Response({"error": "Necesitas autenticación."}, status = status.HTTP_401_UNAUTHORIZED)
-
-    recipe = get_my_visible_recipes(request).filter(id = id).first()
-
-    if not recipe:
-      return Response({"error": "Receta no encontrada."}, status = status.HTTP_404_NOT_FOUND)
-
-    if recipe.user != request.user:
-      return Response({"error": "No tienes permiso para modificar esta receta."}, status = status.HTTP_403_FORBIDDEN)
-
-    serializer = RecipeInputSerializer(data = request.data, partial = True)
-    serializer.is_valid(raise_exception = True)
-
-    # Si un paso falla, se deshacen todos los cambios en la base de datos
-    try:
-      with transaction.atomic():
-        # Actualizar los campos de la receta
-        for field, value in serializer.validated_data.items():
-          if field in ["recipe_categories", "ingredients"]:
-            continue # Como son relaciones, se manejan aparte
-          setattr(recipe, field, value)
-        recipe.save()
-
-        # Actualizar las categorías si se proporcionan
-        if "recipe_categories" in serializer.validated_data:
-          recipe.recipe_categories.set(serializer.validated_data["recipe_categories"])
-
-        # Actualizar los ingredientes si se proporcionan
-        if "ingredients" in serializer.validated_data:
-          # Primero se eliminan los antiguos
-          IngredientInRecipe.objects.filter(recipe = recipe).delete()
-          # Luego se añaden los nuevos
-          for ingredient_data in serializer.validated_data.get("ingredients", []):
-            ingredient = Ingredient.objects.get(id_ingredient = ingredient_data["id_ingredient"])
-            IngredientInRecipe.objects.create(
-              recipe = recipe,
-              ingredient = ingredient,
-              amount = ingredient_data["amount"],
-              unit = ingredient_data["unit"],
+    def get(self, request, id):
+        recipe = get_my_visible_recipes(request).filter(id=id).first()
+        if not recipe:
+            return Response(
+                {"error": "Receta no encontrada."}, status=status.HTTP_404_NOT_FOUND
             )
-    except Exception as e:
-      return Response({"error": str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
-    output_serializer = RecipeOutputSerializer(recipe, context = {"request": request})
-    return Response(output_serializer.data, status = status.HTTP_200_OK)
+        serializer = RecipeOutputSerializer(recipe, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-  def delete(self, request, id):
-    if not request.user.is_authenticated:
-      return Response({"error": "Necesitas autenticación."}, status = status.HTTP_401_UNAUTHORIZED)
+    def put(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "Necesitas autenticación."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-    recipe = get_my_visible_recipes(request).filter(id = id).first()
+        recipe = get_my_visible_recipes(request).filter(id=id).first()
 
-    if not recipe:
-      return Response({"error": "Receta no encontrada."}, status = status.HTTP_404_NOT_FOUND)
+        if not recipe:
+            return Response(
+                {"error": "Receta no encontrada."}, status=status.HTTP_404_NOT_FOUND
+            )
 
-    if recipe.user != request.user:
-      return Response({"error": "No tienes permiso para eliminar esta receta."}, status = status.HTTP_403_FORBIDDEN)
+        if recipe.user != request.user:
+            return Response(
+                {"error": "No tienes permiso para modificar esta receta."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
-    recipe.delete()
-    return Response({"message": "Receta eliminada."}, status = status.HTTP_200_OK)
+        serializer = RecipeInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Si un paso falla, se deshacen todos los cambios en la base de datos
+        try:
+            with transaction.atomic():
+                # Actualizar los campos de la receta
+                recipe.name = serializer.validated_data["name"]
+                recipe.description = serializer.validated_data.get("description", "")
+                recipe.preparation_time = serializer.validated_data.get(
+                    "preparation_time"
+                )
+                recipe.steps = serializer.validated_data.get("steps")
+                recipe.visibility = serializer.validated_data["visibility"]
+                recipe.save()
+
+                # Actualizar las categorías
+                recipe.recipe_categories.set(
+                    serializer.validated_data["recipe_categories"]
+                )
+
+                # Actualizar los ingredientes
+                # Primero se eliminan los antiguos
+                IngredientInRecipe.objects.filter(recipe=recipe).delete()
+                # Luego se añaden los nuevos
+                for ingredient_data in serializer.validated_data.get("ingredients", []):
+                    ingredient = Ingredient.objects.get(
+                        id_ingredient=ingredient_data["id_ingredient"]
+                    )
+                    IngredientInRecipe.objects.create(
+                        recipe=recipe,
+                        ingredient=ingredient,
+                        amount=ingredient_data["amount"],
+                        unit=ingredient_data["unit"],
+                    )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        output_serializer = RecipeOutputSerializer(recipe, context={"request": request})
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "Necesitas autenticación."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        recipe = get_my_visible_recipes(request).filter(id=id).first()
+
+        if not recipe:
+            return Response(
+                {"error": "Receta no encontrada."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if recipe.user != request.user:
+            return Response(
+                {"error": "No tienes permiso para modificar esta receta."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        serializer = RecipeInputSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        # Si un paso falla, se deshacen todos los cambios en la base de datos
+        try:
+            with transaction.atomic():
+                # Actualizar los campos de la receta
+                for field, value in serializer.validated_data.items():
+                    if field in ["recipe_categories", "ingredients"]:
+                        continue  # Como son relaciones, se manejan aparte
+                    setattr(recipe, field, value)
+                recipe.save()
+
+                # Actualizar las categorías si se proporcionan
+                if "recipe_categories" in serializer.validated_data:
+                    recipe.recipe_categories.set(
+                        serializer.validated_data["recipe_categories"]
+                    )
+
+                # Actualizar los ingredientes si se proporcionan
+                if "ingredients" in serializer.validated_data:
+                    # Primero se eliminan los antiguos
+                    IngredientInRecipe.objects.filter(recipe=recipe).delete()
+                    # Luego se añaden los nuevos
+                    for ingredient_data in serializer.validated_data.get(
+                        "ingredients", []
+                    ):
+                        ingredient = Ingredient.objects.get(
+                            id_ingredient=ingredient_data["id_ingredient"]
+                        )
+                        IngredientInRecipe.objects.create(
+                            recipe=recipe,
+                            ingredient=ingredient,
+                            amount=ingredient_data["amount"],
+                            unit=ingredient_data["unit"],
+                        )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        output_serializer = RecipeOutputSerializer(recipe, context={"request": request})
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "Necesitas autenticación."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        recipe = get_my_visible_recipes(request).filter(id=id).first()
+
+        if not recipe:
+            return Response(
+                {"error": "Receta no encontrada."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if recipe.user != request.user:
+            return Response(
+                {"error": "No tienes permiso para eliminar esta receta."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        recipe.delete()
+        return Response({"message": "Receta eliminada."}, status=status.HTTP_200_OK)

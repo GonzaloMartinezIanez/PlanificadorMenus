@@ -7,31 +7,57 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='IngredientCategory',
+            name="IngredientCategory",
             fields=[
-                ('id_ingredient_category', models.IntegerField(primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=100)),
-                ('primary_category', models.IntegerField(null=True)),
-                ('icon', models.TextField(blank=True, null=True)),
+                (
+                    "id_ingredient_category",
+                    models.IntegerField(primary_key=True, serialize=False),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("primary_category", models.IntegerField(null=True)),
+                ("icon", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Ingredient',
+            name="Ingredient",
             fields=[
-                ('id_ingredient', models.CharField(max_length=50, primary_key=True, serialize=False)),
-                ('name', models.TextField()),
-                ('packaging', models.CharField(blank=True, max_length=50, null=True)),
-                ('reference_format', models.CharField(blank=True, max_length=20, null=True)),
-                ('reference_price', models.DecimalField(blank=True, decimal_places=3, max_digits=10, null=True)),
-                ('unit_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('unit_size', models.DecimalField(blank=True, decimal_places=5, max_digits=10, null=True)),
-                ('image', models.TextField(blank=True, null=True)),
-                ('id_ingredient_categories', models.ManyToManyField(to='ingredients.ingredientcategory')),
+                (
+                    "id_ingredient",
+                    models.CharField(max_length=50, primary_key=True, serialize=False),
+                ),
+                ("name", models.TextField()),
+                ("packaging", models.CharField(blank=True, max_length=50, null=True)),
+                (
+                    "reference_format",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                (
+                    "reference_price",
+                    models.DecimalField(
+                        blank=True, decimal_places=3, max_digits=10, null=True
+                    ),
+                ),
+                (
+                    "unit_price",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=10, null=True
+                    ),
+                ),
+                (
+                    "unit_size",
+                    models.DecimalField(
+                        blank=True, decimal_places=5, max_digits=10, null=True
+                    ),
+                ),
+                ("image", models.TextField(blank=True, null=True)),
+                (
+                    "id_ingredient_categories",
+                    models.ManyToManyField(to="ingredients.ingredientcategory"),
+                ),
             ],
         ),
     ]

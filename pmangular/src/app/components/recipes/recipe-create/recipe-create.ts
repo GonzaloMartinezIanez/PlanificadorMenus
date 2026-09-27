@@ -25,7 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatSelectModule,
     MatSnackBarModule,
     IngredientPicker,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './recipe-create.html',
   styleUrl: './recipe-create.css',
