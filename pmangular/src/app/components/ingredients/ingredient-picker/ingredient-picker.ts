@@ -23,7 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './ingredient-picker.html',
   styleUrl: './ingredient-picker.css',
 })
-export class IngredientPicker implements OnInit {
+export class IngredientPicker implements OnInit, OnDestroy {
   @Input() selectedIngredientIds: string[] = []; // El padre le indica cuales han sido elegidos
   @Output() ingredientSelected = new EventEmitter<Ingredient>(); // Avisa al padre de cual se elige
 

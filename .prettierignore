@@ -1,0 +1,15 @@
+**/node_modules/
+**/venv/
+**/.venv/
+**/dist/
+**/.angular/
+**/coverage/
+**/__pycache__/
+**/.env
+**/.env.*
+**/package-lock.json
+pmdjango/scripts/*.json
+mysql-data/
+certbot/
+IMG/
+AGENTS.md

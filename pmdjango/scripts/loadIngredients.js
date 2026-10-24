@@ -1,31 +1,31 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const baseURL = "https://planificadormenus.es"; // "http://127.0.0.1:8000"
-const accessToken = "" // Pegar aquí el access token de una persona que está en AUTHORIZED_EMAIL del .env
+const baseURL = 'https://planificadormenus.es'; // "http://127.0.0.1:8000"
+const accessToken = ''; // Pegar aquí el access token de una persona que está en AUTHORIZED_EMAIL del .env
 const ingredientBatchSize = 100;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const categoriesFilePath = path.join(__dirname, "categories.json");
-const productsFilePath = path.join(__dirname, "products.json");
+const categoriesFilePath = path.join(__dirname, 'categories.json');
+const productsFilePath = path.join(__dirname, 'products.json');
 
 function getAuthHeaders() {
   if (!accessToken) {
-    throw new Error("Hace falta el access token");
+    throw new Error('Hace falta el access token');
   }
 
   return {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${accessToken}`,
   };
 }
 
-async function loadCategories(output = "") {
+async function loadCategories(output = '') {
   const listCategories = [];
   const idCategories = [];
 
-  const response = await fetch("https://tienda.mercadona.es/api/categories/");
+  const response = await fetch('https://tienda.mercadona.es/api/categories/');
   const categories = await response.json();
 
   categories.results.forEach((cat) => {
@@ -53,19 +53,14 @@ async function loadCategories(output = "") {
   );
 
   switch (output) {
-    case "log":
+    case 'log':
       console.log(sortedCategories);
       break;
-    case "file":
-      fs.writeFileSync(
-        categoriesFilePath,
-        JSON.stringify(sortedCategories, null, 2),
-      );
+    case 'file':
+      fs.writeFileSync(categoriesFilePath, JSON.stringify(sortedCategories, null, 2));
       break;
     default:
-      console.log(
-        "Pasa 'log' o 'file' a la funcion para mostrar o guardar la informacion.",
-      );
+      console.log("Pasa 'log' o 'file' a la funcion para mostrar o guardar la informacion.");
       break;
   }
 
@@ -73,7 +68,7 @@ async function loadCategories(output = "") {
 }
 
 async function insertCategoriesInDB() {
-  const categories = JSON.parse(fs.readFileSync(categoriesFilePath, "utf8"));
+  const categories = JSON.parse(fs.readFileSync(categoriesFilePath, 'utf8'));
 
   if (categories.length === 0) {
     console.log("Ejecuta antes loadCategories('file')");
@@ -81,18 +76,15 @@ async function insertCategoriesInDB() {
   }
 
   const response = await fetch(`${baseURL}/api/ingredient_categories/`, {
-    method: "POST",
+    method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(categories),
   });
 
   if (response.status === 201) {
-    console.log("Categorias insertadas correctamente en la base de datos");
+    console.log('Categorias insertadas correctamente en la base de datos');
   } else {
-    console.log(
-      "Error al insertar categorias en la base de datos",
-      await response.text(),
-    );
+    console.log('Error al insertar categorias en la base de datos', await response.text());
   }
 }
 
@@ -101,9 +93,7 @@ async function loadProducts() {
   const idCategories = await loadCategories();
 
   for (const id of idCategories) {
-    const response = await fetch(
-      `https://tienda.mercadona.es/api/categories/${id}/`,
-    );
+    const response = await fetch(`https://tienda.mercadona.es/api/categories/${id}/`);
     const products = await response.json();
 
     process.stdout.write(`\rCargando productos de la categoria ${id}`);
@@ -130,48 +120,36 @@ async function loadProducts() {
           reference_price: Number(product.price_instructions.reference_price),
           unit_price: Number(product.price_instructions.unit_price),
           unit_size: Number(product.price_instructions.unit_size),
-          image: product.thumbnail.replaceAll("h=300&w=300", "h=100&w=100"),
+          image: product.thumbnail.replaceAll('h=300&w=300', 'h=100&w=100'),
         });
       });
     });
   }
 
-  const listProducts = Array.from(productMap.values()).sort((a, b) =>
-    a.id_ingredient > b.id_ingredient ? 1 : -1,
-  );
+  const listProducts = Array.from(productMap.values()).sort((a, b) => (a.id_ingredient > b.id_ingredient ? 1 : -1));
 
   console.log(`\nGuardados ${listProducts.length} productos unicos`);
   fs.writeFileSync(productsFilePath, JSON.stringify(listProducts, null, 2));
 }
 
 async function insertIngredientsInDB() {
-  const ingredients = JSON.parse(fs.readFileSync(productsFilePath, "utf8"));
+  const ingredients = JSON.parse(fs.readFileSync(productsFilePath, 'utf8'));
 
   if (ingredients.length === 0) {
-    console.log("Ejecuta antes loadProducts()");
+    console.log('Ejecuta antes loadProducts()');
     return;
   }
 
-  for (
-    let index = 0;
-    index < ingredients.length;
-    index += ingredientBatchSize
-  ) {
-    const ingredientBatch = ingredients.slice(
-      index,
-      index + ingredientBatchSize,
-    );
+  for (let index = 0; index < ingredients.length; index += ingredientBatchSize) {
+    const ingredientBatch = ingredients.slice(index, index + ingredientBatchSize);
     const response = await fetch(`${baseURL}/api/ingredients/`, {
-      method: "POST",
+      method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(ingredientBatch),
     });
 
     if (response.status !== 201) {
-      console.log(
-        "Error al insertar ingredientes en la base de datos",
-        await response.text(),
-      );
+      console.log('Error al insertar ingredientes en la base de datos', await response.text());
       return;
     }
 
@@ -180,7 +158,7 @@ async function insertIngredientsInDB() {
     );
   }
 
-  console.log("Ingredientes insertados correctamente en la base de datos");
+  console.log('Ingredientes insertados correctamente en la base de datos');
 }
 
 // await loadCategories("file")

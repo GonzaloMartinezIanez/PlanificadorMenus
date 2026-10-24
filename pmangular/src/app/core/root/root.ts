@@ -1,6 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Login } from '../login/login';
-import { Home } from '../home/home';
 import { AuthService } from '../../services/auth.service';
 import { GroupService } from '../../services/group.service';
 import { Router } from '@angular/router';

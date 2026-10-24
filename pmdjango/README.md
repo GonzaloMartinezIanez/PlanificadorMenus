@@ -15,7 +15,7 @@ Para una descripción general del proyecto y el despliegue, consulta el [README 
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 Copy-Item .env.example .env
 python manage.py migrate
 python manage.py runserver
@@ -39,13 +39,28 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Para formatear Python con Black, instálalo en el entorno virtual:
+Black es el formateador de Python y se instala con las dependencias de desarrollo.
+Su versión está fijada en `requirements-dev.txt` y su configuración en
+`pyproject.toml`. Prettier se encarga de los formatos compatibles del repositorio,
+pero no de Python.
 
 ```powershell
-pip install black
-black --check .
-black .
+python -m black --check .
+python -m black .
+
+# Comprobaciones de configuración y migraciones pendientes
+python manage.py check
+python manage.py makemigrations --check --dry-run
 ```
+
+Si el entorno restringe el acceso a la caché de usuario de Black, puedes comprobar
+el formato con `python -m black --check --no-cache --workers 1 .`.
+
+`requirements.txt` fija las versiones de las dependencias directas de ejecución;
+`requirements-dev.txt` añade Black sin instalarlo en producción. Las versiones
+transitivas no están bloqueadas. Actualiza las versiones de forma deliberada y
+ejecuta las pruebas después. Las versiones fijadas corresponden al entorno local
+existente, salvo Uvicorn 0.54.0, que no estaba instalado localmente.
 
 ## Aplicaciones
 

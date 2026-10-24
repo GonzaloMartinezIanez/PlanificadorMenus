@@ -1,4 +1,5 @@
 # Planificador de menús
+
 ## Gonzalo Martínez Iáñez
 
 Aplicación web para planificar menús compartidos, guardar recetas y generar una lista de la compra para cada grupo.
@@ -19,19 +20,24 @@ La aplicación está desplegada en https://planificadormenus.es/login.
 ## Capturas
 
 ### Calendario semanal
+
 ![Calendario semanal](IMG/Home.png)
 
-### Lista de la compra 
+### Lista de la compra
+
 ![Lista de la compra](IMG/Lista.png)
 
 ### Buscador de recetas
+
 ![Buscador de recetas](IMG/BuscadorRecetas.png)
 
 ### Recetas
+
 ![Detalle de receta](IMG/Receta1.png)
 ![Detalle de receta](IMG/Receta2.png)
 
-### Administración de grupos 
+### Administración de grupos
+
 ![Administración de grupos](IMG/Gestion1.png)
 ![Administración de grupos](IMG/Gestion2.png)
 
@@ -65,7 +71,7 @@ Consulta las instrucciones concretas de cada aplicación:
 
 ## Testing
 
-```powershell
+```bash
 cd pmangular
 npm test -- --watch=false
 
@@ -77,7 +83,7 @@ python manage.py test
 
 El despliegue usa las imágenes publicadas en GitHub Container Registry al crear una etiqueta que comienza por `v`.
 
-```powershell
+```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```

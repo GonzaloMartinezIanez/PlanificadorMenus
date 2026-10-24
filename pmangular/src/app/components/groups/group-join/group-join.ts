@@ -1,4 +1,14 @@
-import { Component, ElementRef, inject, NgZone, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { GroupService } from '../../../services/group.service';
 import { AuthService } from '../../../services/auth.service';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -30,7 +40,7 @@ declare global {
   templateUrl: './group-join.html',
   styleUrl: './group-join.css',
 })
-export class GroupJoin implements OnInit {
+export class GroupJoin implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('googleButton', { static: false }) googleButton?: ElementRef<HTMLDivElement>;
 
   groupService = inject(GroupService);

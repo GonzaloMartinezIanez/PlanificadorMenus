@@ -22,19 +22,31 @@ La aplicación de desarrollo se inicia en `http://localhost:4200` y usa la API c
 
 ```powershell
 # Ejecutar tests una vez
-ng test -- --watch=false
+npm test -- --watch=false
 
 # Generar el build de producción
-ng build
+npm run build
 
-# Comprobar formato sin modificar archivos
-npx prettier --check "src/**/*.{ts,html,css,scss,json}"
+# Comprobar TypeScript y plantillas con ESLint
+npm run lint
+
+# Aplicar las correcciones automáticas de ESLint y revisar el resultado
+npm run lint:fix
+
+# Comprobar formato del repositorio sin modificar archivos
+npm run format:check
 
 # Aplicar formato
-npx prettier --write "src/**/*.{ts,html,css,scss,json}"
+npm run format
 ```
 
-La configuración de Prettier se encuentra en `.prettierrc`.
+Prettier está fijado a una versión concreta y usa `.prettierrc` y la configuración
+de la raíz para los archivos fuera de Angular. Los comandos de formato abarcan
+todo el repositorio; `.prettierignore` excluye dependencias, builds, secretos y
+datos de carga. Python se formatea con Black desde `pmdjango/`.
+
+ESLint se configura en `eslint.config.mjs` y comprueba TypeScript y plantillas
+Angular. El formato queda a cargo de Prettier.
 
 ## Estructura
 

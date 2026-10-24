@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { GroupService } from '../services/group.service';
 import { firstValueFrom } from 'rxjs';
 
-export const groupGuard: CanActivateFn = async (route: ActivatedRouteSnapshot, state) => {
+export const groupGuard: CanActivateFn = async (route: ActivatedRouteSnapshot) => {
   const groupService = inject(GroupService);
   const router = inject(Router);
 

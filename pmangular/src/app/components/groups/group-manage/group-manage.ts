@@ -83,7 +83,9 @@ export class GroupManage implements OnInit {
   joinUrl = computed(() => `/groups/${this.selectedGroupCode()}/join`);
   joinUrlLong = computed(() => `${environment.frontendUrl}${this.joinUrl()}`);
 
-  constructor(private fb: FormBuilder) {
+  private fb = inject(FormBuilder);
+
+  constructor() {
     this.groupForm = this.fb.group({
       group_name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       group_description: [''],

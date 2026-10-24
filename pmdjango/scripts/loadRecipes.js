@@ -1,22 +1,22 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const apiUrl = "http://localhost:8000/api/recipes/"; // Por ejemplo: https://planificadormenus.es/api/recipes/
-const accessToken = ""; // Pega aquí tu access token
+const apiUrl = 'http://localhost:8000/api/recipes/'; // Por ejemplo: https://planificadormenus.es/api/recipes/
+const accessToken = ''; // Pega aquí tu access token
 const requestDelayMs = 50;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const recipesFilePath = path.join(__dirname, "recipes.json");
+const recipesFilePath = path.join(__dirname, 'recipes.json');
 
 function getHeaders() {
   if (!apiUrl || !accessToken) {
-    throw new Error("Debes indicar apiUrl y accessToken antes de ejecutar el script");
+    throw new Error('Debes indicar apiUrl y accessToken antes de ejecutar el script');
   }
 
   return {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${accessToken}`,
   };
 }
@@ -26,12 +26,12 @@ function wait(milliseconds) {
 }
 
 async function loadRecipes() {
-  const recipes = JSON.parse(fs.readFileSync(recipesFilePath, "utf8"));
+  const recipes = JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
   const errors = [];
 
   for (const [index, recipe] of recipes.entries()) {
     const response = await fetch(apiUrl, {
-      method: "POST",
+      method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(recipe),
     });
@@ -53,11 +53,11 @@ async function loadRecipes() {
   console.log(`Proceso terminado: ${recipes.length - errors.length}/${recipes.length} recetas insertadas.`);
 
   if (errors.length > 0) {
-    console.log("Errores:", errors);
+    console.log('Errores:', errors);
   }
 }
 
 loadRecipes().catch((error) => {
-  console.error("No se pudieron insertar las recetas:", error.message);
+  console.error('No se pudieron insertar las recetas:', error.message);
   process.exitCode = 1;
 });

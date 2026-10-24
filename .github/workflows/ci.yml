@@ -3,7 +3,7 @@ name: Build y publicar las imágenes en el repositorio de github
 on:
   push:
     tags:
-      - "v*" # Solo se activa si el tag empieza por v
+      - 'v*' # Solo se activa si el tag empieza por v
 
 # Permisos para leer
 permissions:
@@ -28,11 +28,12 @@ jobs:
       # Instala python
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.13'
       # Actualiza el sistema (se instalan librerías de mysql porque en requirement.txt está esta dependencia)
       - run: sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev pkg-config
       # Instala las dependencias
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements-dev.txt
+      - run: python -m black --check .
       # Ejecuta los test
       - run: python manage.py test
 
@@ -49,11 +50,13 @@ jobs:
       # Instala node
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
           cache-dependency-path: pmangular/package-lock.json
       # Instala las dependencias
       - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
       # Lanza los test
       - run: npm test -- --watch=false # Con false no se queda esperando cambios en los test
       # Compila la aplicación

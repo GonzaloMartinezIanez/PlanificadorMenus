@@ -1,13 +1,25 @@
-import { AfterViewInit, Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MenuService } from '../../services/menu.service';
 import { MenuModel, ShortMenuModel } from '../../models/menu';
 import { CalendarDay } from './calendar-day/calendar-day';
 
 @Component({
   selector: 'app-menus',
-  imports: [MatButtonModule, CalendarDay],
+  imports: [MatButtonModule, MatSnackBarModule, CalendarDay],
   templateUrl: './menus.html',
   styleUrl: './menus.css',
 })
@@ -16,6 +28,17 @@ export class Menus implements OnInit, AfterViewInit {
 
   route = inject(ActivatedRoute);
   menuService = inject(MenuService);
+  private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
+  private midnightTimer?: ReturnType<typeof setTimeout>;
+  private scrollTimer?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      clearTimeout(this.midnightTimer);
+      clearTimeout(this.scrollTimer);
+    });
+  }
 
   groupCode = signal<string | null>(null);
   menus = signal<MenuModel[]>([]);
@@ -43,15 +66,16 @@ export class Menus implements OnInit, AfterViewInit {
     this.week.set(this.generateWeek(this.thisMonday()));
 
     // Escuchar la url para el cambio de grupo
-    this.route.paramMap.subscribe({
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (params) => {
         const groupCode = params.get('group_code');
 
+        this.groupCode.set(groupCode);
+        this.menus.set([]);
         if (!groupCode) {
           return;
         }
 
-        this.groupCode.set(groupCode);
         this.loadMenus();
       },
     });
@@ -68,11 +92,21 @@ export class Menus implements OnInit, AfterViewInit {
       return;
     }
 
-    this.menuService.getMenus(groupCode).subscribe({
-      next: (menus) => {
-        this.menus.set(menus);
-      },
-    });
+    this.menuService
+      .getMenus(groupCode)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (menus) => {
+          if (this.groupCode() === groupCode) {
+            this.menus.set(menus);
+          }
+        },
+        error: () => {
+          if (this.groupCode() === groupCode) {
+            this.showError('No se pudo cargar el calendario. Vuelve a intentarlo.');
+          }
+        },
+      });
   }
 
   generateWeek(monday: Date): Date[] {
@@ -137,7 +171,8 @@ export class Menus implements OnInit, AfterViewInit {
   }
 
   scrollToToday() {
-    setTimeout(() => {
+    clearTimeout(this.scrollTimer);
+    this.scrollTimer = setTimeout(() => {
       const todayElement = this.weekContainer?.nativeElement.querySelector<HTMLElement>('[data-current-day="true"]');
 
       todayElement?.scrollIntoView({
@@ -161,11 +196,17 @@ export class Menus implements OnInit, AfterViewInit {
       time: event.time,
     };
 
-    this.menuService.postMenus(groupCode, menu).subscribe({
-      next: () => {
-        this.loadMenus();
-      },
-    });
+    this.menuService
+      .postMenus(groupCode, menu)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.loadMenus();
+        },
+        error: () => {
+          this.showError('No se pudo añadir la receta al menú. Vuelve a intentarlo.');
+        },
+      });
   }
 
   deleteRecipeFromMenu(event: ShortMenuModel) {
@@ -181,11 +222,17 @@ export class Menus implements OnInit, AfterViewInit {
       time: event.time,
     };
 
-    this.menuService.deleteMenus(groupCode, menu).subscribe({
-      next: () => {
-        this.loadMenus();
-      },
-    });
+    this.menuService
+      .deleteMenus(groupCode, menu)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.loadMenus();
+        },
+        error: () => {
+          this.showError('No se pudo quitar la receta del menú. Vuelve a intentarlo.');
+        },
+      });
   }
 
   formatDate(date: Date) {
@@ -197,6 +244,7 @@ export class Menus implements OnInit, AfterViewInit {
   }
 
   updateDayMidnight() {
+    clearTimeout(this.midnightTimer);
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(now.getDate() + 1);
@@ -205,9 +253,23 @@ export class Menus implements OnInit, AfterViewInit {
     const msUntilTomorrow = tomorrow.getTime() - now.getTime();
 
     // Actualizar el día a las 24:00 y programar para pasado mañana
-    setTimeout(() => {
+    this.midnightTimer = setTimeout(() => {
       this.today.set(new Date());
+      // Si cambia la semana mientras el calendario está abierto, muestra la nueva.
+      const monday = this.week()?.[0];
+      if (monday && monday.getTime() < this.thisMonday().getTime()) {
+        this.week.set(this.generateWeek(this.thisMonday()));
+      }
       this.updateDayMidnight();
     }, msUntilTomorrow);
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['snackbar-error'],
+    });
   }
 }

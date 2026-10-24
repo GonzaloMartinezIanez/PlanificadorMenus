@@ -48,7 +48,9 @@ export class RecipeDetail implements OnInit {
   commentForm: FormGroup;
   dialog = inject(MatDialog);
 
-  constructor(private fb: FormBuilder) {
+  private fb = inject(FormBuilder);
+
+  constructor() {
     this.commentForm = this.fb.group({
       score: [null, [Validators.required, Validators.min(0), Validators.max(5)]],
       comment: [''],

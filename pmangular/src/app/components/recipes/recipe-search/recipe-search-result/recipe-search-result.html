@@ -16,7 +16,7 @@
   <mat-card-content>
     <p class="recipe-card-description">{{ recipe?.description }}</p>
 
-    @if (recipe?.recipe_categories?.length != 0) {
+    @if (recipe?.recipe_categories?.length !== 0) {
       <div class="recipe-card-categories">
         @for (category of recipe?.recipe_categories; track category.id) {
           <span class="recipe-card-category">{{ category.name }}</span>

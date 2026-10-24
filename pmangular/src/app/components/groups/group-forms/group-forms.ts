@@ -29,7 +29,9 @@ export class GroupForms {
   newGroupForm: FormGroup;
   joinGroupForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  private fb = inject(FormBuilder);
+
+  constructor() {
     this.newGroupForm = this.fb.group({
       group_name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       group_description: [''],

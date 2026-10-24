@@ -18,7 +18,7 @@ services:
       - mysql_data:/var/lib/mysql
     # Verificar que está corriendo MySQL
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${MYSQL_ROOT_PASSWORD}']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -44,7 +44,7 @@ services:
         condition: service_healthy
     # Expone su puerto 8000 de su contenedor, pero no a Internet, de eso se encarga nginx
     expose:
-      - "8000"
+      - '8000'
     networks:
       - internal
 
@@ -58,8 +58,8 @@ services:
       DOMAIN: ${DOMAIN}
     # Usa los puertos 80 (para pedir/renovar el certificado) y 433 para https de Django y Angular
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     # Compartir los ficheros de configuración y certificado con certbot
     volumes:
       - certbot_conf:/etc/letsencrypt
@@ -71,7 +71,6 @@ services:
     # pero se sigue comunicando mediante la red interna de docker
     networks:
       - internal
-
 
   certbot:
     image: certbot/certbot:latest
