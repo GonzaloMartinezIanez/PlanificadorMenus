@@ -1,0 +1,9 @@
+:host {
+  display: flex;
+  justify-content: center;
+}
+
+.google-button.busy {
+  pointer-events: none;
+  opacity: 0.6;
+}

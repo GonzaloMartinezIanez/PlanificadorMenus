@@ -16,7 +16,14 @@
 
     <p>¡No pierdas tiempo y crea una cuenta!</p>
 
-    <div #googleButton class="google-button-host login-button"></div>
+    @if (!authService.isAuthenticated()) {
+      <app-google-login
+        class="login-button"
+        (authenticated)="onAuthenticated()"
+        (loadingChange)="onLoadingChange($event)"
+        (loginError)="errorMessage.set($event)"
+      />
+    }
 
     @if (isLoading()) {
       <p class="status-message">Conectando con el servidor...</p>

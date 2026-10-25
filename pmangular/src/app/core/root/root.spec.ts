@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { GroupService } from '../../services/group.service';
+import { GoogleIdentityService } from '../../services/google-identity.service';
 import { Root } from './root';
 
 describe('Root', () => {
@@ -21,6 +22,7 @@ describe('Root', () => {
       providers: [
         { provide: AuthService, useValue: { isAuthenticated: vi.fn().mockReturnValue(false) } },
         { provide: GroupService, useValue: groupService },
+        { provide: GoogleIdentityService, useValue: { load: () => Promise.resolve(), renderButton: () => () => {} } },
         { provide: Router, useValue: router },
       ],
     }).compileComponents();

@@ -26,12 +26,6 @@
   text-align: center;
 }
 
-.google-button-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
 .join-button {
   align-self: center;
   width: 300px;

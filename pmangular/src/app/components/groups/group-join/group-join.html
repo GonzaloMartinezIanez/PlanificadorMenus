@@ -19,7 +19,11 @@
 
   @if (!authService.isAuthenticated()) {
     <p>Debes iniciar sesión para unirte a este grupo.</p>
-    <div #googleButton class="google-button-container"></div>
+    <app-google-login
+      (authenticated)="onAuthenticated()"
+      (loadingChange)="isLoading.set($event)"
+      (loginError)="showError($event)"
+    />
   } @else {
     @if (hasRequestedJoin()) {
       <p>Tu solicitud está pendiente de aprobación.</p>

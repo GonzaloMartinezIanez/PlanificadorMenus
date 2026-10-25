@@ -65,3 +65,14 @@ src/app/
 `src/environments/environment.ts` contiene la configuración de producción y `environment.development.ts` la de desarrollo. Ambas definen la URL de la API y el Client ID público de Google OAuth.
 
 No incluyas tokens de acceso ni secretos en estos ficheros.
+
+## Inicio de sesión compartido
+
+`core/google-login/` contiene el botón reutilizable de Google y el intercambio de
+la credencial mediante `AuthService`. Emite `authenticated`, `loadingChange` y
+`loginError`, de modo que cada pantalla mantiene su navegación y mensajes.
+
+`services/google-identity.service.ts` comparte la descarga del SDK, limita el
+tiempo de espera y permite volver a cargarlo después de un fallo. Inicializa la
+API una sola vez y desconecta el callback de la pantalla al destruir el botón.
+Las pantallas de login e invitación a grupos usan este mismo componente.
