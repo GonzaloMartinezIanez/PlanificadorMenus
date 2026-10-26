@@ -1,8 +1,8 @@
 .shopping-list {
   width: 100%;
-  max-width: 900px;
+  max-width: var(--app-list-width);
   margin: 0 auto;
-  padding: 1.5rem;
+  padding-block: var(--app-space-4);
 }
 
 .shopping-list-header,
@@ -10,11 +10,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--app-space-4);
 }
 
 .shopping-list-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--app-space-6);
 }
 
 .shopping-list-header h1,
@@ -23,33 +23,47 @@
 }
 
 .shopping-list-summary {
-  padding: 1rem;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 5px;
-  border-radius: 12px;
-  background: #fff;
+  padding: var(--app-space-6);
+  border-radius: var(--app-radius-card);
+  background: var(--app-color-accent-soft);
+  border: 1px solid var(--app-color-border);
+}
+
+.shopping-list-summary strong {
+  display: block;
+  color: var(--app-color-accent-text);
+  font-size: var(--app-font-section);
+  font-weight: 600;
+}
+.shopping-list-summary p {
+  margin-top: var(--app-space-2);
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
 }
 
 .shopping-list-categories {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--app-space-2);
   overflow-x: auto;
-  margin: 1rem 0;
-  padding-bottom: 0.5rem;
+  margin: var(--app-space-6) 0;
+  padding-bottom: var(--app-space-2);
 }
 
 .shopping-list-category {
   display: inline-flex;
   flex: 0 0 auto;
-  gap: 0.5rem;
+  gap: var(--app-space-2);
   min-width: 48px;
-  min-height: 48px;
-  border-radius: 1rem;
+  min-height: 52px;
+  padding-inline: var(--app-space-3);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-sm);
 }
 
 .shopping-list-category img {
-  width: 48px;
-  height: 48px;
-  border-radius: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--app-radius-sm);
   object-fit: cover;
   vertical-align: middle;
 }
@@ -59,39 +73,38 @@
 }
 
 .shopping-list-category--selected {
-  border-color: #2f6b45;
-  background-color: #e8f1e9;
-  color: #1d4d30;
+  border-color: var(--app-color-accent);
+  background-color: var(--app-color-accent-soft);
+  color: var(--app-color-accent-text);
   font-weight: 600;
 }
 
 .shopping-list-items {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--app-space-3);
 }
 
 .shopping-list-empty {
-  padding: 2rem;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 5px;
-  border-radius: 12px;
-  text-align: center;
+  margin-block: var(--app-space-6);
 }
 
 .shopping-list-add-product {
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  max-width: 600px;
+  max-width: var(--app-form-width);
   margin: 0 auto;
-  gap: 1.5rem;
+  padding-block: var(--app-space-4);
+  overflow-y: auto;
+  gap: var(--app-space-6);
 }
 
 .shopping-list-add-product-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--app-space-4);
   width: 100%;
 }
 
@@ -101,29 +114,29 @@
 }
 
 .shopping-list-add-product-header img {
-  width: 100px;
-  height: 100px;
-  flex: 0 0 100px;
-  border-radius: 10px;
-  object-fit: cover;
+  width: 80px;
+  height: 80px;
+  flex: 0 0 80px;
+  border-radius: var(--app-radius-sm);
+  object-fit: contain;
 }
 
 .shopping-list-add-product-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1rem;
+  gap: var(--app-space-2) var(--app-space-4);
   width: 100%;
 }
 
 .shopping-list-add-product-amount {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--app-space-4);
   width: 100%;
-  padding: 1rem;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 5px;
-  border-radius: 12px;
-  background: #fff;
+  padding: var(--app-space-4);
+  border-radius: var(--app-radius-card);
+  background: var(--app-color-surface-muted);
+  border: 1px solid var(--app-color-border);
 }
 
 .shopping-list-add-product-amount mat-form-field {
@@ -132,7 +145,7 @@
 }
 
 .shopping-list-add-product-amount span {
-  padding-right: 2rem;
+  padding-right: var(--app-space-8);
   font-weight: 600;
 }
 
@@ -140,16 +153,17 @@
   display: flex;
   width: 100%;
   justify-content: space-around;
-  gap: 1rem;
+  gap: var(--app-space-4);
+  flex-wrap: wrap;
 }
 
 .ingredient-dialog-close-button {
-  margin-top: 0.5rem;
+  margin-top: var(--app-space-2);
 }
 
 @media (max-width: 960px) {
   .shopping-list {
-    padding: 1rem;
+    padding-block: var(--app-space-4);
   }
 
   .shopping-list-header,

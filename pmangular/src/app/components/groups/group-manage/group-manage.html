@@ -21,13 +21,13 @@
         </mat-form-field>
         @if (groupForm.get('group_name')?.touched && groupForm.get('group_name')?.invalid) {
           @if (groupForm.get('group_name')?.errors?.['required']) {
-            <small style="color: red">El nombre es obligatorio.</small>
+            <small class="form-error">El nombre es obligatorio.</small>
           }
           @if (groupForm.get('group_name')?.errors?.['minlength']) {
-            <small style="color: red">El nombre debe tener al menos 3 caracteres.</small>
+            <small class="form-error">El nombre debe tener al menos 3 caracteres.</small>
           }
           @if (groupForm.get('group_name')?.errors?.['maxlength']) {
-            <small style="color: red">El nombre no puede tener más de 100 caracteres.</small>
+            <small class="form-error">El nombre no puede tener más de 100 caracteres.</small>
           }
         }
 
@@ -73,49 +73,51 @@
 
   <section>
     <h2>Miembros del grupo</h2>
-    <table mat-table [dataSource]="acceptedMembers()" class="mat-shadow-2">
-      <ng-container matColumnDef="username">
-        <th mat-header-cell *matHeaderCellDef>Nombre</th>
-        <td mat-cell *matCellDef="let element">{{ element.username }}</td>
-      </ng-container>
+    <div class="group-table-scroll">
+      <table mat-table [dataSource]="acceptedMembers()" class="mat-shadow-2">
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="role">
-        <th mat-header-cell *matHeaderCellDef>Rol</th>
-        <td mat-cell *matCellDef="let element">
-          @if (isAdmin()) {
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-select
-                [value]="element.role"
-                [panelWidth]="null"
-                (valueChange)="changeRole(element.user_id, $event)"
-              >
-                <mat-option value="ADMIN">Administrador</mat-option>
-                <mat-option value="MEMBER">Miembro</mat-option>
-              </mat-select>
-            </mat-form-field>
-          } @else {
-            {{ element.role }}
-          }
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Rol</th>
+          <td mat-cell *matCellDef="let element">
+            @if (isAdmin()) {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-select
+                  [value]="element.role"
+                  [panelWidth]="null"
+                  (valueChange)="changeRole(element.user_id, $event)"
+                >
+                  <mat-option value="ADMIN">Administrador</mat-option>
+                  <mat-option value="MEMBER">Miembro</mat-option>
+                </mat-select>
+              </mat-form-field>
+            } @else {
+              {{ element.role }}
+            }
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="joining_date">
-        <th mat-header-cell *matHeaderCellDef>Fecha de unión</th>
-        <td mat-cell *matCellDef="let element">{{ formatDate(element.joining_date) }}</td>
-      </ng-container>
+        <ng-container matColumnDef="joining_date">
+          <th mat-header-cell *matHeaderCellDef>Fecha de unión</th>
+          <td mat-cell *matCellDef="let element">{{ formatDate(element.joining_date) }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Expulsar</th>
-        <td mat-cell *matCellDef="let element">
-          @if (isAdmin()) {
-            <button mat-button type="button" (click)="removeMember(element.user_id)">Expulsar</button>
-          }
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Expulsar</th>
+          <td mat-cell *matCellDef="let element">
+            @if (isAdmin()) {
+              <button mat-button type="button" (click)="removeMember(element.user_id)">Expulsar</button>
+            }
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedAcceptedColumns()"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedAcceptedColumns()"></tr>
-    </table>
+        <tr mat-header-row *matHeaderRowDef="displayedAcceptedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedAcceptedColumns()"></tr>
+      </table>
+    </div>
   </section>
 
   @if (isAdmin()) {
@@ -129,30 +131,32 @@
     } @else {
       <section>
         <h2>Solicitudes pendientes</h2>
-        <table mat-table [dataSource]="pendingMembers()" class="mat-shadow-2">
-          <ng-container matColumnDef="username">
-            <th mat-header-cell *matHeaderCellDef>Nombre</th>
-            <td mat-cell *matCellDef="let element">{{ element.username }}</td>
-          </ng-container>
+        <div class="group-table-scroll">
+          <table mat-table [dataSource]="pendingMembers()" class="mat-shadow-2">
+            <ng-container matColumnDef="username">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="joining_date">
-            <th mat-header-cell *matHeaderCellDef>Fecha de solicitud</th>
-            <td mat-cell *matCellDef="let element">{{ formatDate(element.joining_date) }}</td>
-          </ng-container>
+            <ng-container matColumnDef="joining_date">
+              <th mat-header-cell *matHeaderCellDef>Fecha de solicitud</th>
+              <td mat-cell *matCellDef="let element">{{ formatDate(element.joining_date) }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let element">
-              @if (isAdmin()) {
-                <button mat-button type="button" (click)="acceptMember(element.user_id)">Aceptar</button>
-                <button mat-button type="button" (click)="rejectMember(element.user_id)">Rechazar</button>
-              }
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let element">
+                @if (isAdmin()) {
+                  <button mat-button type="button" (click)="acceptMember(element.user_id)">Aceptar</button>
+                  <button mat-button type="button" (click)="rejectMember(element.user_id)">Rechazar</button>
+                }
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedPendingColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedPendingColumns"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedPendingColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedPendingColumns"></tr>
+          </table>
+        </div>
       </section>
     }
   }
@@ -168,7 +172,7 @@
     </mat-form-field>
 
     @if (qrCodeUrl()) {
-      <p style="text-align: center">
+      <p class="invitation-description">
         Para que tus amigos o familiares se unan al grupo también pueden escanear este código QR.
       </p>
       <img class="qr" [src]="qrCodeUrl()" [alt]="'QR para unirse al grupo ' + selectedGroupCode()" />

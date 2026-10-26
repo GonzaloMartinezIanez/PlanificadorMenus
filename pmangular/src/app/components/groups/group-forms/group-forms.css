@@ -1,22 +1,49 @@
 .group-forms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--app-space-6);
   width: 100%;
-  max-width: 600px;
+  max-width: var(--app-content-width);
   margin: 0 auto;
+  padding-block: var(--app-space-4);
 }
-
 .group-forms header {
-  text-align: center;
-  margin: 2rem 0;
+  grid-column: 1 / -1;
+  padding: var(--app-space-4) 0 var(--app-space-2);
 }
-
+.group-forms header h2 {
+  font-size: var(--app-font-title);
+  font-weight: 600;
+}
+.group-forms header p {
+  margin-bottom: 0;
+  color: var(--app-color-text-muted);
+}
 .group-forms form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: var(--app-space-3);
+  min-width: 0;
 }
-
+.group-forms form h3 {
+  padding-bottom: var(--app-space-4);
+  border-bottom: 1px solid var(--app-color-border);
+}
+.group-forms form button {
+  margin-top: auto;
+}
 .group-forms small {
-  color: red;
-  margin-top: -1.7rem;
+  color: var(--app-color-error);
+  font-size: var(--app-font-small);
+  margin-top: calc(-1 * var(--app-space-3));
+}
+.group-forms > button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+@media (max-width: 640px) {
+  .group-forms {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

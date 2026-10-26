@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../../services/auth.service';
 import { RecipeService } from '../../../services/recipe.service';
+import { Recipe } from '../../../models/recipe';
 import { RecipeDetail } from './recipe-detail';
 
 describe('RecipeDetail', () => {
@@ -51,6 +52,41 @@ describe('RecipeDetail', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it.each([
+    [4, 5, false],
+    [4, 6, true],
+    [4, 7, true],
+    [3, 4, false],
+    [3, 5, true],
+    [0, 0, false],
+    [0, 1, true],
+  ])('stacks sections with %i steps and %i ingredients: %s', (steps, ingredients, stacked) => {
+    const recipe: Recipe = {
+      id: 1,
+      author: 'Gonzalo',
+      is_author: true,
+      name: 'Receta',
+      description: '',
+      preparation_time: 20,
+      steps: Array.from({ length: steps }, (_, index) => `Paso ${index + 1}`),
+      visibility: 'PUBLIC',
+      recipe_categories: [],
+      num_valorations: 0,
+      avg_score: 0,
+      ingredients: Array.from({ length: ingredients }, (_, index) => ({
+        id_ingredient: String(index),
+        name: `Ingrediente ${index + 1}`,
+        amount: 1,
+        unit: 'ud',
+      })),
+    };
+    expect(component.stackRecipeSections()).toBe(false);
+    component.recipe.set(recipe);
+    expect(component.stackRecipeSections()).toBe(stacked);
+    component.recipe.set(null);
+    expect(component.stackRecipeSections()).toBe(false);
   });
 
   it('should separates the current user comment from public comments', () => {

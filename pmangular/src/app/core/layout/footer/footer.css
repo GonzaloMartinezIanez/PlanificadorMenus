@@ -1,10 +1,14 @@
 footer {
-  margin-top: 1rem;
-  height: 3rem;
+  margin-top: var(--app-space-4);
+  min-height: var(--app-space-12);
   text-align: center;
-  box-shadow: 0 -2px 2px 1px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--app-color-border);
+  background: var(--app-color-surface);
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
 }
 
 footer p {
-  padding-top: 1rem;
+  margin: 0;
+  padding: var(--app-space-4);
 }

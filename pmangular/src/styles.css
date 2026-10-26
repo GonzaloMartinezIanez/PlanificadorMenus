@@ -1,3 +1,7 @@
+@import './styles/tokens.css';
+@import './styles/fonts.css';
+@import './styles/patterns.css';
+
 *,
 *::before,
 *::after {
@@ -7,31 +11,135 @@
 html,
 body {
   width: 100%;
-  max-width: 100%;
   min-height: 100%;
   margin: 0;
   padding: 0;
 }
 
-.button-danger {
-  --mat-button-filled-container-color: #b3261e;
-  --mat-button-filled-label-text-color: #fff;
-  --mat-button-filled-state-layer-color: #fff;
+body {
+  background: var(--app-color-surface);
+  color: var(--app-color-text);
+  font: var(--mat-sys-body-medium);
 }
 
-.button-danger-outline {
-  --mat-button-outlined-outline-color: #b3261e;
-  --mat-button-outlined-label-text-color: #b3261e;
-  --mat-button-outlined-state-layer-color: #b3261e;
+app-root {
+  display: block;
+  min-height: 100dvh;
+}
+
+/* Escala la interfaz según el ancho disponible, respetando el tamaño de fuente del navegador. */
+@media (min-width: 1920px) {
+  html {
+    font-size: clamp(100%, calc(0.625vw + 0.25rem), 125%);
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--app-color-text);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  margin: 0 0 var(--app-space-4);
+  font-size: var(--app-font-title);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  margin: 0 0 var(--app-space-4);
+  font-size: var(--app-font-section);
+  font-weight: 500;
+}
+
+h3,
+h4 {
+  margin: 0 0 var(--app-space-3);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+p {
+  line-height: 1.65;
+}
+
+a {
+  color: var(--app-color-accent);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--app-color-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: var(--app-color-accent-text);
+  background: var(--app-color-accent-soft);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+  width: 100%;
+  height: auto;
+  padding: var(--app-space-4) var(--app-space-6);
+  border-bottom: 1px solid var(--app-color-border);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-header);
+}
+
+.app-logo {
+  width: 2.625rem;
+  height: 2.625rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.app-header :where(h1) {
+  margin: 0;
+  color: var(--app-color-accent);
+  font-size: var(--app-font-section);
+}
+
+.error-message,
+.form-error {
+  color: var(--app-color-error);
+  font-size: var(--app-font-small);
+}
+
+.status-message {
+  color: var(--app-color-text-muted);
 }
 
 .ingredient-dialog {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  width: 100%;
+  height: 100%;
+  padding: var(--app-space-6);
   overflow: hidden;
+  gap: var(--app-space-3);
 }
 
 .ingredient-dialog-content {
@@ -42,23 +150,24 @@ body {
 }
 
 .ingredient-dialog-close-button {
-  margin: 1rem 0 -1rem 0;
+  margin-top: var(--app-space-4);
   flex-shrink: 0;
-}
-
-.mat-mdc-form-field {
-  --mat-form-field-filled-container-color: transparent;
-  --mat-form-field-filled-hover-container-color: transparent;
+  align-self: flex-end;
 }
 
 @media (max-width: 960px) {
-  .landing-bullet .mdc-evolution-chip-set__chips {
-    flex-direction: column;
-    align-items: center;
-    margin-left: 0;
+  .app-header,
+  .ingredient-dialog {
+    padding: var(--app-space-4);
   }
+}
 
-  .landing-bullet .mdc-evolution-chip {
-    margin: 0.25rem 0;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
   }
 }

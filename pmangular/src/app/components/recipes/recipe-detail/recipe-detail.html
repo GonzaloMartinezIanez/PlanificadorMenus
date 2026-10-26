@@ -1,10 +1,10 @@
-<section class="recipe-detail">
+<section class="recipe-detail" [class.recipe-detail--stacked]="stackRecipeSections()">
   @if (isLoading()) {
-    <p>Cargando receta...</p>
+    <p class="status-message">Cargando receta...</p>
   } @else if (errorMessage()) {
-    <p>{{ errorMessage() }}</p>
+    <p class="error-message">{{ errorMessage() }}</p>
   } @else if (recipe()) {
-    <article>
+    <article class="recipe-detail-overview app-panel">
       <section class="recipe-detail-header">
         <div>
           <h1>{{ recipe()!.name }}</h1>
@@ -54,7 +54,7 @@
       </div>
     }
 
-    <section>
+    <section class="recipe-detail-preparation app-panel">
       <h2>Pasos</h2>
       <ol class="recipe-detail-steps">
         @for (step of recipe()!.steps; track $index) {
@@ -63,7 +63,7 @@
       </ol>
     </section>
 
-    <section>
+    <section class="recipe-detail-ingredients-section app-panel">
       <h2>Ingredientes</h2>
       <ul class="recipe-detail-ingredients">
         @for (ingredient of recipe()!.ingredients; track ingredient.id_ingredient) {
@@ -82,7 +82,7 @@
     </section>
 
     @if (this.authService.isAuthenticated()) {
-      <section class="recipe-detail-comments">
+      <section class="recipe-detail-comments app-panel">
         <h2>Comentarios</h2>
 
         @if (this.myComment()) {
@@ -173,7 +173,7 @@
         }
       </section>
     } @else {
-      <section class="no-auth-section">
+      <section class="no-auth-section app-panel">
         <p><a [routerLink]="['/login']">Inicia sesión</a> para ver y escribir comentarios.</p>
       </section>
     }

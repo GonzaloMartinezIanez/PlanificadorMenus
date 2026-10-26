@@ -76,3 +76,43 @@ la credencial mediante `AuthService`. Emite `authenticated`, `loadingChange` y
 tiempo de espera y permite volver a cargarlo después de un fallo. Inicializa la
 API una sola vez y desconecta el callback de la pantalla al destruir el botón.
 Las pantallas de login e invitación a grupos usan este mismo componente.
+
+## Estilos compartidos
+
+La interfaz usa blanco como superficie principal y verde como acento para botones,
+enlaces y selecciones. El rojo se reserva para errores y acciones destructivas.
+Las estrellas de valoración conservan el amarillo mediante `--app-color-rating`.
+
+El texto secundario busca un contraste de al menos 7:1 sobre las superficies
+claras. Los controles usan `--app-color-control-border` (mínimo 3:1 respecto al
+fondo); `--app-color-border` queda para separadores y paneles decorativos. Las
+estrellas usan un relleno amarillo vivo y un contorno oscuro con contraste superior
+a 3:1 sobre blanco, mediante `--app-color-rating-outline`. Comprueba los colores efectivos
+del navegador, incluidos estados seleccionados, foco y botones deshabilitados,
+al cambiar la paleta. Estas comprobaciones de contraste no sustituyen una
+auditoría completa de accesibilidad.
+
+- `src/material-theme.scss`: paleta y personalizaciones de Angular Material
+  mediante `mat.theme`, `mat.theme-overrides` y los overrides de cada componente.
+- `src/styles/tokens.css`: variables `--app-*` de color, espaciado, radios,
+  sombras, tipografía y anchuras. Los colores se derivan del tema Material.
+- `src/styles/fonts.css`: las fuentes Roboto y Material Icons se cargan desde
+  `public/fonts/`, junto a sus licencias, sin depender de Google Fonts.
+- `src/styles/patterns.css`: patrones reutilizables de cabecera de página
+  (`app-page-heading`), panel (`app-panel`) y estado vacío (`app-empty-state`).
+- `src/styles.css`: reglas base de tipografía, foco, cabeceras, mensajes y
+  contenedores de diálogo compartidos.
+- CSS de cada componente: distribución y estados particulares de su pantalla.
+
+Antes de introducir un valor nuevo, reutiliza una variable existente. Conserva la
+encapsulación, los cortes responsive de 960px/640px y los estilos estáticos fuera
+del HTML. Evita selectores internos de Material, `::ng-deep` e `!important`, salvo
+las excepciones de accesibilidad de movimiento reducido. Las dimensiones
+específicas de imágenes, iconos o columnas pueden permanecer en su componente.
+
+En ventanas de más de 1920 px, el tamaño raíz aumenta gradualmente hasta el 125 %
+a 2560 px y se mantiene limitado en pantallas mayores. Los tamaños en `rem`
+permiten que texto, espacios, controles y anchuras máximas crezcan juntos. Usa
+unidades relativas para estos elementos; conserva los puntos de adaptación de
+móvil en píxeles. La escala depende del ancho de la ventana en píxeles CSS, no de
+la resolución física ni de la densidad del monitor, y respeta la fuente del navegador.

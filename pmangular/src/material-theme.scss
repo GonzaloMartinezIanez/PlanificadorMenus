@@ -1,38 +1,157 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
 html {
-  height: 100%;
+  // El contorno define la silueta sin apagar el relleno amarillo.
+  --app-rating-color: #ffc400;
+  --app-rating-outline-color: #8a6400;
+  color-scheme: light;
   @include mat.theme(
     (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+      color: mat.$green-palette,
+      typography: (
+        plain-family: (
+          Roboto,
+          Arial,
+          sans-serif,
+        ),
+        brand-family: (
+          Roboto,
+          Arial,
+          sans-serif,
+        ),
       ),
-      typography: Roboto,
       density: 0,
+    )
+  );
+
+  // Blanco como superficie principal y verde como acento de la interfaz.
+  @include mat.theme-overrides(
+    (
+      primary: #255638,
+      on-primary: #ffffff,
+      primary-container: #e8f3eb,
+      on-primary-container: #214d32,
+      secondary: #255638,
+      on-secondary: #ffffff,
+      secondary-container: #e8f3eb,
+      on-secondary-container: #214d32,
+      tertiary: #255638,
+      on-tertiary: #ffffff,
+      tertiary-container: #e8f3eb,
+      on-tertiary-container: #214d32,
+      surface: #ffffff,
+      surface-bright: #ffffff,
+      surface-dim: #f1f4f2,
+      surface-container-lowest: #ffffff,
+      surface-container-low: #f3f6f3,
+      surface-container: #ffffff,
+      surface-container-high: #f1f5f2,
+      surface-container-highest: #e1e8e3,
+      on-surface: #18281d,
+      on-surface-variant: #414f45,
+      outline: #637568,
+      outline-variant: #a7b7ac,
+      error: #b3261e,
+      on-error: #ffffff,
+      error-container: #fcecea,
+      on-error-container: #762019,
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      filled-container-shape: var(--app-radius-sm),
+      outlined-container-shape: var(--app-radius-sm),
+      protected-container-shape: var(--app-radius-sm),
+      text-container-shape: var(--app-radius-sm),
+      protected-container-color: var(--app-color-surface),
+      protected-label-text-color: var(--app-color-accent),
+      outlined-outline-color: var(--app-color-control-border),
+      filled-disabled-container-color: var(--mat-sys-surface-container-highest),
+      filled-disabled-label-text-color: var(--app-color-text-muted),
+      outlined-disabled-label-text-color: var(--app-color-text-muted),
+      protected-disabled-label-text-color: var(--app-color-text-muted),
+      text-disabled-label-text-color: var(--app-color-text-muted),
+      filled-container-height: 2.5rem,
+      outlined-container-height: 2.5rem,
+      protected-container-height: 2.5rem,
+      text-container-height: 2.5rem,
+    )
+  );
+  @include mat.card-overrides(
+    (
+      elevated-container-color: var(--app-color-surface),
+      elevated-container-shape: var(--app-radius-card),
+      elevated-container-elevation: var(--app-shadow-card),
+      outlined-container-color: var(--app-color-surface),
+      outlined-container-shape: var(--app-radius-card),
+      outlined-outline-color: var(--app-color-border),
+      title-text-size: var(--app-font-section),
+      subtitle-text-size: var(--app-font-small),
+      subtitle-text-color: var(--app-color-text-muted),
+    )
+  );
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: var(--app-color-surface),
+      container-text-color: var(--app-color-text),
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      filled-container-color: transparent,
+      filled-disabled-container-color: transparent,
+      hover-state-layer-opacity: 0,
+      filled-active-indicator-color: var(--app-color-control-border),
+      container-height: 3.5rem,
+      container-vertical-padding: 1rem,
+      filled-with-label-container-padding-top: 1.5rem,
+      filled-with-label-container-padding-bottom: 0.5rem,
+    )
+  );
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--app-color-surface),
+      container-shape: var(--app-radius-card),
+    )
+  );
+  @include mat.chips-overrides(
+    (
+      outline-color: var(--app-color-control-border),
+      flat-selected-outline-width: 2px,
+      container-shape-radius: var(--app-radius-pill),
     )
   );
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+.button-danger {
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--app-color-error),
+      filled-label-text-color: var(--mat-sys-on-error),
+      filled-state-layer-color: var(--mat-sys-on-error),
+      text-label-text-color: var(--app-color-error),
+    )
+  );
+}
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+.button-danger-outline {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--app-color-error),
+      outlined-label-text-color: var(--app-color-error),
+      outlined-state-layer-color: var(--app-color-error),
+      text-label-text-color: var(--app-color-error),
+    )
+  );
+}
 
-  // Reset the user agent margin.
-  margin: 0;
-  height: 100%;
+.snackbar-error {
+  @include mat.snack-bar-overrides(
+    (
+      container-color: var(--app-color-error),
+      supporting-text-color: var(--mat-sys-on-error),
+      button-color: var(--mat-sys-on-error),
+    )
+  );
 }

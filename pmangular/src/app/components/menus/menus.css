@@ -1,50 +1,58 @@
 .menu-calendar {
   width: 100%;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: var(--app-space-4) 0;
 }
-
 .menu-calendar-header {
-  margin-bottom: 1rem;
-  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--app-space-2) var(--app-space-6);
 }
-
-.menu-calendar-header h1,
+.menu-calendar-header h1 {
+  grid-column: 1;
+}
 .menu-calendar-header p {
+  grid-column: 1;
   margin: 0;
+  color: var(--app-color-text-muted);
 }
-
-.menu-calendar-header p {
-  margin-top: 0.5rem;
-}
-
 .menu-calendar-nav {
+  grid-column: 2;
+  grid-row: 1 / span 2;
   display: flex;
-  margin: 1rem auto 0;
+  align-items: center;
+  gap: var(--app-space-2);
 }
-
-.menu-calendar-previous-week {
-  margin-right: auto;
-}
-
-.menu-calendar-next-week {
-  margin-left: auto;
-}
-
 .menu-calendar-week {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(10.9375rem, 1fr));
   align-items: stretch;
-  gap: 0.75rem;
+  gap: var(--app-space-3);
   overflow-x: auto;
-  padding-bottom: 0.75rem;
+  padding: var(--app-space-1) var(--app-space-1) var(--app-space-4);
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-color-border) var(--app-color-surface);
 }
-
 app-calendar-day {
-  min-width: 320px;
+  min-width: 0;
 }
-
 @media (max-width: 960px) {
-  .menu-calendar {
-    padding: 1rem;
+  .menu-calendar-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .menu-calendar-nav {
+    grid-column: 1;
+    grid-row: auto;
+    justify-content: space-between;
+    margin-top: var(--app-space-3);
+  }
+  .menu-calendar-next-week {
+    margin-left: auto;
+  }
+  .menu-calendar-week {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(80vw, 300px);
   }
 }

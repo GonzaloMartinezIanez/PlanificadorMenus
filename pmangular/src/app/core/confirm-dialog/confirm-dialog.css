@@ -1,0 +1,10 @@
+mat-dialog-content {
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+mat-dialog-actions {
+  gap: var(--app-space-2);
+  flex-wrap: wrap;
+  border-top: 1px solid var(--app-color-border);
+  background: var(--app-color-surface-muted);
+}

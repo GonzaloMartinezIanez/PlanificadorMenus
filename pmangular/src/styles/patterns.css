@@ -1,0 +1,49 @@
+/* Patrones visuales reutilizables; la distribución particular vive en cada componente. */
+.app-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--app-space-4);
+  margin-bottom: var(--app-space-6);
+  padding-bottom: var(--app-space-6);
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+.app-page-heading h1 {
+  margin: 0;
+}
+
+.app-panel {
+  padding: var(--app-space-6);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-panel);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-card);
+}
+
+.app-panel > h2,
+.app-panel > h3 {
+  margin-bottom: var(--app-space-5);
+  font-weight: 600;
+}
+
+.app-empty-state {
+  padding: var(--app-space-10) var(--app-space-6);
+  border: 1px dashed var(--app-color-border);
+  border-radius: var(--app-radius-card);
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .app-page-heading {
+    align-items: flex-start;
+    padding-bottom: var(--app-space-4);
+  }
+
+  .app-panel {
+    padding: var(--app-space-4);
+  }
+}

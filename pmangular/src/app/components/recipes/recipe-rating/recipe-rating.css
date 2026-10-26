@@ -2,14 +2,39 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--app-space-2);
 }
 
 .recipe-rating-stars {
   display: flex;
-  color: #eaac00;
+  color: var(--app-color-rating);
+}
+
+.recipe-rating-stars mat-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+  -webkit-text-stroke: 0.04em var(--app-color-rating-outline);
+  paint-order: stroke fill;
+}
+.recipe-rating-stars .recipe-rating-star {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  text-align: center;
 }
 
 .recipe-rating-star:hover {
   transform: scale(1.2);
+}
+
+.recipe-rating-star {
+  cursor: pointer;
+  transition: transform var(--app-motion-fast);
+}
+
+.recipe-rating > span {
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-caption);
 }

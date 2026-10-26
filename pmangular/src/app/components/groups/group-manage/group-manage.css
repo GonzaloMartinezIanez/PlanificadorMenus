@@ -1,16 +1,36 @@
-.group-info {
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18.75rem;
+  align-items: start;
+  gap: var(--app-space-6);
   width: 100%;
-  max-width: 800px;
+  max-width: var(--app-content-width);
   margin: 0 auto;
-  padding: 1.5rem;
+}
+
+:host > section {
+  min-width: 0;
+  padding: var(--app-space-6);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-panel);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-card);
+}
+
+.group-info {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: var(--app-space-6);
 }
 
 .group-info-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: var(--app-space-4);
+  margin-bottom: var(--app-space-5);
 }
 
 .group-info-header h2 {
@@ -21,7 +41,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--app-space-3);
 }
 
 .group-info mat-form-field {
@@ -30,12 +50,12 @@
 }
 
 .group-info p {
-  font-size: large;
-  margin: 0.5rem 0;
+  font-size: var(--app-font-body);
+  margin: var(--app-space-2) 0;
 }
 
 .save-button {
-  margin-top: 1rem;
+  margin-top: var(--app-space-4);
   width: 100%;
 }
 
@@ -44,34 +64,89 @@ table {
   table-layout: fixed;
 }
 
+.group-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-color-border) var(--app-color-surface);
+}
+
 th,
 td {
-  padding: 0.75rem;
+  padding: var(--app-space-3);
   overflow-wrap: anywhere;
 }
 
+td mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+th {
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-caption);
+  font-weight: 500;
+}
+
+:host > section:not(.group-info):not(.invitation) {
+  grid-column: 1;
+}
+:host > section > h2 {
+  padding-bottom: var(--app-space-4);
+  border-bottom: 1px solid var(--app-color-border);
+}
+
 .invitation {
+  grid-column: 2;
+  grid-row: 2 / span 2;
   display: flex;
   flex-direction: column;
 }
 
+.invitation-description {
+  text-align: center;
+  color: var(--app-color-text-muted);
+}
+
 .qr {
   align-self: center;
-  width: 40%;
-  height: 40%;
+  width: min(100%, 220px);
+  height: auto;
+  margin-block: var(--app-space-4);
 }
 
 @media (max-width: 960px) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .invitation {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  table {
+    min-width: 560px;
+  }
+
   th,
   td {
-    padding: 0.5rem;
+    padding: var(--app-space-2);
   }
 
   mat-form-field {
     width: 100%;
   }
 
-  .group-information {
-    padding: 1rem;
+  :host > section {
+    padding: var(--app-space-4);
+  }
+
+  .group-info-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .group-danger-actions {
+    justify-content: flex-start;
   }
 }

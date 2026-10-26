@@ -2,114 +2,128 @@
   @if (isLoading()) {
     <h2>Cargando receta...</h2>
   } @else {
-    <h1>{{ getTitle() }}</h1>
+    <header class="app-page-heading">
+      <h1>{{ getTitle() }}</h1>
+    </header>
 
     <form [formGroup]="recipeForm" (ngSubmit)="saveRecipe()" class="recipe-form">
-      <mat-form-field>
-        <mat-label>Nombre</mat-label>
-        <input matInput formControlName="name" />
-      </mat-form-field>
+      <section class="app-panel recipe-form-section">
+        <div class="recipe-form-basics">
+          <mat-form-field>
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Descripción</mat-label>
-        <textarea matInput cdkTextareaAutosize formControlName="description"></textarea>
-      </mat-form-field>
+          <mat-form-field>
+            <mat-label>Descripción</mat-label>
+            <textarea matInput cdkTextareaAutosize formControlName="description"></textarea>
+          </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Tiempo de preparación (minutos)</mat-label>
-        <input matInput type="number" min="1" formControlName="preparation_time" />
-      </mat-form-field>
+          <mat-form-field>
+            <mat-label>Tiempo de preparación (minutos)</mat-label>
+            <input matInput type="number" min="1" formControlName="preparation_time" />
+          </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Visibilidad</mat-label>
-        <mat-select formControlName="visibility">
-          <mat-option value="PUBLIC">Pública</mat-option>
-          <mat-option value="PRIVATE">Privada</mat-option>
-        </mat-select>
-      </mat-form-field>
+          <mat-form-field>
+            <mat-label>Visibilidad</mat-label>
+            <mat-select formControlName="visibility">
+              <mat-option value="PUBLIC">Pública</mat-option>
+              <mat-option value="PRIVATE">Privada</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Categorías</mat-label>
-        <mat-select formControlName="recipe_categories" multiple>
-          @for (category of recipeCategories(); track category.id) {
-            <mat-option [value]="category.id">
-              @if (category.icon) {
-                <img [src]="category.icon" [alt]="category.name" width="24" height="24" />
+          <mat-form-field>
+            <mat-label>Categorías</mat-label>
+            <mat-select formControlName="recipe_categories" multiple>
+              @for (category of recipeCategories(); track category.id) {
+                <mat-option [value]="category.id">
+                  @if (category.icon) {
+                    <img [src]="category.icon" [alt]="category.name" width="24" height="24" />
+                  }
+                  {{ category.name }}
+                </mat-option>
               }
-              {{ category.name }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <h2>Pasos</h2>
-
-      <div formArrayName="steps">
-        @for (step of steps().controls; track $index) {
-          <div class="recipe-form-step">
-            <mat-form-field>
-              <mat-label>Paso {{ $index + 1 }}</mat-label>
-              <textarea matInput cdkTextareaAutosize [formControlName]="$index"></textarea>
-            </mat-form-field>
-
-            <button mat-button type="button" (click)="removeStep($index)">Eliminar paso</button>
-          </div>
-        }
-      </div>
-
-      <button mat-stroked-button type="button" (click)="addStep()">Añadir paso</button>
-
-      <h2>Ingredientes</h2>
-
-      <button mat-stroked-button type="button" (click)="openIngredientPicker()">Añadir ingrediente</button>
-
-      <ng-template #ingredientPickerDialog>
-        <div class="ingredient-dialog">
-          <app-ingredient-picker
-            class="ingredient-dialog-content"
-            [selectedIngredientIds]="getSelectedIngredientIds()"
-            (ingredientSelected)="selectIngredient($event)"
-          />
-
-          <button class="ingredient-dialog-close-button" mat-button type="button" (click)="dialog.closeAll()">
-            Cerrar
-          </button>
+            </mat-select>
+          </mat-form-field>
         </div>
-        >
-      </ng-template>
+      </section>
 
-      <div formArrayName="ingredients">
-        @for (ingredient of ingredients().controls; track $index) {
-          <div [formGroupName]="$index" class="recipe-form-ingredients">
-            <div class="recipe-form-ingredients-info">
-              @if (ingredient.get('image')?.value) {
-                <img
-                  [src]="ingredient.get('image')?.value"
-                  [alt]="ingredient.get('name')?.value"
-                  width="100"
-                  height="100"
-                />
-              }
-              <div>
-                <p class="recipe-form-ingredients-name">{{ ingredient.get('name')?.value }}</p>
-                <div class="recipe-form-ingredients-input">
-                  <mat-form-field>
-                    <mat-label>Cantidad</mat-label>
-                    <input matInput type="number" min="0.001" step="0.001" formControlName="amount" />
-                  </mat-form-field>
-                  <p class="recipe-form-ingredients-unit">
-                    {{ formatUnit(ingredient.get('reference_format')?.value) }}
-                  </p>
-                </div>
-              </div>
+      <section class="app-panel recipe-form-section">
+        <h2>Pasos</h2>
+
+        <div formArrayName="steps">
+          @for (step of steps().controls; track $index) {
+            <div class="recipe-form-step">
+              <mat-form-field>
+                <mat-label>Paso {{ $index + 1 }}</mat-label>
+                <textarea matInput cdkTextareaAutosize [formControlName]="$index"></textarea>
+              </mat-form-field>
+
+              <button mat-button type="button" (click)="removeStep($index)">Eliminar paso</button>
             </div>
+          }
+        </div>
 
-            <button class="recipe-form-ingredients-remove" mat-button type="button" (click)="removeIngredient($index)">
-              Eliminar ingrediente
+        <button mat-stroked-button type="button" (click)="addStep()">Añadir paso</button>
+      </section>
+
+      <section class="app-panel recipe-form-section">
+        <h2>Ingredientes</h2>
+
+        <button mat-stroked-button type="button" (click)="openIngredientPicker()">Añadir ingrediente</button>
+
+        <ng-template #ingredientPickerDialog>
+          <div class="ingredient-dialog">
+            <app-ingredient-picker
+              class="ingredient-dialog-content"
+              [selectedIngredientIds]="getSelectedIngredientIds()"
+              (ingredientSelected)="selectIngredient($event)"
+            />
+
+            <button class="ingredient-dialog-close-button" mat-button type="button" (click)="dialog.closeAll()">
+              Cerrar
             </button>
           </div>
-        }
-      </div>
+        </ng-template>
+
+        <div formArrayName="ingredients">
+          @for (ingredient of ingredients().controls; track $index) {
+            <div [formGroupName]="$index" class="recipe-form-ingredients">
+              <div class="recipe-form-ingredients-info">
+                @if (ingredient.get('image')?.value) {
+                  <img
+                    [src]="ingredient.get('image')?.value"
+                    [alt]="ingredient.get('name')?.value"
+                    width="100"
+                    height="100"
+                  />
+                }
+                <div>
+                  <p class="recipe-form-ingredients-name">{{ ingredient.get('name')?.value }}</p>
+                  <div class="recipe-form-ingredients-input">
+                    <mat-form-field>
+                      <mat-label>Cantidad</mat-label>
+                      <input matInput type="number" min="0.001" step="0.001" formControlName="amount" />
+                    </mat-form-field>
+                    <p class="recipe-form-ingredients-unit">
+                      {{ formatUnit(ingredient.get('reference_format')?.value) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                class="recipe-form-ingredients-remove button-danger-outline"
+                mat-button
+                type="button"
+                (click)="removeIngredient($index)"
+              >
+                Eliminar ingrediente
+              </button>
+            </div>
+          }
+        </div>
+      </section>
 
       <button mat-flat-button type="submit" [disabled]="recipeForm.invalid || isSaving()" class="recipe-form-submit">
         Guardar receta

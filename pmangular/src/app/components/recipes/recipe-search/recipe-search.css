@@ -1,25 +1,41 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.recipe-search > h2 {
+  margin-bottom: var(--app-space-2);
+  font-size: var(--app-font-section);
+}
+.recipe-search > p {
+  margin-top: 0;
+  color: var(--app-color-text-muted);
+}
 .recipe-search-text {
   display: block;
-  justify-self: center;
   width: 100%;
+  margin-top: var(--app-space-6);
 }
-
 .recipe-search-categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  display: block;
+  margin: var(--app-space-2) 0 var(--app-space-8);
 }
-
+.recipe-search-categories mat-chip-option {
+  margin: var(--app-space-1);
+}
 .recipe-search-results {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 360px));
-  justify-content: start;
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18.75rem), 1fr));
+  align-items: stretch;
+  gap: var(--app-space-6);
 }
-
-@media (max-width: 960px) {
+.recipe-search > h3 {
+  margin-bottom: var(--app-space-4);
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
+}
+@media (max-width: 640px) {
   .recipe-search-results {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--app-space-4);
   }
 }

@@ -1,7 +1,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   max-width: 100%;
 }
@@ -9,17 +9,18 @@
 .page-content {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--app-content-width);
   margin: 0 auto;
-  padding: 0 2rem 0 2rem;
+  padding: var(--app-space-6) var(--app-space-8);
+  min-width: 0;
 }
 
 .page-content:has(app-menus) {
-  max-width: 1600px;
+  max-width: var(--app-content-wide);
 }
 
 @media (max-width: 960px) {
   .page-content {
-    padding: 1rem;
+    padding: var(--app-space-4);
   }
 }

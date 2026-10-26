@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeComment } from '../../../models/recipe';
@@ -38,6 +38,10 @@ export class RecipeDetail implements OnInit {
   snackBar = inject(MatSnackBar);
 
   recipe = signal<Recipe | null>(null);
+  stackRecipeSections = computed(() => {
+    const recipe = this.recipe();
+    return !!recipe && recipe.ingredients.length > 0 && recipe.ingredients.length >= recipe.steps.length * 1.5;
+  });
   comments = signal<RecipeComment[]>([]);
   myComment = signal<RecipeComment | null>(null);
   errorMessage = signal('');

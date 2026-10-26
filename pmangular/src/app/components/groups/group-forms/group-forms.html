@@ -4,7 +4,7 @@
     <p>{{ subtitle }}</p>
   </header>
 
-  <form [formGroup]="newGroupForm" (ngSubmit)="createGroup()">
+  <form class="app-panel" [formGroup]="newGroupForm" (ngSubmit)="createGroup()">
     <h3>Crear grupo</h3>
     <mat-form-field>
       <mat-label>Nombre del grupo</mat-label>
@@ -29,7 +29,7 @@
     <button mat-raised-button [disabled]="newGroupForm.invalid" type="submit">Crear grupo</button>
   </form>
 
-  <form [formGroup]="joinGroupForm" (ngSubmit)="joinGroup()">
+  <form class="app-panel" [formGroup]="joinGroupForm" (ngSubmit)="joinGroup()">
     <h3>Unirse a un grupo</h3>
 
     <mat-form-field>

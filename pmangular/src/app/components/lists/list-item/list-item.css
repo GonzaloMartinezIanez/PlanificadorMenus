@@ -1,16 +1,20 @@
 .shopping-list-item {
   display: grid;
-  grid-template-columns: 50px 100px minmax(0, 1fr) auto;
+  grid-template-columns: 32px 64px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 5px;
-  border-radius: 12px;
-  background: #fff;
+  gap: var(--app-space-4);
+  padding: var(--app-space-4);
+  border-radius: var(--app-radius-card);
+  background: var(--app-color-surface);
+  border: 1px solid var(--app-color-border);
 }
 
 .shopping-list-item--bought {
-  opacity: 0.65;
+  background: var(--app-color-surface-muted);
+}
+
+.shopping-list-item--bought .shopping-list-item-image {
+  opacity: 0.55;
 }
 
 .shopping-list-item--bought .shopping-list-item-name {
@@ -18,23 +22,26 @@
 }
 
 .shopping-list-item-check {
-  font-size: 30px;
-  width: 35px;
-  height: 35px;
+  font-size: 28px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  border: 2px solid #000000;
-  border-radius: 35px;
+  border: 2px solid var(--app-color-control-border);
+  border-radius: var(--app-radius-sm);
   color: transparent;
 }
 
 .shopping-list-item-check--bought {
-  border-color: #2f6b45;
-  background: #2f6b45;
-  color: #fff;
+  border-color: var(--app-color-accent);
+  background: var(--app-color-accent);
+  color: var(--app-color-surface);
 }
 
 .shopping-list-item-image {
-  object-fit: cover;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: var(--app-radius-sm);
 }
 
 .shopping-list-item-name,
@@ -45,20 +52,22 @@
 .shopping-list-item-name {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 0.5rem;
+  gap: var(--app-space-1) var(--app-space-2);
   overflow-wrap: anywhere;
+  font-size: var(--app-font-small);
 }
 
 .shopping-list-item-details {
-  margin-top: 0.25rem;
-  font-size: 0.9rem;
+  margin-top: var(--app-space-1);
+  font-size: var(--app-font-caption);
+  color: var(--app-color-text-muted);
 }
 
 .shopping-list-item-actions,
 .shopping-list-item-edit {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--app-space-2);
 }
 
 .shopping-list-item-edit mat-form-field {
@@ -68,13 +77,13 @@
 
 @media (max-width: 960px) {
   .shopping-list-item {
-    grid-template-columns: 30px 80px minmax(0, 1fr);
-    gap: 0.75rem;
+    grid-template-columns: 32px 48px minmax(0, 1fr);
+    gap: var(--app-space-3);
   }
 
   .shopping-list-item-image {
-    width: 80px;
-    height: 80px;
+    width: 48px;
+    height: 48px;
   }
 
   .shopping-list-item-actions,

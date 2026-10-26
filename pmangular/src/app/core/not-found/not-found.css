@@ -1,0 +1,16 @@
+:host {
+  display: grid;
+  place-items: center;
+  min-height: 60dvh;
+  padding: var(--app-space-12) var(--app-space-6);
+  text-align: center;
+}
+h1 {
+  max-width: var(--app-form-width);
+  margin: 0;
+  padding: var(--app-space-8);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-panel);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-card);
+}

@@ -2,18 +2,20 @@
   <mat-card-header class="recipe-card-header">
     <mat-card-title>{{ recipe?.name }}</mat-card-title>
     <mat-card-subtitle>De: {{ recipe?.author }}</mat-card-subtitle>
-    <mat-card-subtitle class="recipe-card-time">
-      <mat-icon>schedule</mat-icon>
-      {{ recipe?.preparation_time }} minutos
-    </mat-card-subtitle>
-    <app-recipe-rating
-      class="recipe-card-rating"
-      [score]="recipe?.avg_score ?? 0"
-      [num_valorations]="recipe?.num_valorations ?? 0"
-      [showValorations]="true"
-    />
   </mat-card-header>
   <mat-card-content>
+    <div class="recipe-card-meta">
+      <p class="recipe-card-time">
+        <mat-icon>schedule</mat-icon>
+        {{ recipe?.preparation_time }} minutos
+      </p>
+      <app-recipe-rating
+        class="recipe-card-rating"
+        [score]="recipe?.avg_score ?? 0"
+        [num_valorations]="recipe?.num_valorations ?? 0"
+        [showValorations]="true"
+      />
+    </div>
     <p class="recipe-card-description">{{ recipe?.description }}</p>
 
     @if (recipe?.recipe_categories?.length !== 0) {

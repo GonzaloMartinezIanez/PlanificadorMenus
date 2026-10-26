@@ -1,5 +1,5 @@
 <section class="shopping-list">
-  <header class="shopping-list-header">
+  <header class="shopping-list-header app-page-heading">
     <h1>Lista de la compra</h1>
 
     <button mat-stroked-button type="button" (click)="openIngredientPicker()">Añadir producto</button>
@@ -81,7 +81,7 @@
   </ng-template>
 
   @if (filteredList().length === 0) {
-    <p class="shopping-list-empty">No hay productos en la lista.</p>
+    <p class="shopping-list-empty app-empty-state">No hay productos en la lista.</p>
   } @else {
     <div class="shopping-list-summary">
       <div>

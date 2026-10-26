@@ -52,7 +52,7 @@
 
     @if (selectedMainCategory()) {
       <h4>Selecciona una subcategoría</h4>
-      <div class="ingredient-picker-category-list" style="margin-bottom: 0.5rem">
+      <div class="ingredient-picker-category-list ingredient-picker-subcategory-list">
         @for (subcategory of subcategories(); track subcategory.id_ingredient_category) {
           <button
             mat-button
