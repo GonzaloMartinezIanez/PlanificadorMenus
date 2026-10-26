@@ -31,7 +31,19 @@
         />
       }
     </div>
-  } @else {
+  } @else if (!isLoading() && !errorMessage()) {
     <p>No hemos encontrado recetas que coincidan con tu búsqueda.</p>
+  }
+  @if (isLoading()) {
+    <p class="status-message" role="status">Cargando recetas...</p>
+  }
+  @if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+    <button mat-button type="button" (click)="nextPage() ? loadMore() : loadRecipes()" [disabled]="isLoading()">
+      Reintentar
+    </button>
+  }
+  @if (nextPage()) {
+    <button mat-stroked-button type="button" (click)="loadMore()" [disabled]="isLoading()">Cargar más recetas</button>
   }
 </section>

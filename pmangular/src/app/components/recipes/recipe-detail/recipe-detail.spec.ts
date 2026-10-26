@@ -54,6 +54,29 @@ describe('RecipeDetail', () => {
     expect(component).toBeTruthy();
   });
 
+  it('appends comment pages and keeps the current user comment separate', () => {
+    recipeService.getCommentsByRecipeId.mockReturnValueOnce(
+      of({ count: 2, next: '?page=2', previous: null, results: [{ user_id: 2, comment: 'Primero' }] }),
+    );
+    component.loadComments(4);
+    expect(component.nextCommentsPage()).toBe(2);
+    recipeService.getCommentsByRecipeId.mockReturnValueOnce(
+      of({
+        count: 2,
+        next: null,
+        previous: '?page=1',
+        results: [
+          { user_id: 1, comment: 'Propio' },
+          { user_id: 3, comment: 'Segundo' },
+        ],
+      }),
+    );
+    component.loadComments(4, 2);
+    expect(component.comments().map((comment) => comment.user_id)).toEqual([2, 3]);
+    expect(component.nextCommentsPage()).toBeNull();
+    expect(recipeService.getCommentsByRecipeId).toHaveBeenLastCalledWith(4, 2);
+  });
+
   it.each([
     [4, 5, false],
     [4, 6, true],
@@ -68,6 +91,7 @@ describe('RecipeDetail', () => {
       author: 'Gonzalo',
       is_author: true,
       name: 'Receta',
+      creation_date: '2026-10-26',
       description: '',
       preparation_time: 20,
       steps: Array.from({ length: steps }, (_, index) => `Paso ${index + 1}`),
@@ -84,6 +108,7 @@ describe('RecipeDetail', () => {
     };
     expect(component.stackRecipeSections()).toBe(false);
     component.recipe.set(recipe);
+    expect(component.formattedCreationDate()).toBe('26/10/2026');
     expect(component.stackRecipeSections()).toBe(stacked);
     component.recipe.set(null);
     expect(component.stackRecipeSections()).toBe(false);
@@ -91,10 +116,15 @@ describe('RecipeDetail', () => {
 
   it('should separates the current user comment from public comments', () => {
     recipeService.getCommentsByRecipeId.mockReturnValue(
-      of([
-        { user_id: 1, score: 5, comment: 'Propio' },
-        { user_id: 2, score: 4, comment: 'Otro' },
-      ]),
+      of({
+        count: 2,
+        next: null,
+        previous: null,
+        results: [
+          { user_id: 1, score: 5, comment: 'Propio' },
+          { user_id: 2, score: 4, comment: 'Otro' },
+        ],
+      }),
     );
 
     component.loadComments(4);

@@ -19,10 +19,10 @@ describe('RecipeService', () => {
   afterEach(() => http.verify());
 
   it('should get recipes', () => {
-    service.getRecipes().subscribe();
-    const recipesRequest = http.expectOne(`${environment.apiUrl}/recipes/`);
+    service.getRecipes(2).subscribe((page) => expect(page.results).toEqual([]));
+    const recipesRequest = http.expectOne(`${environment.apiUrl}/recipes/?page=2`);
     expect(recipesRequest.request.method).toBe('GET');
-    recipesRequest.flush([]);
+    recipesRequest.flush({ count: 24, next: null, previous: '?page=1', results: [] });
   });
 
   it('should get recipe categories', () => {
@@ -44,7 +44,16 @@ describe('RecipeService', () => {
 
     const request = http.expectOne(`${environment.apiUrl}/recipes/search/?name=tortilla&categories=1,3`);
     expect(request.request.method).toBe('GET');
-    request.flush([]);
+    request.flush({ count: 0, next: null, previous: null, results: [] });
+  });
+
+  it('encodes search text without losing filters on following pages', () => {
+    service.searchRecipes('arroz & pollo', [1, 3], 2).subscribe();
+    const request = http.expectOne(
+      `${environment.apiUrl}/recipes/search/?name=arroz%20%26%20pollo&categories=1,3&page=2`,
+    );
+    expect(request.request.params.get('page')).toBe('2');
+    request.flush({ count: 25, next: null, previous: '?page=1', results: [] });
   });
 
   it('should get recipe by id', () => {
@@ -84,7 +93,7 @@ describe('RecipeService', () => {
     service.getCommentsByRecipeId(4).subscribe();
     const commentsRequest = http.expectOne(`${environment.apiUrl}/comments/4/`);
     expect(commentsRequest.request.method).toBe('GET');
-    commentsRequest.flush([]);
+    commentsRequest.flush({ count: 0, next: null, previous: null, results: [] });
   });
 
   it('should get the current user comment', () => {

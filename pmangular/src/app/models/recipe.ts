@@ -32,6 +32,7 @@ export interface Recipe {
   author: string;
   is_author: boolean;
   name: string;
+  creation_date: string;
   description: string;
   preparation_time: number;
   steps: string[];

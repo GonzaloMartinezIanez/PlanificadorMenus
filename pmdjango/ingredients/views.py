@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from config.permissions import IsEmailAuthorizedOrReadOnly
+from config.pagination import IngredientPagination, paginated_response
 
 
 # CRUD de Categorías de ingredientes
@@ -36,14 +37,18 @@ class IngredientCategoryIngredientsApiView(APIView):
         ingredients = Ingredient.objects.filter(
             id_ingredient_categories__id_ingredient_category=id_ingredient_category
         )
-        serializer = IngredientSerializer(ingredients, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return paginated_response(
+            ingredients.order_by("name", "pk"),
+            request,
+            IngredientSerializer,
+            IngredientPagination,
+        )
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
+    pagination_class = IngredientPagination
     permission_classes = [IsEmailAuthorizedOrReadOnly]
-    queryset = Ingredient.objects.all()
+    queryset = Ingredient.objects.order_by("name", "pk")
     serializer_class = IngredientSerializer
     lookup_field = "id_ingredient"
     lookup_value_regex = "[^/]+"
@@ -72,6 +77,9 @@ class IngredientByNameApiView(APIView):
         ingredients = Ingredient.objects.filter(
             name__icontains=name
         )  # Con icontains se ignoran mayúsculas y minúsculas
-        serializer = IngredientSerializer(ingredients, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return paginated_response(
+            ingredients.order_by("name", "pk"),
+            request,
+            IngredientSerializer,
+            IngredientPagination,
+        )

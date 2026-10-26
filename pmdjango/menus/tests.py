@@ -109,6 +109,42 @@ class MenuApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_menu_interval_is_inclusive_bounded_and_isolated(self):
+        self.client.force_authenticate(user=self.member)
+        for days in [0, 6, 7, 40]:
+            Menu.objects.create(
+                group=self.group,
+                recipe=self.public_recipe,
+                date=self.today + timedelta(days=days),
+                time="LUNCH",
+            )
+        url = f"/api/menus/{self.group.group_code}/"
+        self.assertEqual(len(self.client.get(url).data), 2)
+        start = self.today + timedelta(days=6)
+        end = self.today + timedelta(days=7)
+        response = self.client.get(
+            url, {"from": start.isoformat(), "to": end.isoformat()}
+        )
+        self.assertEqual(
+            [row["date"] for row in response.data], [start.isoformat(), end.isoformat()]
+        )
+        for params in [
+            {"from": "incorrecta"},
+            {"from": end.isoformat(), "to": start.isoformat()},
+            {
+                "from": self.today.isoformat(),
+                "to": (self.today + timedelta(days=31)).isoformat(),
+            },
+        ]:
+            self.assertEqual(self.client.get(url, params).status_code, 400)
+        self.client.force_authenticate(user=self.outsider)
+        self.assertEqual(
+            self.client.get(
+                url, {"from": start.isoformat(), "to": end.isoformat()}
+            ).status_code,
+            403,
+        )
+
     def test_get_menus_returns_only_today_and_future_group_menus(self):
         Menu.objects.create(
             group=self.group,

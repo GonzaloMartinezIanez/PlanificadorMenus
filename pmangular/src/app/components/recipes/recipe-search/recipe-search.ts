@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, computed, DestroyRef, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeCategory } from '../../../models/recipe';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,6 +21,7 @@ import { MatIconModule } from '@angular/material/icon';
     RecipeSearchResult,
     MatChipsModule,
     MatIconModule,
+    MatButtonModule,
   ],
   templateUrl: './recipe-search.html',
   styleUrl: './recipe-search.css',
@@ -29,6 +32,15 @@ export class RecipeSearch implements OnInit {
   @Output() detailsClicked = new EventEmitter<void>();
 
   recipeService = inject(RecipeService);
+  private destroyRef = inject(DestroyRef);
+  private requestId = 0;
+  nextPage = signal<number | null>(null);
+  isLoading = signal(false);
+  errorMessage = signal('');
+
+  constructor() {
+    this.destroyRef.onDestroy(() => clearTimeout(this.searchTimeout ?? undefined));
+  }
 
   recipeCategories = signal<RecipeCategory[]>([]);
   searchedRecipes = signal<Recipe[]>([]);
@@ -71,6 +83,9 @@ export class RecipeSearch implements OnInit {
 
   // Para que no se haga una búsqueda en cada tecla, se añade un delay de 300ms
   scheduleSearch() {
+    this.requestId++;
+    this.nextPage.set(null);
+    this.isLoading.set(true);
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
@@ -81,6 +96,9 @@ export class RecipeSearch implements OnInit {
   }
 
   loadRecipes() {
+    clearTimeout(this.searchTimeout ?? undefined);
+    this.searchedRecipes.set([]);
+    this.nextPage.set(null);
     if (this.showingTopRecipes()) {
       this.searchTopRecipes();
       return;
@@ -89,24 +107,56 @@ export class RecipeSearch implements OnInit {
     this.searchRecipes();
   }
 
-  searchRecipes() {
-    this.recipeService.searchRecipes(this.searchName(), this.selectedCategoryIds()).subscribe({
-      next: (recipes) => {
-        this.searchedRecipes.set(recipes);
-      },
-    });
+  searchRecipes(page = 1) {
+    const requestId = ++this.requestId;
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.recipeService
+      .searchRecipes(this.searchName(), this.selectedCategoryIds(), page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (requestId !== this.requestId) return;
+          this.searchedRecipes.update((recipes) => (page === 1 ? response.results : [...recipes, ...response.results]));
+          this.nextPage.set(response.next ? page + 1 : null);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          if (requestId !== this.requestId) return;
+          this.errorMessage.set('No se pudieron cargar las recetas. Vuelve a intentarlo.');
+          this.isLoading.set(false);
+        },
+      });
   }
 
   searchTopRecipes() {
-    this.recipeService.getTopRecipes().subscribe({
-      next: (recipes) => {
-        this.searchedRecipes.set(recipes);
-      },
-    });
+    const requestId = ++this.requestId;
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.recipeService
+      .getTopRecipes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (recipes) => {
+          if (requestId !== this.requestId) return;
+          this.searchedRecipes.set(recipes);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          if (requestId !== this.requestId) return;
+          this.errorMessage.set('No se pudieron cargar las recetas. Vuelve a intentarlo.');
+          this.isLoading.set(false);
+        },
+      });
   }
 
   isCategorySelected(categoryId: number) {
     return this.selectedCategoryIds().includes(categoryId);
+  }
+
+  loadMore() {
+    const page = this.nextPage();
+    if (page && !this.isLoading()) this.searchRecipes(page);
   }
 
   onActionClicked(recipe: Recipe) {

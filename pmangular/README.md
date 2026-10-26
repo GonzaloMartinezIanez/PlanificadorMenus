@@ -66,6 +66,16 @@ src/app/
 
 No incluyas tokens de acceso ni secretos en estos ficheros.
 
+## Carga de listados
+
+Los servicios de ingredientes, búsquedas de recetas y comentarios usan
+`PaginatedResponse<T>` (`count`, `next`, `previous`, `results`). Las pantallas
+añaden resultados con «Cargar más» y vuelven a la primera página al cambiar los
+filtros. Una respuesta anterior no puede sustituir los resultados de la búsqueda
+actual; los fallos permiten reintentar sin descartar las páginas ya cargadas.
+Las recetas populares siguen siendo un listado de hasta diez elementos.
+El calendario consulta el intervalo de la semana visible mediante `from` y `to`.
+
 ## Inicio de sesión compartido
 
 `core/google-login/` contiene el botón reutilizable de Google y el intercambio de

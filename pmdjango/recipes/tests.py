@@ -4,6 +4,9 @@ from rest_framework.test import APITestCase
 from ingredients.models import Ingredient, IngredientCategory
 from groups.models import Group, GroupMember
 from .models import RecipeCategory, Recipe, IngredientInRecipe, RecipeComment
+from django.utils import timezone
+from datetime import datetime, time, timedelta, timezone as datetime_timezone
+from unittest.mock import patch
 
 User = get_user_model()
 
@@ -119,12 +122,140 @@ class RecipeAndCommentApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
+    def test_creation_date_uses_madrid_day_and_cannot_be_changed_by_the_client(self):
+        self.client.force_authenticate(user=self.owner)
+        instant = datetime.combine(
+            timezone.localdate(), time(23, 30), tzinfo=datetime_timezone.utc
+        )
+        expected = (instant + timedelta(days=1)).date()
+        with (
+            timezone.override("Europe/Madrid"),
+            patch("django.utils.timezone.now", return_value=instant),
+        ):
+            response = self.client.post(
+                "/api/recipes/",
+                {
+                    "name": "Receta con fecha",
+                    "visibility": "PUBLIC",
+                    "steps": [],
+                    "recipe_categories": [],
+                    "ingredients": [],
+                    "creation_date": (expected - timedelta(days=10)).isoformat(),
+                },
+                format="json",
+            )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["creation_date"], expected.isoformat())
+        recipe = Recipe.objects.get(pk=response.data["id"])
+        self.assertEqual(recipe.creation_date, expected)
+        with patch(
+            "django.utils.timezone.now", return_value=instant + timedelta(days=1)
+        ):
+            response = self.client.patch(
+                f"/api/recipes/{recipe.pk}/",
+                {
+                    "name": "Nombre modificado",
+                    "creation_date": (expected + timedelta(days=1)).isoformat(),
+                },
+                format="json",
+            )
+        self.assertEqual(response.status_code, 200)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.creation_date, expected)
+        self.assertEqual(
+            self.client.get(f"/api/recipes/{recipe.pk}/").data["creation_date"],
+            expected.isoformat(),
+        )
+
+    def test_recipe_pagination_preserves_visibility_and_filters(self):
+        for index in range(2):
+            recipe = Recipe.objects.create(
+                user=self.owner, name=f"Tortilla {index}", steps=[], visibility="PUBLIC"
+            )
+            recipe.recipe_categories.add(self.recipe_category_main)
+        for url in [
+            "/api/recipes/?page_size=1",
+            f"/api/recipes/search/?name=Tortilla&categories={self.recipe_category_main.pk}&page_size=1",
+            f"/api/recipe_category/{self.recipe_category_main.pk}/recipes/?page_size=1",
+        ]:
+            with self.subTest(url=url):
+                seen = []
+                while url:
+                    response = self.client.get(url)
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.data["count"], 3)
+                    self.assertEqual(len(response.data["results"]), 1)
+                    seen.append(response.data["results"][0]["id"])
+                    url = response.data["next"]
+                self.assertEqual(len(set(seen)), 3)
+                self.assertNotIn(self.private_recipe.pk, seen)
+                self.assertNotIn(self.groupmate_private_recipe.pk, seen)
+        self.client.force_authenticate(user=self.outsider)
+        response = self.client.get("/api/recipes/?page_size=1")
+        self.assertEqual(response.data["count"], 3)
+        self.assertEqual(self.client.get("/api/recipes/?page=999").status_code, 404)
+
+    def test_default_recipe_page_size_and_top_remain_bounded(self):
+        Recipe.objects.bulk_create(
+            [
+                Recipe(
+                    user=self.owner,
+                    name=f"Receta {index}",
+                    steps=[],
+                    visibility="PUBLIC",
+                    num_valorations=1,
+                    avg_score=4,
+                )
+                for index in range(25)
+            ]
+        )
+        response = self.client.get("/api/recipes/")
+        self.assertEqual(response.data["count"], 26)
+        self.assertEqual(len(response.data["results"]), 24)
+        self.assertEqual(len(self.client.get("/api/recipes/top/").data), 10)
+
+    def test_comment_pagination_and_private_recipe_permissions(self):
+        users = User.objects.bulk_create(
+            [
+                User(username=f"reader-{index}", email=f"reader-{index}@example.com")
+                for index in range(21)
+            ]
+        )
+        RecipeComment.objects.bulk_create(
+            [
+                RecipeComment(
+                    user=user,
+                    recipe=self.public_recipe,
+                    score=4,
+                    comment=f"Comentario {index}",
+                )
+                for index, user in enumerate(users)
+            ]
+        )
+        self.client.force_authenticate(user=self.outsider)
+        first = self.client.get(f"/api/comments/{self.public_recipe.pk}/")
+        self.assertEqual(first.data["count"], 21)
+        self.assertEqual(len(first.data["results"]), 20)
+        second = self.client.get(first.data["next"])
+        self.assertEqual(len(second.data["results"]), 1)
+        self.assertNotIn(
+            second.data["results"][0]["user_id"],
+            [row["user_id"] for row in first.data["results"]],
+        )
+        self.assertIsNone(second.data["next"])
+        self.assertEqual(
+            self.client.get(
+                f"/api/comments/{self.private_recipe.pk}/?page=2"
+            ).status_code,
+            403,
+        )
+
     def test_get_recipes_returns_only_public_recipes_for_anonymous_user(self):
         response = self.client.get("/api/recipes/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["name"], "Tortilla publica")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["name"], "Tortilla publica")
 
     def test_get_recipes_returns_private_recipes_visible_to_authenticated_user(self):
         self.client.force_authenticate(user=self.owner)
@@ -132,7 +263,7 @@ class RecipeAndCommentApiTests(APITestCase):
         response = self.client.get("/api/recipes/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data["results"]), 3)
 
     def test_get_recipe_by_id_returns_404_when_private_recipe_is_not_visible(self):
         self.client.force_authenticate(user=self.outsider)
@@ -147,8 +278,8 @@ class RecipeAndCommentApiTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["name"], "Tortilla publica")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["name"], "Tortilla publica")
 
     def test_get_recipes_by_category_returns_owner_private_recipe_when_authenticated(
         self,
@@ -160,7 +291,7 @@ class RecipeAndCommentApiTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data["results"]), 2)
 
     def test_get_recipes_by_category_returns_404_when_category_does_not_exist(self):
         response = self.client.get("/api/recipe_category/9999/recipes/")
@@ -407,8 +538,8 @@ class RecipeAndCommentApiTests(APITestCase):
         response = self.client.get(f"/api/comments/{self.public_recipe.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["comment"], "Comentario visible")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["comment"], "Comentario visible")
 
     def test_put_comment_updates_existing_comment(self):
         RecipeComment.objects.create(

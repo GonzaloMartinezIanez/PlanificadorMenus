@@ -73,6 +73,7 @@ class RecipeOutputSerializer(serializers.ModelSerializer):
             "id",
             "author",
             "is_author",
+            "creation_date",
             "name",
             "description",
             "preparation_time",
@@ -83,6 +84,8 @@ class RecipeOutputSerializer(serializers.ModelSerializer):
             "avg_score",
             "ingredients",
         ]
+
+        read_only_fields = ["creation_date"]
 
     def get_ingredients(self, obj):
         ingredients = IngredientInRecipe.objects.filter(recipe=obj)

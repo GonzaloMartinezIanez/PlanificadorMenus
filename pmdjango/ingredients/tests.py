@@ -145,7 +145,49 @@ class IngredientApiTests(APITestCase):
         response = self.client.get("/api/ingredients/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data["results"]), 2)
+
+    def test_ingredient_pages_keep_filters_and_have_no_overlap(self):
+        self.ingredient_ham.id_ingredient_categories.add(self.category_secondary)
+        self.ingredient_ham.name = "Manzana segunda"
+        self.ingredient_ham.save()
+        for url in [
+            "/api/ingredients/?page_size=1",
+            "/api/ingredient_by_name/?name=manzana&page_size=1",
+            f"/api/ingredient_categories/{self.category_secondary.pk}/ingredients/?page_size=1",
+        ]:
+            with self.subTest(url=url):
+                first = self.client.get(url)
+                self.assertEqual(first.data["count"], 2)
+                self.assertEqual(len(first.data["results"]), 1)
+                self.assertIsNone(first.data["previous"])
+                second = self.client.get(first.data["next"])
+                self.assertIsNone(second.data["next"])
+                self.assertIsNotNone(second.data["previous"])
+                self.assertNotEqual(
+                    first.data["results"][0]["id_ingredient"],
+                    second.data["results"][0]["id_ingredient"],
+                )
+        self.assertEqual(self.client.get("/api/ingredients/?page=999").status_code, 404)
+
+    def test_ingredient_default_and_maximum_page_size(self):
+        Ingredient.objects.bulk_create(
+            [
+                Ingredient(
+                    id_ingredient=f"extra-{index}",
+                    name="Producto",
+                    reference_format="ud",
+                )
+                for index in range(101)
+            ]
+        )
+        response = self.client.get("/api/ingredients/")
+        self.assertEqual(response.data["count"], 103)
+        self.assertEqual(len(response.data["results"]), 30)
+        self.assertEqual(
+            len(self.client.get("/api/ingredients/?page_size=1000").data["results"]),
+            100,
+        )
 
     def test_get_single_ingredient_returns_ingredient(self):
         response = self.client.get(
@@ -250,8 +292,8 @@ class IngredientApiTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["id_ingredient"], "1001")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id_ingredient"], "1001")
 
     def test_get_ingredients_by_category_returns_404_when_category_does_not_exist(self):
         response = self.client.get("/api/ingredient_categories/9999/ingredients/")
@@ -263,14 +305,14 @@ class IngredientApiTests(APITestCase):
         response = self.client.get("/api/ingredient_by_name/?name=jamon")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["id_ingredient"], "2001.1")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id_ingredient"], "2001.1")
 
     def test_get_ingredient_by_name_returns_empty_list_when_no_match(self):
         response = self.client.get("/api/ingredient_by_name/?name=kiwi")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data["results"], [])
 
     def test_get_ingredient_by_name_returns_400_when_name_is_missing(self):
         response = self.client.get("/api/ingredient_by_name/")

@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import MenuInputSerializer, MenuOutputSerializer
+from .serializers import MenuInputSerializer, MenuOutputSerializer, MenuRangeSerializer
 from .models import Menu
 from rest_framework.permissions import IsAuthenticated
 from groups.models import Group, GroupMember
@@ -71,7 +71,15 @@ class MenuApiView(APIView):
             return error
 
         today = timezone.localdate()
-        menus = Menu.objects.filter(group=group, date__gte=today)
+        range_data = {"start": request.query_params.get("from", today.isoformat())}
+        if "to" in request.query_params:
+            range_data["end"] = request.query_params["to"]
+        interval = MenuRangeSerializer(data=range_data)
+        interval.is_valid(raise_exception=True)
+        start, end = interval.validated_data["start"], interval.validated_data["end"]
+        menus = Menu.objects.filter(
+            group=group, date__gte=max(today, start), date__lte=end
+        ).order_by("date", "time", "pk")
         serializer = MenuOutputSerializer(menus, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

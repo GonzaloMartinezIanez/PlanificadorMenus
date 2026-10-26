@@ -32,6 +32,7 @@ describe('Menus', () => {
 
     fixture = TestBed.createComponent(Menus);
     component = fixture.componentInstance;
+    component.week.set(component.generateWeek(component.thisMonday()));
     http = TestBed.inject(HttpTestingController);
   });
 
@@ -43,6 +44,23 @@ describe('Menus', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('requests the visible week and ignores a late response from the previous week', () => {
+    component.groupCode.set('GROUP');
+    component.loadMenus();
+    const week = component.week()!;
+    const old = http.expectOne(
+      (req) =>
+        req.params.get('from') === component.formatDate(week[0]) &&
+        req.params.get('to') === component.formatDate(week[6]),
+    );
+    component.generateNextWeek();
+    const current = http.expectOne((req) => req.params.get('from') === component.formatDate(component.week()![0]));
+    const menus = [{ recipe: { id: 2 }, date: component.formatDate(component.week()![0]), time: 'LUNCH' }];
+    current.flush(menus);
+    old.flush([]);
+    expect(component.menus()).toEqual(menus);
   });
 
   it('should generates seven consecutive days starting on Monday', () => {

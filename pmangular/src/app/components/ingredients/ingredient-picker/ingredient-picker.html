@@ -23,7 +23,7 @@
           />
         }
       </div>
-    } @else {
+    } @else if (!errorMessage()) {
       <p>No se han encontrado ingredientes.</p>
     }
   } @else {
@@ -85,9 +85,25 @@
             />
           }
         </div>
-      } @else {
+      } @else if (!errorMessage()) {
         <p>No hay ingredientes en esta subcategoría.</p>
       }
     }
+  }
+  @if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+    <button
+      mat-button
+      type="button"
+      (click)="loadIngredients(nextPage() ?? 1)"
+      [disabled]="isLoadingMore() || isLoadingSearchResults() || isLoadingCategoryIngredients()"
+    >
+      Reintentar
+    </button>
+  }
+  @if (nextPage()) {
+    <button mat-stroked-button type="button" (click)="loadMore()" [disabled]="isLoadingMore()">
+      {{ isLoadingMore() ? 'Cargando...' : 'Cargar más ingredientes' }}
+    </button>
   }
 </section>

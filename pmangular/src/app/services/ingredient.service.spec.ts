@@ -31,14 +31,14 @@ describe('IngredientService', () => {
 
     const request = http.expectOne(`${environment.apiUrl}/ingredient_categories/29/ingredients/`);
     expect(request.request.method).toBe('GET');
-    request.flush([]);
+    request.flush({ count: 0, next: null, previous: null, results: [] });
   });
 
   it('should get ingredients by name', () => {
-    service.searchIngredientsByName('arroz con pollo').subscribe();
+    service.searchIngredientsByName('arroz con pollo', 2).subscribe();
 
-    const request = http.expectOne(`${environment.apiUrl}/ingredient_by_name/?name=arroz%20con%20pollo`);
+    const request = http.expectOne(`${environment.apiUrl}/ingredient_by_name/?name=arroz%20con%20pollo&page=2`);
     expect(request.request.method).toBe('GET');
-    request.flush([]);
+    request.flush({ count: 31, next: null, previous: '?page=1', results: [] });
   });
 });

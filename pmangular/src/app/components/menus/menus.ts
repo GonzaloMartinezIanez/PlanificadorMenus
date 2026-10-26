@@ -32,6 +32,7 @@ export class Menus implements OnInit, AfterViewInit {
   private destroyRef = inject(DestroyRef);
   private midnightTimer?: ReturnType<typeof setTimeout>;
   private scrollTimer?: ReturnType<typeof setTimeout>;
+  private menuRequestId = 0;
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -87,22 +88,24 @@ export class Menus implements OnInit, AfterViewInit {
 
   loadMenus() {
     const groupCode = this.groupCode();
+    const week = this.week();
 
-    if (!groupCode) {
+    if (!groupCode || !week) {
       return;
     }
 
+    const requestId = ++this.menuRequestId;
     this.menuService
-      .getMenus(groupCode)
+      .getMenus(groupCode, this.formatDate(week[0]), this.formatDate(week[6]))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (menus) => {
-          if (this.groupCode() === groupCode) {
+          if (this.groupCode() === groupCode && requestId === this.menuRequestId) {
             this.menus.set(menus);
           }
         },
         error: () => {
-          if (this.groupCode() === groupCode) {
+          if (this.groupCode() === groupCode && requestId === this.menuRequestId) {
             this.showError('No se pudo cargar el calendario. Vuelve a intentarlo.');
           }
         },
@@ -131,6 +134,8 @@ export class Menus implements OnInit, AfterViewInit {
     nextMonday.setDate(nextMonday.getDate() + 1);
 
     this.week.set(this.generateWeek(nextMonday));
+    this.menus.set([]);
+    this.loadMenus();
   }
 
   generatePreviousWeek() {
@@ -143,6 +148,8 @@ export class Menus implements OnInit, AfterViewInit {
     previousMonday.setDate(previousMonday.getDate() - 7);
 
     this.week.set(this.generateWeek(previousMonday));
+    this.menus.set([]);
+    this.loadMenus();
   }
 
   // No permitir ir a semanas anteriores
@@ -259,6 +266,8 @@ export class Menus implements OnInit, AfterViewInit {
       const monday = this.week()?.[0];
       if (monday && monday.getTime() < this.thisMonday().getTime()) {
         this.week.set(this.generateWeek(this.thisMonday()));
+        this.menus.set([]);
+        this.loadMenus();
       }
       this.updateDayMidnight();
     }, msUntilTomorrow);

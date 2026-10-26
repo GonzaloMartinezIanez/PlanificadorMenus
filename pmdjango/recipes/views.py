@@ -12,6 +12,7 @@ from django.db import transaction
 from ingredients.models import Ingredient
 from .utils import get_my_visible_recipes
 from config.permissions import IsEmailAuthorizedOrReadOnly
+from config.pagination import RecipePagination, paginated_response
 
 
 # CRUD de Categorias de recetas
@@ -35,11 +36,13 @@ class RecipeCategoryRecipesApiView(APIView):
             recipe_categories__id=id_recipe_category
         )
 
-        serializer = RecipeOutputSerializer(
-            recipes, many=True, context={"request": request}
+        return paginated_response(
+            recipes.order_by("id"),
+            request,
+            RecipeOutputSerializer,
+            RecipePagination,
+            context={"request": request},
         )
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # GET todas y añadir nueva
@@ -48,11 +51,13 @@ class RecipeApiView(APIView):
 
     def get(self, request):
         recipes = get_my_visible_recipes(request)
-        serializer = RecipeOutputSerializer(
-            recipes, many=True, context={"request": request}
+        return paginated_response(
+            recipes.order_by("id"),
+            request,
+            RecipeOutputSerializer,
+            RecipePagination,
+            context={"request": request},
         )
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -138,10 +143,13 @@ class RecipeSearchApiView(APIView):
                     recipe_categories__id__in=categories_ids
                 ).distinct()  # Sin distinct se repite la misma si pertenece a las dos categorías
 
-        serializer = RecipeOutputSerializer(
-            recipes, many=True, context={"request": request}
+        return paginated_response(
+            recipes.order_by("id"),
+            request,
+            RecipeOutputSerializer,
+            RecipePagination,
+            context={"request": request},
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RecipeTopApiView(APIView):

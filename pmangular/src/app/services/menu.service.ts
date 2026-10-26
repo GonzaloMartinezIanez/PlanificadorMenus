@@ -11,8 +11,10 @@ import { MessageModel } from '../models/message';
 export class MenuService {
   private http = inject(HttpClient);
 
-  getMenus(group_code: string): Observable<MenuModel[]> {
-    return this.http.get<MenuModel[]>(`${environment.apiUrl}/menus/${group_code}/`);
+  getMenus(group_code: string, from?: string, to?: string): Observable<MenuModel[]> {
+    return this.http.get<MenuModel[]>(`${environment.apiUrl}/menus/${group_code}/`, {
+      params: from && to ? { from, to } : {},
+    });
   }
 
   postMenus(group_code: string, menu: ShortMenuModel): Observable<MenuModel> {

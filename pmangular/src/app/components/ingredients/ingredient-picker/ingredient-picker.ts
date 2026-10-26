@@ -1,5 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, EventEmitter, inject, Input, OnDestroy, OnInit, Output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -39,6 +51,10 @@ export class IngredientPicker implements OnInit, OnDestroy {
   isLoadingCategoryIngredients = signal(false);
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
   categoryRequestId = 0;
+  private destroyRef = inject(DestroyRef);
+  nextPage = signal<number | null>(null);
+  errorMessage = signal('');
+  isLoadingMore = signal(false);
 
   mainCategories = computed(() => this.allCategories().filter((category) => category.primary_category === null));
 
@@ -69,6 +85,10 @@ export class IngredientPicker implements OnInit, OnDestroy {
   }
 
   searchIngredients(event: Event) {
+    this.categoryRequestId++;
+    this.nextPage.set(null);
+    this.errorMessage.set('');
+    this.isLoadingMore.set(false);
     const name = (event.target as HTMLInputElement).value.trim();
     this.searchText.set(name);
 
@@ -78,13 +98,15 @@ export class IngredientPicker implements OnInit, OnDestroy {
       }
       this.isLoadingSearchResults.set(false);
       this.searchResults.set([]);
+      if (this.selectedSubcategory()) this.loadIngredients();
       return;
     }
 
-    this.scheduleSearch(name);
+    this.searchResults.set([]);
+    this.scheduleSearch();
   }
 
-  scheduleSearch(name: string) {
+  scheduleSearch() {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
@@ -92,21 +114,18 @@ export class IngredientPicker implements OnInit, OnDestroy {
     this.isLoadingSearchResults.set(true);
 
     this.searchTimeout = setTimeout(() => {
-      this.ingredientService.searchIngredientsByName(name).subscribe({
-        next: (ingredients) => {
-          this.searchResults.set(ingredients);
-          this.isLoadingSearchResults.set(false);
-        },
-        error: () => {
-          this.searchResults.set([]);
-          this.isLoadingSearchResults.set(false);
-        },
-      });
+      this.loadIngredients();
     }, 300);
   }
 
   selectMainCategory(category: IngredientCategory) {
     this.categoryRequestId++;
+    clearTimeout(this.searchTimeout ?? undefined);
+    this.nextPage.set(null);
+    this.errorMessage.set('');
+    this.isLoadingSearchResults.set(false);
+    this.isLoadingCategoryIngredients.set(false);
+    this.isLoadingMore.set(false);
     this.selectedMainCategory.set(category);
     this.selectedSubcategory.set(null);
     this.categoryIngredients.set([]);
@@ -115,28 +134,53 @@ export class IngredientPicker implements OnInit, OnDestroy {
   }
 
   selectSubcategory(category: IngredientCategory) {
-    const requestId = ++this.categoryRequestId; // Evitar que se puedan mandar dos peticiones
     this.selectedSubcategory.set(category);
-    this.isLoadingCategoryIngredients.set(this.categoryIngredients().length === 0);
+    this.categoryIngredients.set([]);
+    this.nextPage.set(null);
+    this.loadIngredients();
+  }
 
-    this.ingredientService.getIngredientsByCategory(category.id_ingredient_category).subscribe({
-      next: (ingredients) => {
+  loadIngredients(page = 1) {
+    const name = this.searchText();
+    const category = this.selectedSubcategory();
+    if (!name && !category) return;
+    const requestId = ++this.categoryRequestId;
+    this.errorMessage.set('');
+    this.isLoadingMore.set(page > 1);
+    this.isLoadingSearchResults.set(!!name && page === 1);
+    this.isLoadingCategoryIngredients.set(!name && page === 1);
+    const request = name
+      ? this.ingredientService.searchIngredientsByName(name, page)
+      : this.ingredientService.getIngredientsByCategory(category!.id_ingredient_category, page);
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
         if (requestId !== this.categoryRequestId) {
           return;
         }
 
-        this.categoryIngredients.set(ingredients);
+        const results = name ? this.searchResults : this.categoryIngredients;
+        results.update((current) => (page === 1 ? response.results : [...current, ...response.results]));
+        this.nextPage.set(response.next ? page + 1 : null);
+        this.isLoadingSearchResults.set(false);
         this.isLoadingCategoryIngredients.set(false);
+        this.isLoadingMore.set(false);
       },
       error: () => {
         if (requestId !== this.categoryRequestId) {
           return;
         }
 
-        this.categoryIngredients.set([]);
+        this.errorMessage.set('No se pudieron cargar los ingredientes. Vuelve a intentarlo.');
+        this.isLoadingSearchResults.set(false);
         this.isLoadingCategoryIngredients.set(false);
+        this.isLoadingMore.set(false);
       },
     });
+  }
+
+  loadMore() {
+    const page = this.nextPage();
+    if (page && !this.isLoadingMore()) this.loadIngredients(page);
   }
 
   addIngredient(ingredient: Ingredient) {

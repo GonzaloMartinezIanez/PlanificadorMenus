@@ -32,6 +32,10 @@
         @if (recipe()!.preparation_time) {
           <p>Tiempo de preparación: {{ recipe()!.preparation_time }} minutos</p>
         }
+        <p>
+          Fecha de creación:
+          <time [attr.datetime]="recipe()!.creation_date">{{ formattedCreationDate() }}</time>
+        </p>
 
         <mat-chip-set aria-label="Categorías de recetas de esta receta">
           @for (category of recipe()!.recipe_categories; track category.id) {
@@ -145,7 +149,7 @@
           </article>
         }
 
-        @if (comments().length === 0 && !myComment()) {
+        @if (comments().length === 0 && !myComment() && !isLoadingComments() && !commentsError()) {
           <p>Todavía no hay comentarios.</p>
         } @else {
           @if (comments().length > 0) {
@@ -170,6 +174,25 @@
               }
             </ul>
           }
+        }
+        @if (isLoadingComments()) {
+          <p class="status-message" role="status">Cargando comentarios...</p>
+        }
+        @if (commentsError()) {
+          <p class="error-message" role="alert">{{ commentsError() }}</p>
+          <button
+            mat-button
+            type="button"
+            (click)="nextCommentsPage() ? loadMoreComments() : loadComments(recipe()!.id)"
+            [disabled]="isLoadingComments()"
+          >
+            Reintentar
+          </button>
+        }
+        @if (nextCommentsPage()) {
+          <button mat-stroked-button type="button" (click)="loadMoreComments()" [disabled]="isLoadingComments()">
+            Cargar más comentarios
+          </button>
         }
       </section>
     } @else {

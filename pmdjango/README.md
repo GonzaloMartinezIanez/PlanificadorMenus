@@ -64,6 +64,33 @@ existente, salvo Uvicorn 0.54.0, que no estaba instalado localmente.
 
 ## Aplicaciones
 
+Las recetas guardan `creation_date` como fecha sin hora, con el día local de
+`Europe/Madrid`. El servidor la asigna al crear la receta y no admite cambios
+desde la API. La migración `recipes/0003_recipe_creation_date` asigna a todas las
+recetas existentes el día en que se ejecute la migración, sin fijar una fecha en
+el código. La web la muestra únicamente en el detalle completo de la receta.
+
+Los GET de `/ingredients/`, `/ingredient_by_name/`,
+`/ingredient_categories/{id}/ingredients/`, `/recipes/`, `/recipes/search/`,
+`/recipe_category/{id}/recipes/` y `/comments/{id}/` devuelven
+`{count, next, previous, results}`. Admiten `page` y `page_size` (máximo 100).
+Por defecto se devuelven 30 ingredientes, 24 recetas o 20 comentarios por página.
+Los filtros y permisos se aplican antes de paginar. Las recetas se ordenan por ID,
+los ingredientes por nombre e ID y los comentarios por ID descendente.
+
+`/recipes/top/` sigue devolviendo un array de hasta diez recetas. Categorías,
+grupos y listas de la compra conservan sus respuestas completas. Los POST y los
+endpoints de detalle no cambian de formato.
+
+`GET /menus/{codigo}/?from=YYYY-MM-DD&to=YYYY-MM-DD` devuelve todos los menús
+del intervalo, de hasta 31 días inclusivos, manteniendo el filtro de fechas desde
+hoy. Sin parámetros devuelve desde hoy hasta seis días después. Fechas inválidas,
+intervalos invertidos o demasiado largos devuelven 400. La web envía las fechas
+de la semana visible y consulta de nuevo al navegar entre semanas.
+
+Este cambio requiere actualizar el frontend junto al backend: los consumidores
+de los listados paginados deben leer `results` y recorrer las páginas necesarias.
+
 - `users`: usuarios de Google, login y JWT.
 - `groups`: grupos, miembros, roles e invitaciones.
 - `ingredients`: categorías e ingredientes.

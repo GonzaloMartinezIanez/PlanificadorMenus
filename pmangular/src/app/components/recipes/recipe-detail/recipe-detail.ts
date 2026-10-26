@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeComment } from '../../../models/recipe';
@@ -38,11 +39,18 @@ export class RecipeDetail implements OnInit {
   snackBar = inject(MatSnackBar);
 
   recipe = signal<Recipe | null>(null);
+  // Es una fecha de calendario: se muestra sin convertirla a una hora o zona horaria.
+  formattedCreationDate = computed(() => this.recipe()?.creation_date?.split('-').reverse().join('/') ?? '');
   stackRecipeSections = computed(() => {
     const recipe = this.recipe();
     return !!recipe && recipe.ingredients.length > 0 && recipe.ingredients.length >= recipe.steps.length * 1.5;
   });
   comments = signal<RecipeComment[]>([]);
+  nextCommentsPage = signal<number | null>(null);
+  isLoadingComments = signal(false);
+  commentsError = signal('');
+  private commentsRequestId = 0;
+  private destroyRef = inject(DestroyRef);
   myComment = signal<RecipeComment | null>(null);
   errorMessage = signal('');
   isLoading = signal(true);
@@ -93,15 +101,37 @@ export class RecipeDetail implements OnInit {
     });
   }
 
-  loadComments(id: number) {
-    this.recipeService.getCommentsByRecipeId(id).subscribe({
-      next: (comments) => {
-        this.comments.set(comments.filter((c) => c.user_id != this.authService.currentUserId()));
-      },
-      error: (err) => {
-        this.showError(err.error.error ?? 'No se pudieron cargar los comentarios.');
-      },
-    });
+  loadComments(id: number, page = 1) {
+    const requestId = ++this.commentsRequestId;
+    if (page === 1) {
+      this.comments.set([]);
+      this.nextCommentsPage.set(null);
+    }
+    this.isLoadingComments.set(true);
+    this.commentsError.set('');
+    this.recipeService
+      .getCommentsByRecipeId(id, page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (requestId !== this.commentsRequestId) return;
+          const comments = response.results.filter((c) => c.user_id != this.authService.currentUserId());
+          this.comments.update((current) => (page === 1 ? comments : [...current, ...comments]));
+          this.nextCommentsPage.set(response.next ? page + 1 : null);
+          this.isLoadingComments.set(false);
+        },
+        error: () => {
+          if (requestId !== this.commentsRequestId) return;
+          this.commentsError.set('No se pudieron cargar los comentarios. Vuelve a intentarlo.');
+          this.isLoadingComments.set(false);
+        },
+      });
+  }
+
+  loadMoreComments() {
+    const recipe = this.recipe();
+    const page = this.nextCommentsPage();
+    if (recipe && page && !this.isLoadingComments()) this.loadComments(recipe.id, page);
   }
 
   loadMyComment(id: number) {

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Recipe, RecipeCategory, RecipeComment } from '../models/recipe';
+import { PaginatedResponse } from '../models/paginated-response';
 
 @Injectable({
   providedIn: 'root',
@@ -10,17 +11,19 @@ import { Recipe, RecipeCategory, RecipeComment } from '../models/recipe';
 export class RecipeService {
   private http = inject(HttpClient);
 
-  getRecipes(): Observable<Recipe[]> {
-    return this.http.get<Recipe[]>(`${environment.apiUrl}/recipes/`);
+  getRecipes(page = 1): Observable<PaginatedResponse<Recipe>> {
+    return this.http.get<PaginatedResponse<Recipe>>(`${environment.apiUrl}/recipes/`, {
+      params: page > 1 ? { page } : {},
+    });
   }
 
-  searchRecipes(name: string, categoryIds: number[]): Observable<Recipe[]> {
+  searchRecipes(name: string, categoryIds: number[], page = 1): Observable<PaginatedResponse<Recipe>> {
     let url = `${environment.apiUrl}/recipes/search/?`;
-    if (name) url += `name=${name}&`;
+    if (name) url += `name=${encodeURIComponent(name)}&`;
 
     if (categoryIds.length > 0) url += `categories=${categoryIds.join(',')}`;
 
-    return this.http.get<Recipe[]>(url);
+    return this.http.get<PaginatedResponse<Recipe>>(url, { params: page > 1 ? { page } : {} });
   }
 
   getTopRecipes(): Observable<Recipe[]> {
@@ -47,8 +50,10 @@ export class RecipeService {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/recipes/${id}/`);
   }
 
-  getCommentsByRecipeId(id: number): Observable<RecipeComment[]> {
-    return this.http.get<RecipeComment[]>(`${environment.apiUrl}/comments/${id}/`);
+  getCommentsByRecipeId(id: number, page = 1): Observable<PaginatedResponse<RecipeComment>> {
+    return this.http.get<PaginatedResponse<RecipeComment>>(`${environment.apiUrl}/comments/${id}/`, {
+      params: page > 1 ? { page } : {},
+    });
   }
 
   getMyCommentByRecipeId(id: number): Observable<RecipeComment | { comment: null }> {

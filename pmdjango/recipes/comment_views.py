@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from groups.models import GroupMember
 from django.db.models import Avg, Count
+from config.pagination import CommentPagination, paginated_response
 
 
 def get_recipe(request, id):
@@ -56,9 +57,12 @@ class CommentApiView(APIView):
             return error
 
         comments = RecipeComment.objects.filter(recipe=recipe, comment__isnull=False)
-        serializer = CommentOutputSerializer(comments, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return paginated_response(
+            comments.order_by("-id"),
+            request,
+            CommentOutputSerializer,
+            CommentPagination,
+        )
 
     def post(self, request, id):
         serializer = CommentInputSerializer(data=request.data)
