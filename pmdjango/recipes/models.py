@@ -49,6 +49,7 @@ class IngredientInRecipe(models.Model):
 
 
 class RecipeComment(models.Model):
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     score = models.PositiveIntegerField(

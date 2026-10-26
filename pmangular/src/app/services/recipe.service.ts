@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Recipe, RecipeCategory, RecipeComment } from '../models/recipe';
+import { Recipe, RecipeCategory, RecipeComment, CommentOrder } from '../models/recipe';
 import { PaginatedResponse } from '../models/paginated-response';
 
 @Injectable({
@@ -50,9 +50,18 @@ export class RecipeService {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/recipes/${id}/`);
   }
 
-  getCommentsByRecipeId(id: number, page = 1): Observable<PaginatedResponse<RecipeComment>> {
+  getCommentsByRecipeId(
+    id: number,
+    page = 1,
+    order: CommentOrder = 'newest',
+    scores: number[] = [],
+  ): Observable<PaginatedResponse<RecipeComment>> {
     return this.http.get<PaginatedResponse<RecipeComment>>(`${environment.apiUrl}/comments/${id}/`, {
-      params: page > 1 ? { page } : {},
+      params: {
+        ...(page > 1 ? { page } : {}),
+        ...(order !== 'newest' ? { order } : {}),
+        ...(scores.length ? { scores: scores.join(',') } : {}),
+      },
     });
   }
 

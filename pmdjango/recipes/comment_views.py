@@ -1,5 +1,9 @@
 from .models import Recipe, RecipeComment
-from .serializers import CommentInputSerializer, CommentOutputSerializer
+from .serializers import (
+    CommentInputSerializer,
+    CommentOutputSerializer,
+    CommentFilterSerializer,
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -57,8 +61,26 @@ class CommentApiView(APIView):
             return error
 
         comments = RecipeComment.objects.filter(recipe=recipe, comment__isnull=False)
+        filters = CommentFilterSerializer(
+            data={
+                "order": request.query_params.get("order", "newest"),
+                "scores": (
+                    request.query_params["scores"].split(",")
+                    if request.query_params.get("scores")
+                    else []
+                ),
+            }
+        )
+        filters.is_valid(raise_exception=True)
+        if filters.validated_data["scores"]:
+            comments = comments.filter(score__in=filters.validated_data["scores"])
+        ordering = (
+            ("created_at", "id")
+            if filters.validated_data["order"] == "oldest"
+            else ("-created_at", "-id")
+        )
         return paginated_response(
-            comments.order_by("-id"),
+            comments.order_by(*ordering),
             request,
             CommentOutputSerializer,
             CommentPagination,

@@ -3,7 +3,8 @@ import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../../services/recipe.service';
-import { Recipe, RecipeComment } from '../../../models/recipe';
+import { Recipe, RecipeComment, CommentOrder } from '../../../models/recipe';
+import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../../../services/auth.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +28,7 @@ import { MatDialog } from '@angular/material/dialog';
     RouterLink,
     MatChipsModule,
     RecipeRating,
+    MatSelectModule,
   ],
   templateUrl: './recipe-detail.html',
   styleUrl: './recipe-detail.css',
@@ -46,6 +48,18 @@ export class RecipeDetail implements OnInit {
     return !!recipe && recipe.ingredients.length > 0 && recipe.ingredients.length >= recipe.steps.length * 1.5;
   });
   comments = signal<RecipeComment[]>([]);
+  commentOrder = signal<CommentOrder>('newest');
+  commentScores = signal<number[]>([]);
+  readonly scoreFilters = [5, 4, 3, 2, 1, 0];
+  private readonly commentDateFormatter = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  });
   nextCommentsPage = signal<number | null>(null);
   isLoadingComments = signal(false);
   commentsError = signal('');
@@ -110,7 +124,7 @@ export class RecipeDetail implements OnInit {
     this.isLoadingComments.set(true);
     this.commentsError.set('');
     this.recipeService
-      .getCommentsByRecipeId(id, page)
+      .getCommentsByRecipeId(id, page, this.commentOrder(), this.commentScores())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -132,6 +146,22 @@ export class RecipeDetail implements OnInit {
     const recipe = this.recipe();
     const page = this.nextCommentsPage();
     if (recipe && page && !this.isLoadingComments()) this.loadComments(recipe.id, page);
+  }
+
+  changeCommentOrder(order: CommentOrder) {
+    this.commentOrder.set(order);
+    const recipe = this.recipe();
+    if (recipe) this.loadComments(recipe.id);
+  }
+
+  changeCommentScores(scores: number[]) {
+    this.commentScores.set(scores);
+    const recipe = this.recipe();
+    if (recipe) this.loadComments(recipe.id);
+  }
+
+  formatCommentDate(value: string) {
+    return this.commentDateFormatter.format(new Date(value)).replace(', ', ' - ');
   }
 
   loadMyComment(id: number) {

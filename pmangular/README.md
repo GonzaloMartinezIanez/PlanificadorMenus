@@ -76,6 +76,12 @@ actual; los fallos permiten reintentar sin descartar las páginas ya cargadas.
 Las recetas populares siguen siendo un listado de hasta diez elementos.
 El calendario consulta el intervalo de la semana visible mediante `from` y `to`.
 
+Los comentarios permiten combinar el orden por fecha (recientes o antiguos)
+con varias puntuaciones. Cada cambio vuelve a la primera página; «Cargar más»
+conserva ambos filtros. La valoración propia queda separada de la lista filtrada.
+Las fechas de publicación se presentan mediante `Intl.DateTimeFormat` en
+`Europe/Madrid`, con día, mes, año, hora y minutos, sin segundos.
+
 ## Inicio de sesión compartido
 
 `core/google-login/` contiene el botón reutilizable de Google y el intercambio de

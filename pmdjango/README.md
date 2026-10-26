@@ -70,13 +70,26 @@ desde la API. La migración `recipes/0003_recipe_creation_date` asigna a todas l
 recetas existentes el día en que se ejecute la migración, sin fijar una fecha en
 el código. La web la muestra únicamente en el detalle completo de la receta.
 
+Los comentarios guardan `created_at` como instante con zona horaria, asignado por
+el servidor y conservado al editar. La migración `0004_recipecomment_created_at`
+rellena todos los comentarios existentes con el mismo momento de ejecución.
+La web muestra fecha y hora de Madrid sin segundos; se conserva la precisión del
+instante almacenado para ordenar correctamente.
+
+`GET /comments/{id}/` admite `order=newest` (predeterminado) u `order=oldest`,
+y `scores=5,4` para seleccionar una o varias puntuaciones entre 0 y 5. Sin
+`scores` se incluyen todas. Las puntuaciones seleccionadas se combinan entre sí
+con OR y con el orden elegido. Se filtra antes de paginar y se ordena por
+`created_at` e ID como desempate. Valores inválidos devuelven 400, conservando
+los permisos sobre la receta. El comentario propio sigue en su bloque separado.
+
 Los GET de `/ingredients/`, `/ingredient_by_name/`,
 `/ingredient_categories/{id}/ingredients/`, `/recipes/`, `/recipes/search/`,
 `/recipe_category/{id}/recipes/` y `/comments/{id}/` devuelven
 `{count, next, previous, results}`. Admiten `page` y `page_size` (máximo 100).
 Por defecto se devuelven 30 ingredientes, 24 recetas o 20 comentarios por página.
 Los filtros y permisos se aplican antes de paginar. Las recetas se ordenan por ID,
-los ingredientes por nombre e ID y los comentarios por ID descendente.
+los ingredientes por nombre e ID y los comentarios por fecha e ID descendentes.
 
 `/recipes/top/` sigue devolviendo un array de hasta diez recetas. Categorías,
 grupos y listas de la compra conservan sus respuestas completas. Los POST y los

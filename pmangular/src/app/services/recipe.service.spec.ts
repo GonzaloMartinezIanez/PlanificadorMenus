@@ -96,6 +96,14 @@ describe('RecipeService', () => {
     commentsRequest.flush({ count: 0, next: null, previous: null, results: [] });
   });
 
+  it('keeps comment order and multiple star filters when loading another page', () => {
+    service.getCommentsByRecipeId(4, 2, 'oldest', [5, 4]).subscribe();
+    const request = http.expectOne((req) => req.url.endsWith('/comments/4/') && req.params.get('page') === '2');
+    expect(request.request.params.get('order')).toBe('oldest');
+    expect(request.request.params.get('scores')).toBe('5,4');
+    request.flush({ count: 21, next: null, previous: '?page=1', results: [] });
+  });
+
   it('should get the current user comment', () => {
     service.getMyCommentByRecipeId(4).subscribe();
     const myCommentRequest = http.expectOne(`${environment.apiUrl}/comments/4/mine/`);

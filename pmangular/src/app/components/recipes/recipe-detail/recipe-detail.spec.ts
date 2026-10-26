@@ -3,11 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../../services/auth.service';
 import { RecipeService } from '../../../services/recipe.service';
-import { Recipe } from '../../../models/recipe';
+import { Recipe, RecipeComment } from '../../../models/recipe';
+import { PaginatedResponse } from '../../../models/paginated-response';
 import { RecipeDetail } from './recipe-detail';
 
 describe('RecipeDetail', () => {
@@ -74,7 +75,32 @@ describe('RecipeDetail', () => {
     component.loadComments(4, 2);
     expect(component.comments().map((comment) => comment.user_id)).toEqual([2, 3]);
     expect(component.nextCommentsPage()).toBeNull();
-    expect(recipeService.getCommentsByRecipeId).toHaveBeenLastCalledWith(4, 2);
+    expect(recipeService.getCommentsByRecipeId).toHaveBeenLastCalledWith(4, 2, 'newest', []);
+  });
+
+  it('combines order and multiple ratings, resets pages and ignores a late response', () => {
+    const old = new Subject<PaginatedResponse<RecipeComment>>();
+    // Solo es necesario el ID para las llamadas de filtrado de este caso.
+    component.recipe.set({ id: 4 } as Recipe);
+    recipeService.getCommentsByRecipeId
+      .mockReturnValueOnce(old)
+      .mockReturnValue(of({ count: 1, next: '?page=2', previous: null, results: [{ user_id: 2 }] }));
+    component.loadComments(4, 2);
+    component.changeCommentOrder('oldest');
+    component.changeCommentScores([5, 4]);
+    expect(recipeService.getCommentsByRecipeId).toHaveBeenLastCalledWith(4, 1, 'oldest', [5, 4]);
+    expect(component.comments().map((comment) => comment.user_id)).toEqual([2]);
+    old.next({ count: 0, next: null, previous: null, results: [] });
+    expect(component.comments().map((comment) => comment.user_id)).toEqual([2]);
+    component.loadMoreComments();
+    expect(recipeService.getCommentsByRecipeId).toHaveBeenLastCalledWith(4, 2, 'oldest', [5, 4]);
+    component.changeCommentScores([]);
+    expect(recipeService.getCommentsByRecipeId).toHaveBeenLastCalledWith(4, 1, 'oldest', []);
+  });
+
+  it('shows Madrid time without seconds across winter and summer offsets', () => {
+    expect(component.formatCommentDate('2026-01-15T23:45:59Z')).toBe('16/01/2026 - 00:45');
+    expect(component.formatCommentDate('2026-07-15T23:45:59Z')).toBe('16/07/2026 - 01:45');
   });
 
   it.each([

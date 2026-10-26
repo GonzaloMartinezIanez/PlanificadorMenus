@@ -20,12 +20,15 @@ export interface IngredientOption {
 }
 
 export interface RecipeComment {
+  created_at: string;
   recipe: string;
   user: string;
   user_id: number;
   score: number;
   comment: string | null;
 }
+
+export type CommentOrder = 'newest' | 'oldest';
 
 export interface Recipe {
   id: number;

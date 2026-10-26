@@ -7,6 +7,7 @@ from .models import RecipeCategory, Recipe, IngredientInRecipe, RecipeComment
 from django.utils import timezone
 from datetime import datetime, time, timedelta, timezone as datetime_timezone
 from unittest.mock import patch
+from django.utils.dateparse import parse_datetime
 
 User = get_user_model()
 
@@ -458,6 +459,106 @@ class RecipeAndCommentApiTests(APITestCase):
         response = self.client.get(f"/api/comments/{self.public_recipe.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_comment_timestamp_is_assigned_by_server_and_preserved_on_edit(self):
+        self.client.force_authenticate(user=self.owner)
+        url = f"/api/comments/{self.public_recipe.pk}/"
+        instant = timezone.now()
+        with patch("django.utils.timezone.datetime") as clock:
+            clock.now.return_value = instant
+            response = self.client.post(
+                url,
+                {
+                    "score": 5,
+                    "comment": "Nuevo",
+                    "created_at": (instant - timedelta(days=5)).isoformat(),
+                },
+                format="json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(parse_datetime(response.data["created_at"]), instant)
+        with patch(
+            "django.utils.timezone.now", return_value=instant + timedelta(days=1)
+        ):
+            response = self.client.put(
+                url,
+                {
+                    "score": 4,
+                    "comment": "Editado",
+                    "created_at": (instant + timedelta(days=1)).isoformat(),
+                },
+                format="json",
+            )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(parse_datetime(response.data["created_at"]), instant)
+        self.assertEqual(
+            parse_datetime(self.client.get(url + "mine/").data["created_at"]), instant
+        )
+
+    def test_comment_order_and_multiple_scores_combine_before_pagination(self):
+        self.client.force_authenticate(user=self.owner)
+        instant = timezone.now()
+        for user, score, days in [
+            (self.owner, 5, 1),
+            (self.groupmate, 3, 2),
+            (self.outsider, 1, 0),
+        ]:
+            RecipeComment.objects.create(
+                user=user,
+                recipe=self.public_recipe,
+                score=score,
+                comment="Texto",
+                created_at=instant - timedelta(days=days),
+            )
+        url = f"/api/comments/{self.public_recipe.pk}/"
+        self.assertEqual(
+            [row["score"] for row in self.client.get(url).data["results"]], [1, 5, 3]
+        )
+        self.assertEqual(
+            [
+                row["score"]
+                for row in self.client.get(url, {"order": "oldest"}).data["results"]
+            ],
+            [3, 5, 1],
+        )
+        first = self.client.get(
+            url, {"order": "oldest", "scores": "5,3", "page_size": 1}
+        )
+        self.assertEqual(first.data["count"], 2)
+        self.assertEqual(first.data["results"][0]["score"], 3)
+        second = self.client.get(first.data["next"])
+        self.assertEqual(second.data["results"][0]["score"], 5)
+        self.assertIsNone(second.data["next"])
+        self.assertEqual(self.client.get(url, {"scores": "2,4"}).data["count"], 0)
+        RecipeComment.objects.filter(recipe=self.public_recipe).update(
+            created_at=instant
+        )
+        self.assertEqual(
+            [row["score"] for row in self.client.get(url).data["results"]], [1, 3, 5]
+        )
+        self.client.force_authenticate(user=self.outsider)
+        self.assertEqual(
+            self.client.get(
+                f"/api/comments/{self.private_recipe.pk}/?order=oldest&scores=5"
+            ).status_code,
+            403,
+        )
+        self.client.force_authenticate(user=None)
+        self.assertEqual(self.client.get(url, {"scores": "5"}).status_code, 401)
+
+    def test_comment_filters_reject_invalid_order_or_scores(self):
+        self.client.force_authenticate(user=self.owner)
+        url = f"/api/comments/{self.public_recipe.pk}/"
+        for params in [
+            {"order": "invalid"},
+            {"scores": "6"},
+            {"scores": "-1"},
+            {"scores": "4,invalid"},
+            {"scores": "3,,5"},
+        ]:
+            with self.subTest(params=params):
+                self.assertEqual(self.client.get(url, params).status_code, 400)
+        self.assertEqual(self.client.get(url, {"scores": "0"}).status_code, 200)
 
     def test_create_comment_creates_rating_and_updates_recipe_score(self):
         self.client.force_authenticate(user=self.groupmate)

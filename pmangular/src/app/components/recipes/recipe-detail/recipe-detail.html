@@ -92,7 +92,12 @@
         @if (this.myComment()) {
           <article class="recipe-comment recipe-comment--mine">
             <div class="recipe-comment-header">
-              <strong>Tu valoración</strong>
+              <div>
+                <strong>Tu valoración</strong>
+                <time class="recipe-comment-date" [attr.datetime]="myComment()!.created_at">{{
+                  formatCommentDate(myComment()!.created_at)
+                }}</time>
+              </div>
               <app-recipe-rating [score]="myComment()!.score" />
             </div>
 
@@ -149,15 +154,51 @@
           </article>
         }
 
-        @if (comments().length === 0 && !myComment() && !isLoadingComments() && !commentsError()) {
-          <p>Todavía no hay comentarios.</p>
+        <div class="recipe-comment-filters">
+          <mat-form-field>
+            <mat-label>Orden de los comentarios</mat-label>
+            <mat-select [value]="commentOrder()" (selectionChange)="changeCommentOrder($event.value)">
+              <mat-option value="newest">Más recientes</mat-option>
+              <mat-option value="oldest">Más antiguos</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div>
+            <p class="recipe-comment-filter-label">Filtrar por valoración</p>
+            <mat-chip-listbox
+              multiple
+              aria-label="Filtrar comentarios por estrellas"
+              [value]="commentScores()"
+              (change)="changeCommentScores($event.value)"
+            >
+              @for (score of scoreFilters; track score) {
+                <mat-chip-option [value]="score"
+                  >{{ score }} {{ score === 1 ? 'estrella' : 'estrellas' }}</mat-chip-option
+                >
+              }
+            </mat-chip-listbox>
+          </div>
+        </div>
+
+        @if (comments().length === 0 && !isLoadingComments() && !commentsError()) {
+          <p>
+            {{
+              commentScores().length
+                ? 'No hay comentarios que coincidan con los filtros.'
+                : 'Todavía no hay comentarios de otros usuarios.'
+            }}
+          </p>
         } @else {
           @if (comments().length > 0) {
             <ul class="recipe-comment-list">
               @for (comment of comments(); track $index) {
                 <li class="recipe-comment">
                   <div class="recipe-comment-header">
-                    <strong>{{ comment.user }}</strong>
+                    <div>
+                      <strong>{{ comment.user }}</strong>
+                      <time class="recipe-comment-date" [attr.datetime]="comment.created_at">{{
+                        formatCommentDate(comment.created_at)
+                      }}</time>
+                    </div>
                     <app-recipe-rating [score]="comment.score" />
                   </div>
                   @if (comment.comment) {

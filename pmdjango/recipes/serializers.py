@@ -106,6 +106,13 @@ class CommentInputSerializer(serializers.ModelSerializer):
         fields = ["score", "comment"]
 
 
+class CommentFilterSerializer(serializers.Serializer):
+    order = serializers.ChoiceField(choices=["newest", "oldest"], default="newest")
+    scores = serializers.ListField(
+        child=serializers.IntegerField(min_value=0, max_value=5), default=list
+    )
+
+
 class CommentOutputSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source="user.username", read_only=True)
     user_id = serializers.CharField(source="user.id", read_only=True)
@@ -113,4 +120,5 @@ class CommentOutputSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeComment
-        fields = ["recipe", "user", "user_id", "score", "comment"]
+        fields = ["recipe", "user", "user_id", "score", "comment", "created_at"]
+        read_only_fields = ["created_at"]
