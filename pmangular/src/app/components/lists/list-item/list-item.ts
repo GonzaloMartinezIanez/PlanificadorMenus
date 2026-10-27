@@ -4,20 +4,27 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-list-item',
-  imports: [MatIconModule, MatButtonModule, MatInputModule, FormsModule],
+  imports: [MatIconModule, MatButtonModule, MatInputModule, FormsModule, MatTooltipModule],
   templateUrl: './list-item.html',
   styleUrl: './list-item.css',
 })
 export class ListItem {
   @Input() item: ListModel | null = null;
+  @Input() deleting = false;
+  @Output() removeItem = new EventEmitter<string>();
   @Output() changeItemStatus = new EventEmitter<ListStatusItem>();
   @Output() changeItemAmount = new EventEmitter<ListPatchItem>();
 
   editMode = signal(false);
   editedAmount = signal(0);
+
+  remove() {
+    if (this.item && !this.deleting) this.removeItem.emit(this.item.ingredient.id_ingredient);
+  }
 
   change(bought: boolean) {
     if (!this.item) {

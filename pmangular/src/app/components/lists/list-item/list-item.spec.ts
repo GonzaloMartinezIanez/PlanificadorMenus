@@ -20,6 +20,16 @@ describe('ListItem', () => {
     expect(component).toBeTruthy();
   });
 
+  it('emits the product identifier for complete removal and prevents repeated deletion', () => {
+    component.item = { ingredient: { id_ingredient: '10.1' }, amount: 7, unit: 'kg', bought: true } as ListModel;
+    const ids: string[] = [];
+    component.removeItem.subscribe((id) => ids.push(id));
+    component.remove();
+    component.deleting = true;
+    component.remove();
+    expect(ids).toEqual(['10.1']);
+  });
+
   it('should emit the product state change', () => {
     component.item = {
       ingredient: { id_ingredient: '1', name: 'Huevos' },

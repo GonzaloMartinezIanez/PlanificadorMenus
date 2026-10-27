@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../../services/auth.service';
 import { RecipeService } from '../../../services/recipe.service';
@@ -101,6 +101,41 @@ describe('RecipeDetail', () => {
   it('shows Madrid time without seconds across winter and summer offsets', () => {
     expect(component.formatCommentDate('2026-01-15T23:45:59Z')).toBe('16/01/2026 - 00:45');
     expect(component.formatCommentDate('2026-07-15T23:45:59Z')).toBe('16/07/2026 - 01:45');
+  });
+
+  it('keeps comments and pagination visible while replacing the filtered results', () => {
+    const oldComment: RecipeComment = {
+      recipe: '4',
+      user_id: 2,
+      user: 'Ana',
+      score: 5,
+      comment: 'Anterior',
+      created_at: '2026-01-15T12:00:00Z',
+    };
+    const newComment: RecipeComment = { ...oldComment, user_id: 3, user: 'Luis', score: 4, comment: 'Nuevo' };
+    const pending = new Subject<PaginatedResponse<RecipeComment>>();
+    component.comments.set([oldComment]);
+    component.nextCommentsPage.set(3);
+    recipeService.getCommentsByRecipeId.mockReturnValueOnce(pending);
+    component.loadComments(4);
+    expect(component.comments()).toEqual([oldComment]);
+    expect(component.nextCommentsPage()).toBe(3);
+    expect(component.isLoadingComments()).toBe(true);
+    pending.next({ count: 1, next: null, previous: null, results: [newComment] });
+    expect(component.comments()).toEqual([newComment]);
+    expect(component.nextCommentsPage()).toBeNull();
+    expect(component.isLoadingComments()).toBe(false);
+  });
+
+  it('keeps the displayed results after a failed filter change and retries the first page', () => {
+    component.comments.set([{ user_id: 2 } as RecipeComment]);
+    component.nextCommentsPage.set(3);
+    recipeService.getCommentsByRecipeId.mockReturnValueOnce(throwError(() => new Error('Network')));
+    component.loadComments(4);
+    expect(component.comments().map((comment) => comment.user_id)).toEqual([2]);
+    expect(component.nextCommentsPage()).toBeNull();
+    expect(component.commentsError()).not.toBe('');
+    expect(component.isLoadingComments()).toBe(false);
   });
 
   it.each([

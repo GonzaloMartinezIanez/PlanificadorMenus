@@ -4,6 +4,9 @@ from rest_framework.test import APITestCase
 from groups.models import Group, GroupMember
 from ingredients.models import Ingredient, IngredientCategory
 from .models import List
+from recipes.models import Recipe, IngredientInRecipe
+from menus.models import Menu
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -283,3 +286,100 @@ class ListApiTests(APITestCase):
         response = self.client.delete(f"/api/lists/{self.group.group_code}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_single_product_removes_all_amount_only_from_target_group(self):
+        other_group = Group.objects.create(
+            group_code="OTHERLIST", group_name="Otro grupo"
+        )
+        target = List.objects.create(
+            group=self.group,
+            ingredient=self.ingredient_milk,
+            amount="7.000",
+            unit="l",
+            bought=True,
+        )
+        remaining = List.objects.create(
+            group=self.group,
+            ingredient=self.ingredient_bread,
+            amount="1.000",
+            unit="ud",
+        )
+        other = List.objects.create(
+            group=other_group, ingredient=self.ingredient_milk, amount="2.000", unit="l"
+        )
+        self.client.force_authenticate(user=self.member)
+        response = self.client.delete(
+            f"/api/lists/{self.group.group_code}/{self.ingredient_milk.pk}/"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(List.objects.filter(pk=target.pk).exists())
+        self.assertTrue(List.objects.filter(pk=remaining.pk).exists())
+        self.assertTrue(List.objects.filter(pk=other.pk).exists())
+        self.assertTrue(Ingredient.objects.filter(pk=self.ingredient_milk.pk).exists())
+        response = self.client.get(f"/api/lists/{self.group.group_code}/")
+        self.assertEqual(len(response.data["items"]), 1)
+        self.assertEqual(str(response.data["total_price"]), "0.90")
+
+    def test_delete_single_product_checks_authentication_membership_and_existence(self):
+        item = List.objects.create(
+            group=self.group, ingredient=self.ingredient_milk, amount="2.000", unit="l"
+        )
+        url = f"/api/lists/{self.group.group_code}/{self.ingredient_milk.pk}/"
+        self.assertEqual(self.client.delete(url).status_code, 401)
+        self.client.force_authenticate(user=self.outsider)
+        self.assertEqual(self.client.delete(url).status_code, 403)
+        self.client.force_authenticate(user=self.member)
+        GroupMember.objects.filter(group=self.group, user=self.member).update(
+            accepted=False
+        )
+        self.assertEqual(self.client.delete(url).status_code, 403)
+        self.client.force_authenticate(user=self.owner)
+        self.assertEqual(
+            self.client.delete(
+                f"/api/lists/{self.group.group_code}/{self.ingredient_bread.pk}/"
+            ).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.client.delete(
+                f"/api/lists/MISSING/{self.ingredient_milk.pk}/"
+            ).status_code,
+            404,
+        )
+        self.assertTrue(List.objects.filter(pk=item.pk).exists())
+
+    def test_deleting_a_planned_product_keeps_the_menu_and_allows_replanning(self):
+        recipe = Recipe.objects.create(
+            user=self.owner, name="Leche", visibility="PUBLIC", steps=[]
+        )
+        IngredientInRecipe.objects.create(
+            recipe=recipe, ingredient=self.ingredient_milk, amount="1.000", unit="l"
+        )
+        self.client.force_authenticate(user=self.member)
+        menu_url = f"/api/menus/{self.group.group_code}/"
+        data = {
+            "id_recipe": recipe.pk,
+            "date": timezone.localdate().isoformat(),
+            "time": "BREAKFAST",
+        }
+        self.assertEqual(
+            self.client.post(menu_url, data, format="json").status_code, 201
+        )
+        self.assertEqual(
+            self.client.delete(
+                f"/api/lists/{self.group.group_code}/{self.ingredient_milk.pk}/"
+            ).status_code,
+            200,
+        )
+        self.assertTrue(Menu.objects.filter(group=self.group, recipe=recipe).exists())
+        self.assertTrue(IngredientInRecipe.objects.filter(recipe=recipe).exists())
+        self.assertEqual(
+            self.client.delete(menu_url, data, format="json").status_code, 200
+        )
+        self.assertEqual(
+            self.client.post(menu_url, data, format="json").status_code, 201
+        )
+        self.assertEqual(
+            List.objects.get(group=self.group, ingredient=self.ingredient_milk).amount,
+            1,
+        )

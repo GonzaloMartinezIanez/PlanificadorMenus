@@ -68,6 +68,11 @@ No incluyas tokens de acceso ni secretos en estos ficheros.
 
 ## Carga de listados
 
+La papelera de cada producto elimina su fila completa de la lista del grupo y
+actualiza los productos y el total desde el servidor. Está disponible también
+para productos comprados. No elimina el ingrediente del catálogo ni las recetas
+del calendario; planificar de nuevo una receta puede volver a añadirlo a la lista.
+
 Los servicios de ingredientes, búsquedas de recetas y comentarios usan
 `PaginatedResponse<T>` (`count`, `next`, `previous`, `results`). Las pantallas
 añaden resultados con «Cargar más» y vuelven a la primera página al cambiar los
@@ -81,6 +86,9 @@ con varias puntuaciones. Cada cambio vuelve a la primera página; «Cargar más�
 conserva ambos filtros. La valoración propia queda separada de la lista filtrada.
 Las fechas de publicación se presentan mediante `Intl.DateTimeFormat` en
 `Europe/Madrid`, con día, mes, año, hora y minutos, sin segundos.
+Al actualizar los filtros se mantiene la lista anterior hasta recibir la respuesta
+y se reutilizan los elementos por usuario. El mensaje de carga reserva espacio
+con `app-loading-status` para evitar parpadeos y saltos de altura durante la petición.
 
 ## Inicio de sesión compartido
 

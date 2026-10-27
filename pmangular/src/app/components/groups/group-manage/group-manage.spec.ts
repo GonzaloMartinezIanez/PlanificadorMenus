@@ -2,24 +2,28 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../../services/auth.service';
 import { GroupService } from '../../../services/group.service';
 import { GroupManage } from './group-manage';
+import { GroupMember } from '../../../models/group';
 
 describe('GroupManage', () => {
   let component: GroupManage;
   let fixture: ComponentFixture<GroupManage>;
-  const authService = { currentUserId: signal(1) };
-  const groupService = {};
-  const router = { navigate: vi.fn(), events: { pipe: vi.fn() } };
+  const authService = { currentUserId: signal(1), isAuthenticated: signal(true) };
+  const groupService = { getMyGroups: vi.fn(), getGroupMembers: vi.fn() };
+  const router = { navigate: vi.fn(), events: new Subject<NavigationEnd>() };
   const route = { root: { snapshot: { paramMap: { get: vi.fn() } } } };
   const snackBar = { open: vi.fn() };
   const dialog = { open: vi.fn() };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    authService.isAuthenticated.set(true);
+    router.events = new Subject<NavigationEnd>();
     await TestBed.configureTestingModule({
       imports: [GroupManage],
       providers: [
@@ -30,7 +34,9 @@ describe('GroupManage', () => {
         { provide: MatSnackBar, useValue: snackBar },
         { provide: MatDialog, useValue: dialog },
       ],
-    }).compileComponents();
+    })
+      .overrideProvider(MatSnackBar, { useValue: snackBar })
+      .compileComponents();
 
     fixture = TestBed.createComponent(GroupManage);
     component = fixture.componentInstance;
@@ -38,6 +44,45 @@ describe('GroupManage', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('stops route listeners and pending member requests when leaving group management', () => {
+    const pending = new Subject<GroupMember[]>();
+    groupService.getMyGroups.mockReturnValue(of([]));
+    groupService.getGroupMembers.mockReturnValue(pending);
+    route.root.snapshot.paramMap.get.mockReturnValue('ABC12345');
+    vi.spyOn(component, 'loadQRCode').mockImplementation(() => {});
+    component.ngOnInit();
+    expect(groupService.getGroupMembers).toHaveBeenCalledTimes(1);
+    expect(pending.observed).toBe(true);
+    fixture.destroy();
+    expect(pending.observed).toBe(false);
+    router.events.next(new NavigationEnd(1, '/login', '/login'));
+    expect(groupService.getGroupMembers).toHaveBeenCalledTimes(1);
+    expect(snackBar.open).not.toHaveBeenCalled();
+  });
+
+  it('does not request members without a session or show an error after signing out', () => {
+    component.selectedGroupCode.set('ABC12345');
+    const pending = new Subject<GroupMember[]>();
+    groupService.getGroupMembers.mockReturnValue(pending);
+    component.loadGroupMembers();
+    authService.isAuthenticated.set(false);
+    pending.error({ error: {} });
+    component.loadGroupMembers();
+    expect(groupService.getGroupMembers).toHaveBeenCalledTimes(1);
+    expect(snackBar.open).not.toHaveBeenCalled();
+  });
+
+  it('still reports genuine member loading errors while signed in', () => {
+    component.selectedGroupCode.set('ABC12345');
+    groupService.getGroupMembers.mockReturnValue(throwError(() => ({ error: {} })));
+    component.loadGroupMembers();
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'No se pudieron cargar los miembros del grupo.',
+      'Cerrar',
+      expect.any(Object),
+    );
   });
 
   it('should synchronize the form with the selected group and detect changes', () => {

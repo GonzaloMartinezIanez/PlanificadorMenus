@@ -117,10 +117,6 @@ export class RecipeDetail implements OnInit {
 
   loadComments(id: number, page = 1) {
     const requestId = ++this.commentsRequestId;
-    if (page === 1) {
-      this.comments.set([]);
-      this.nextCommentsPage.set(null);
-    }
     this.isLoadingComments.set(true);
     this.commentsError.set('');
     this.recipeService
@@ -136,6 +132,7 @@ export class RecipeDetail implements OnInit {
         },
         error: () => {
           if (requestId !== this.commentsRequestId) return;
+          if (page === 1) this.nextCommentsPage.set(null);
           this.commentsError.set('No se pudieron cargar los comentarios. Vuelve a intentarlo.');
           this.isLoadingComments.set(false);
         },

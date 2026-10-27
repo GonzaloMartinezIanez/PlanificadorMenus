@@ -1,4 +1,7 @@
-import { Component, computed, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { ListService } from '../../services/list.service';
 import { ListModel, ListPatchItem, ListStatusItem } from '../../models/lists';
@@ -24,6 +27,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
+    MatSnackBarModule,
   ],
   templateUrl: './list.html',
   styleUrl: './list.css',
@@ -35,6 +39,9 @@ export class List implements OnInit {
   listService = inject(ListService);
   ingredientService = inject(IngredientService);
   dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
+  deletingItems = signal<Set<string>>(new Set());
 
   groupCode = signal<string | null>(null);
   list = signal<ListModel[]>([]);
@@ -108,12 +115,56 @@ export class List implements OnInit {
   }
 
   loadList() {
-    this.listService.getLists(this.groupCode() || '').subscribe({
-      next: (response) => {
-        this.list.set(response.items);
-        this.totalPrice.set(response.total_price);
-      },
-    });
+    const groupCode = this.groupCode();
+    if (!groupCode) return;
+    this.listService
+      .getLists(groupCode)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (this.groupCode() !== groupCode) return;
+          this.list.set(response.items);
+          this.totalPrice.set(response.total_price);
+          const category = this.selectedCategory();
+          if (
+            category !== null &&
+            !response.items.some(
+              (item) => this.getMainCategory(item.ingredient.id_ingredient_categories[0]) === category,
+            )
+          )
+            this.selectedCategory.set(null);
+        },
+      });
+  }
+
+  deleteItem(id: string) {
+    const groupCode = this.groupCode();
+    if (!groupCode || this.deletingItems().has(id)) return;
+    this.deletingItems.update((ids) => new Set(ids).add(id));
+    this.listService
+      .deleteListItem(groupCode, id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() =>
+          this.deletingItems.update((ids) => {
+            const remaining = new Set(ids);
+            remaining.delete(id);
+            return remaining;
+          }),
+        ),
+      )
+      .subscribe({
+        next: () => {
+          if (this.groupCode() === groupCode) this.loadList();
+        },
+        error: () => {
+          if (this.groupCode() !== groupCode) return;
+          this.snackBar.open('No se pudo eliminar el producto. Vuelve a intentarlo.', 'Cerrar', {
+            duration: 4000,
+            panelClass: ['snackbar-error'],
+          });
+        },
+      });
   }
 
   deleteList() {

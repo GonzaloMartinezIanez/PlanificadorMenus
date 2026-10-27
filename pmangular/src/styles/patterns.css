@@ -1,4 +1,9 @@
 /* Patrones visuales reutilizables; la distribución particular vive en cada componente. */
+.app-loading-status {
+  min-height: 1.65em;
+  margin: var(--app-space-2) 0;
+}
+
 .app-page-heading {
   display: flex;
   align-items: center;

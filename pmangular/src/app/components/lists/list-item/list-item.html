@@ -59,4 +59,15 @@
       <button mat-button type="button" (click)="editMode.set(false)">Volver</button>
     </div>
   }
+  <button
+    class="shopping-list-item-delete button-danger"
+    mat-icon-button
+    type="button"
+    [attr.aria-label]="'Eliminar ' + (item?.ingredient?.name ?? 'producto') + ' de la lista'"
+    matTooltip="Eliminar producto"
+    [disabled]="!item || deleting"
+    (click)="remove()"
+  >
+    <mat-icon>delete</mat-icon>
+  </button>
 </div>

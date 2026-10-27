@@ -48,7 +48,8 @@
   align-items: center;
   gap: var(--app-space-2);
 }
-.button-delete {
+.button-delete,
+.comment-delete {
   margin-left: auto;
 }
 .recipe-detail-preparation {
@@ -179,7 +180,6 @@
 }
 .recipe-comment-form mat-form-field {
   flex: 1;
-  width: 100%;
   min-width: 0;
 }
 .recipe-comment-actions {

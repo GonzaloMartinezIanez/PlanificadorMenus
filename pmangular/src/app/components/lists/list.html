@@ -123,6 +123,8 @@
       @for (item of filteredList(); track item.ingredient.id_ingredient) {
         <app-list-item
           [item]="item"
+          [deleting]="deletingItems().has(item.ingredient.id_ingredient)"
+          (removeItem)="deleteItem($event)"
           (changeItemStatus)="changeItemStatus($event)"
           (changeItemAmount)="changeItemAmount($event)"
         />

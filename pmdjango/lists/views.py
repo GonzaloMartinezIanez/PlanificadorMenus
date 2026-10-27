@@ -86,6 +86,23 @@ class ListApiView(APIView):
 class ListPatchApiView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def delete(self, request, group_code, id_ingredient):
+        group, error = get_my_group(request, group_code)
+        if error:
+            return error
+        deleted, _ = List.objects.filter(
+            group=group, ingredient_id=id_ingredient
+        ).delete()
+        if not deleted:
+            return Response(
+                {"error": "El producto no existe en la lista."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(
+            {"message": "Producto eliminado de la lista de la compra."},
+            status=status.HTTP_200_OK,
+        )
+
     # Endpoint para cambiar la cantidad, la unidad o el estado de "comprado" de un producto
     def patch(self, request, group_code, id_ingredient):
         group, error = get_my_group(request, group_code)

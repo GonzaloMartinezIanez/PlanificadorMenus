@@ -125,6 +125,12 @@ html {
 }
 
 .button-danger {
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--app-color-error),
+      state-layer-color: var(--app-color-error),
+    )
+  );
   @include mat.button-overrides(
     (
       filled-container-color: var(--app-color-error),

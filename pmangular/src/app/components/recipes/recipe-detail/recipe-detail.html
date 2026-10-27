@@ -128,7 +128,9 @@
             } @else {
               <div class="recipe-comment-actions">
                 <button mat-button type="button" (click)="startEditMyComment()">Modificar mi comentario</button>
-                <button mat-button type="button" (click)="deleteMyComment()">Borrar mi comentario</button>
+                <button class="button-danger comment-delete" mat-button type="button" (click)="deleteMyComment()">
+                  Borrar mi comentario
+                </button>
               </div>
             }
           </article>
@@ -179,6 +181,9 @@
           </div>
         </div>
 
+        <p class="app-loading-status status-message" role="status">
+          {{ isLoadingComments() ? 'Cargando comentarios...' : '' }}
+        </p>
         @if (comments().length === 0 && !isLoadingComments() && !commentsError()) {
           <p>
             {{
@@ -189,8 +194,8 @@
           </p>
         } @else {
           @if (comments().length > 0) {
-            <ul class="recipe-comment-list">
-              @for (comment of comments(); track $index) {
+            <ul class="recipe-comment-list" [attr.aria-busy]="isLoadingComments()">
+              @for (comment of comments(); track comment.user_id) {
                 <li class="recipe-comment">
                   <div class="recipe-comment-header">
                     <div>
@@ -206,7 +211,12 @@
                   }
                   @if (isRecipeOwner()) {
                     <div class="recipe-comment-actions">
-                      <button mat-button type="button" (click)="deleteCommentText(comment.user_id)">
+                      <button
+                        class="button-danger comment-delete"
+                        mat-button
+                        type="button"
+                        (click)="deleteCommentText(comment.user_id)"
+                      >
                         Eliminar texto del comentario
                       </button>
                     </div>
@@ -215,9 +225,6 @@
               }
             </ul>
           }
-        }
-        @if (isLoadingComments()) {
-          <p class="status-message" role="status">Cargando comentarios...</p>
         }
         @if (commentsError()) {
           <p class="error-message" role="alert">{{ commentsError() }}</p>

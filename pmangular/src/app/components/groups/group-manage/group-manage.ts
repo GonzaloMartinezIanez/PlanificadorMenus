@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupService } from '../../../services/group.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { GroupMember, GroupModel } from '../../../models/group';
@@ -41,6 +42,7 @@ export class GroupManage implements OnInit {
   route = inject(ActivatedRoute);
   snackBar = inject(MatSnackBar);
   dialog = inject(MatDialog);
+  private destroyRef = inject(DestroyRef);
 
   displayedAcceptedColumns = computed(() => {
     if (this.isAdmin()) {
@@ -95,20 +97,28 @@ export class GroupManage implements OnInit {
   ngOnInit(): void {
     this.updateSelectedGroupFromUrl();
 
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      this.updateSelectedGroupFromUrl();
-      this.syncGroupForm();
-      this.loadQRCode();
-      this.loadGroupMembers();
-    });
-
-    this.groupService.getMyGroups().subscribe({
-      next: (groups) => {
-        this.myGroups.set(groups);
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.updateSelectedGroupFromUrl();
         this.syncGroupForm();
         this.loadQRCode();
-      },
-    });
+        this.loadGroupMembers();
+      });
+
+    this.groupService
+      .getMyGroups()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (groups) => {
+          this.myGroups.set(groups);
+          this.syncGroupForm();
+          this.loadQRCode();
+        },
+      });
 
     this.syncGroupForm();
     this.loadQRCode();
@@ -252,9 +262,7 @@ export class GroupManage implements OnInit {
     }
 
     const groupCode = currentRoute.snapshot.paramMap.get('group_code');
-    if (groupCode) {
-      this.selectedGroupCode.set(groupCode);
-    }
+    this.selectedGroupCode.set(groupCode ?? '');
   }
 
   syncGroupForm() {
@@ -277,18 +285,24 @@ export class GroupManage implements OnInit {
   }
 
   loadGroupMembers() {
-    if (!this.selectedGroupCode()) {
+    const groupCode = this.selectedGroupCode();
+    if (!groupCode || !this.authService.isAuthenticated()) {
       return;
     }
 
-    this.groupService.getGroupMembers(this.selectedGroupCode()).subscribe({
-      next: (res) => {
-        this.groupMembers.set(res);
-      },
-      error: (err) => {
-        this.showError(err.error.error ?? 'No se pudieron cargar los miembros del grupo.');
-      },
-    });
+    this.groupService
+      .getGroupMembers(groupCode)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (!this.authService.isAuthenticated() || this.selectedGroupCode() !== groupCode) return;
+          this.groupMembers.set(res);
+        },
+        error: (err) => {
+          if (!this.authService.isAuthenticated() || this.selectedGroupCode() !== groupCode) return;
+          this.showError(err.error?.error ?? 'No se pudieron cargar los miembros del grupo.');
+        },
+      });
   }
 
   updatePendingMember(user_id: number, accepted: boolean) {

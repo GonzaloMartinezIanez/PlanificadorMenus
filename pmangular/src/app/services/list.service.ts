@@ -36,4 +36,10 @@ export class ListService {
   deleteList(group_code: string): Observable<MessageModel> {
     return this.http.delete<MessageModel>(`${environment.apiUrl}/lists/${group_code}/`);
   }
+
+  deleteListItem(group_code: string, id_ingredient: string): Observable<MessageModel> {
+    return this.http.delete<MessageModel>(
+      `${environment.apiUrl}/lists/${group_code}/${encodeURIComponent(id_ingredient)}/`,
+    );
+  }
 }

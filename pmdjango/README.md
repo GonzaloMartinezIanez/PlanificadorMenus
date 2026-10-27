@@ -64,6 +64,11 @@ existente, salvo Uvicorn 0.54.0, que no estaba instalado localmente.
 
 ## Aplicaciones
 
+`DELETE /lists/{codigo}/{id_ingrediente}/` elimina toda la fila de ese producto
+de la lista del grupo, con independencia de su cantidad o estado comprado.
+Requiere pertenencia aceptada al grupo y devuelve 404 si la fila no existe.
+No borra el ingrediente del catálogo, los menús ni las relaciones con recetas.
+
 Las recetas guardan `creation_date` como fecha sin hora, con el día local de
 `Europe/Madrid`. El servidor la asigna al crear la receta y no admite cambios
 desde la API. La migración `recipes/0003_recipe_creation_date` asigna a todas las

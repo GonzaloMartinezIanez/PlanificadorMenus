@@ -61,4 +61,11 @@ describe('ListService', () => {
     expect(request.request.method).toBe('DELETE');
     request.flush({ message: 'Eliminada' });
   });
+
+  it('deletes one product using its exact identifier and group', () => {
+    service.deleteListItem('ABC123', '10.1').subscribe();
+    const request = http.expectOne(`${environment.apiUrl}/lists/ABC123/10.1/`);
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ message: 'Producto eliminado' });
+  });
 });
