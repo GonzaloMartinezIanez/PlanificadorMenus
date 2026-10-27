@@ -1,16 +1,17 @@
 .calendar-day {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 24.375rem;
-  padding: var(--app-space-3);
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  min-width: 0;
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-card);
   background: var(--app-color-surface);
 }
 .calendar-day h2 {
-  margin: 0 0 var(--app-space-2);
-  padding: var(--app-space-2) 0 var(--app-space-4);
+  align-content: center;
+  margin: 0;
+  padding: var(--app-space-4) var(--app-space-3);
+  border-radius: var(--app-radius-card) var(--app-radius-card) 0 0;
   border-bottom: 1px solid var(--app-color-border);
   text-align: center;
   font-size: var(--app-font-small);
@@ -31,19 +32,9 @@
   box-shadow: 0 0 0 1px var(--app-color-accent);
 }
 .calendar-day--today h2 {
-  margin: calc(-1 * var(--app-space-3)) calc(-1 * var(--app-space-3)) var(--app-space-2);
-  padding: var(--app-space-4) var(--app-space-3);
-  border-radius: var(--app-radius-card) var(--app-radius-card) 0 0;
   background: var(--app-color-accent-soft);
   color: var(--app-color-accent-text);
 }
-.calendar-day-past-text {
-  margin: auto 0;
-  padding-block: var(--app-space-6);
-  color: var(--app-color-text-muted);
-  text-align: center;
-  font-size: var(--app-font-small);
-}
-app-day-mealtime {
-  flex: 1;
+app-day-mealtime + app-day-mealtime {
+  border-top: 1px solid var(--app-color-border);
 }

@@ -101,8 +101,10 @@ grupos y listas de la compra conservan sus respuestas completas. Los POST y los
 endpoints de detalle no cambian de formato.
 
 `GET /menus/{codigo}/?from=YYYY-MM-DD&to=YYYY-MM-DD` devuelve todos los menús
-del intervalo, de hasta 31 días inclusivos, manteniendo el filtro de fechas desde
-hoy. Sin parámetros devuelve desde hoy hasta seis días después. Fechas inválidas,
+del intervalo, de hasta 31 días inclusivos, incluyendo fechas pasadas.
+Sin parámetros devuelve la semana actual completa, de lunes a domingo, según
+`Europe/Madrid`. Los POST y DELETE siguen rechazando fechas anteriores a hoy.
+Fechas inválidas,
 intervalos invertidos o demasiado largos devuelven 400. La web envía las fechas
 de la semana visible y consulta de nuevo al navegar entre semanas.
 

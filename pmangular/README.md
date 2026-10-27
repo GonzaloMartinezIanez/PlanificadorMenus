@@ -80,6 +80,17 @@ filtros. Una respuesta anterior no puede sustituir los resultados de la búsqued
 actual; los fallos permiten reintentar sin descartar las páginas ya cargadas.
 Las recetas populares siguen siendo un listado de hasta diez elementos.
 El calendario consulta el intervalo de la semana visible mediante `from` y `to`.
+Permite navegar también a semanas anteriores. Los días pasados muestran las
+recetas y sus enlaces en modo de consulta, sin añadir ni eliminar; el backend
+mantiene las mismas restricciones de escritura. Si cambia la semana a medianoche,
+la vista actual avanza, pero una semana histórica seleccionada se conserva.
+La cuadrícula del calendario comparte las filas de fecha, desayuno, comida y cena
+mediante CSS `subgrid`, también entre componentes. Las filas de comidas crecen
+según sus recetas y permanecen alineadas entre días. El calendario ocupa al menos
+la altura disponible del layout, con desplazamiento horizontal en móvil.
+Cada receta del calendario tiene una papelera compacta junto al nombre. El botón
+«+» usa el color primario y ocupa el espacio libre del turno; ambos controles
+conservan etiquetas accesibles y solo aparecen en días editables.
 
 Los comentarios permiten combinar el orden por fecha (recientes o antiguos)
 con varias puntuaciones. Cada cambio vuelve a la primera página; «Cargar más»

@@ -124,6 +124,14 @@ html {
   );
 }
 
+.day-mealtime-add {
+  @include mat.button-overrides(
+    (
+      outlined-container-height: auto,
+    )
+  );
+}
+
 .button-danger {
   @include mat.icon-button-overrides(
     (

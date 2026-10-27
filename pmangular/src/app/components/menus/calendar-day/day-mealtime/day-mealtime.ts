@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { MenuModel } from '../../../../models/menu';
 import { Recipe } from '../../../../models/recipe';
@@ -9,7 +11,7 @@ import { RecipeSearch } from '../../../recipes/recipe-search/recipe-search';
 
 @Component({
   selector: 'app-day-mealtime',
-  imports: [CommonModule, MatButtonModule, RouterLink, RecipeSearch],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, RouterLink, RecipeSearch],
   templateUrl: './day-mealtime.html',
   styleUrl: './day-mealtime.css',
 })
@@ -21,11 +23,13 @@ export class DayMealtime {
   @Input() title = '';
   @Input() time = '';
   @Input() menus: MenuModel[] = [];
+  @Input() readOnly = false;
 
   @Output() addRecipe = new EventEmitter<{ recipe: Recipe; time: string }>();
   @Output() deleteRecipe = new EventEmitter<{ id_recipe: number; time: string }>();
 
   openRecipeSearch() {
+    if (this.readOnly) return;
     const dialogRef = this.dialog.open(this.recipeSearchDialog, {
       width: '95vw',
       maxWidth: '95vw',
@@ -35,7 +39,7 @@ export class DayMealtime {
 
     dialogRef.afterClosed().subscribe({
       next: (recipe: Recipe | undefined) => {
-        if (!recipe) {
+        if (!recipe || this.readOnly) {
           return;
         }
 
@@ -48,6 +52,7 @@ export class DayMealtime {
   }
 
   selectRecipe(recipe: Recipe) {
+    if (this.readOnly) return;
     this.dialog.closeAll();
 
     this.addRecipe.emit({
@@ -62,6 +67,7 @@ export class DayMealtime {
   }
 
   onDeleteRecipe(id_recipe: number) {
+    if (this.readOnly) return;
     this.deleteRecipe.emit({
       id_recipe,
       time: this.time,

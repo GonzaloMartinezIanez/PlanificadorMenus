@@ -7,14 +7,14 @@
   flex-direction: column;
   flex: 1;
   gap: var(--app-space-2);
-  margin-top: var(--app-space-2);
-  padding: var(--app-space-3) 0;
+  min-width: 0;
+  padding: var(--app-space-4) var(--app-space-3);
 }
 .day-mealtime h3 {
   margin: 0;
-  color: var(--app-color-text-muted);
-  font-size: var(--app-font-caption);
-  font-weight: 500;
+  color: var(--app-color-text);
+  font-size: var(--app-font-small);
+  font-weight: 600;
 }
 .day-mealtime-recipes {
   display: flex;
@@ -22,16 +22,17 @@
   gap: var(--app-space-2);
 }
 .day-mealtime-recipe {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--app-space-2);
-  padding: var(--app-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--app-space-1);
+  padding: var(--app-space-2);
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-sm);
-  background: var(--app-color-surface-muted);
+  background: var(--app-color-surface);
 }
 .day-mealtime-recipe a {
+  align-self: center;
   overflow-wrap: anywhere;
   color: var(--app-color-accent-text);
   font-size: var(--app-font-small);
@@ -41,16 +42,18 @@
 .day-mealtime-recipe a:hover {
   text-decoration: underline;
 }
-.day-mealtime-recipe button {
-  align-self: flex-end;
-  font-size: var(--app-font-caption);
-}
 .day-mealtime-add {
+  flex: 1;
   width: 100%;
-  margin-top: auto;
+  min-height: 3rem;
   border: 1px dashed var(--app-color-control-border);
   background: var(--app-color-surface);
-  font-size: var(--app-font-caption);
+}
+.day-mealtime-add-symbol {
+  color: var(--app-color-accent);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
 }
 .day-mealtime-search-dialog {
   flex: 1;

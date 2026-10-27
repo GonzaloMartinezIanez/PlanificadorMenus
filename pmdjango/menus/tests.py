@@ -119,7 +119,18 @@ class MenuApiTests(APITestCase):
                 time="LUNCH",
             )
         url = f"/api/menus/{self.group.group_code}/"
-        self.assertEqual(len(self.client.get(url).data), 2)
+        self.assertEqual(
+            len(
+                self.client.get(
+                    url,
+                    {
+                        "from": self.today.isoformat(),
+                        "to": (self.today + timedelta(days=6)).isoformat(),
+                    },
+                ).data
+            ),
+            2,
+        )
         start = self.today + timedelta(days=6)
         end = self.today + timedelta(days=7)
         response = self.client.get(
@@ -145,26 +156,72 @@ class MenuApiTests(APITestCase):
             403,
         )
 
-    def test_get_menus_returns_only_today_and_future_group_menus(self):
-        Menu.objects.create(
-            group=self.group,
-            recipe=self.public_recipe,
-            date=self.past_date,
-            time="LUNCH",
-        )
-        Menu.objects.create(
-            group=self.group,
-            recipe=self.public_recipe,
-            date=self.future_date,
-            time="DINNER",
-        )
+    def test_get_menus_defaults_to_the_full_current_week(self):
+        monday = self.today - timedelta(days=self.today.weekday())
+        sunday = monday + timedelta(days=6)
+        for day in [
+            monday - timedelta(days=1),
+            monday,
+            sunday,
+            sunday + timedelta(days=1),
+        ]:
+            Menu.objects.create(
+                group=self.group, recipe=self.public_recipe, date=day, time="LUNCH"
+            )
         self.client.force_authenticate(user=self.member)
 
         response = self.client.get(f"/api/menus/{self.group.group_code}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["date"], str(self.future_date))
+        self.assertEqual(
+            [row["date"] for row in response.data],
+            [monday.isoformat(), sunday.isoformat()],
+        )
+
+    def test_past_week_can_be_read_but_not_modified_and_remains_group_isolated(self):
+        monday = self.today - timedelta(days=self.today.weekday() + 7)
+        sunday = monday + timedelta(days=6)
+        for day in [monday, sunday]:
+            Menu.objects.create(
+                group=self.group, recipe=self.public_recipe, date=day, time="LUNCH"
+            )
+        # Se conservan las recetas repetidas en el mismo día y turno.
+        Menu.objects.create(
+            group=self.group, recipe=self.public_recipe, date=monday, time="LUNCH"
+        )
+        other = Group.objects.create(group_code="PASTOTHER", group_name="Otro")
+        Menu.objects.create(
+            group=other, recipe=self.public_recipe, date=monday, time="LUNCH"
+        )
+        item = List.objects.create(
+            group=self.group,
+            ingredient=self.ingredient_egg,
+            amount="12.000",
+            unit="ud",
+            bought=True,
+        )
+        self.client.force_authenticate(user=self.member)
+        url = f"/api/menus/{self.group.group_code}/"
+        params = {"from": monday.isoformat(), "to": sunday.isoformat()}
+        response = self.client.get(url, params)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [row["date"] for row in response.data],
+            [monday.isoformat(), monday.isoformat(), sunday.isoformat()],
+        )
+        data = {
+            "id_recipe": self.public_recipe.pk,
+            "date": monday.isoformat(),
+            "time": "LUNCH",
+        }
+        self.assertEqual(self.client.post(url, data, format="json").status_code, 400)
+        self.assertEqual(self.client.delete(url, data, format="json").status_code, 400)
+        self.assertEqual(Menu.objects.filter(group=self.group).count(), 3)
+        item.refresh_from_db()
+        self.assertEqual(item.amount, 12)
+        self.assertTrue(item.bought)
+        self.client.force_authenticate(user=self.outsider)
+        self.assertEqual(self.client.get(url, params).status_code, 403)
 
     def test_non_member_cannot_get_menus(self):
         self.client.force_authenticate(user=self.outsider)

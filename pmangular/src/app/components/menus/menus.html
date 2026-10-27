@@ -4,11 +4,9 @@
     <p>Planifica desayunos, comidas y cenas</p>
 
     <div class="menu-calendar-nav">
-      @if (canGoToPreviousWeek()) {
-        <button class="menu-calendar-previous-week" mat-stroked-button type="button" (click)="generatePreviousWeek()">
-          Semana anterior
-        </button>
-      }
+      <button class="menu-calendar-previous-week" mat-stroked-button type="button" (click)="generatePreviousWeek()">
+        Semana anterior
+      </button>
       <button class="menu-calendar-next-week" mat-stroked-button type="button" (click)="generateNextWeek()">
         Semana siguiente
       </button>

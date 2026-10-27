@@ -152,17 +152,6 @@ export class Menus implements OnInit, AfterViewInit {
     this.loadMenus();
   }
 
-  // No permitir ir a semanas anteriores
-  canGoToPreviousWeek() {
-    const monday = this.week()?.[0];
-
-    if (!monday) {
-      return false;
-    }
-
-    return monday.getTime() > this.thisMonday().getTime();
-  }
-
   getMenusByDay(day: Date) {
     const formattedDay = this.formatDate(day);
 
@@ -193,7 +182,7 @@ export class Menus implements OnInit, AfterViewInit {
   addRecipeToMenu(event: MenuModel) {
     const groupCode = this.groupCode();
 
-    if (!groupCode) {
+    if (!groupCode || event.date < this.formatDate(this.todayStart())) {
       return;
     }
 
@@ -219,7 +208,7 @@ export class Menus implements OnInit, AfterViewInit {
   deleteRecipeFromMenu(event: ShortMenuModel) {
     const groupCode = this.groupCode();
 
-    if (!groupCode) {
+    if (!groupCode || event.date < this.formatDate(this.todayStart())) {
       return;
     }
 
@@ -261,10 +250,11 @@ export class Menus implements OnInit, AfterViewInit {
 
     // Actualizar el día a las 24:00 y programar para pasado mañana
     this.midnightTimer = setTimeout(() => {
+      const previousMonday = this.thisMonday();
       this.today.set(new Date());
-      // Si cambia la semana mientras el calendario está abierto, muestra la nueva.
+      // Avanzar la semana actual, conservando la consulta de semanas históricas.
       const monday = this.week()?.[0];
-      if (monday && monday.getTime() < this.thisMonday().getTime()) {
+      if (monday && monday.getTime() === previousMonday.getTime() && monday.getTime() < this.thisMonday().getTime()) {
         this.week.set(this.generateWeek(this.thisMonday()));
         this.menus.set([]);
         this.loadMenus();

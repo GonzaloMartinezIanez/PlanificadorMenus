@@ -71,14 +71,14 @@ describe('Menus', () => {
     expect(component.formatDate(week[6])).toBe('2026-09-20');
   });
 
-  it('should prevent navigating to weeks before the current week', () => {
+  it('allows navigating backwards from the current week and loading its historical interval', () => {
     component.today.set(new Date('2026-09-19T12:00:00'));
     component.week.set(component.generateWeek(component.thisMonday()));
 
-    expect(component.canGoToPreviousWeek()).toBe(false);
-
-    component.generateNextWeek();
-    expect(component.canGoToPreviousWeek()).toBe(true);
+    component.groupCode.set('GROUP');
+    component.generatePreviousWeek();
+    expect(component.formatDate(component.week()![0])).toBe('2026-09-07');
+    http.expectOne((req) => req.params.get('from') === '2026-09-07' && req.params.get('to') === '2026-09-13').flush([]);
   });
 
   it('should correctly identifies today and past days', () => {
@@ -105,6 +105,7 @@ describe('Menus', () => {
   });
 
   it.each(['POST', 'DELETE'])('should report a failed %s without reloading menus', (method) => {
+    component.today.set(new Date('2026-09-19T12:00:00'));
     component.groupCode.set('GROUP');
     if (method === 'POST') {
       component.addRecipeToMenu({ recipe: { id: 1 } as MenuModel['recipe'], date: '2026-09-19', time: 'LUNCH' });
@@ -121,6 +122,25 @@ describe('Menus', () => {
       expect.any(Object),
     );
     http.expectNone((req) => req.method === 'GET');
+  });
+
+  it('does not send add or remove requests for a past date', () => {
+    component.today.set(new Date('2026-09-19T12:00:00'));
+    component.groupCode.set('GROUP');
+    component.addRecipeToMenu({ recipe: { id: 1 } as MenuModel['recipe'], date: '2026-09-18', time: 'LUNCH' });
+    component.deleteRecipeFromMenu({ id_recipe: 1, date: '2026-09-18', time: 'LUNCH' });
+    http.expectNone((req) => req.method === 'POST' || req.method === 'DELETE');
+  });
+
+  it('preserves a historical week when midnight starts a new current week', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-20T23:59:59'));
+    component.today.set(new Date());
+    component.week.set(component.generateWeek(new Date('2026-09-07T00:00:00')));
+    component.updateDayMidnight();
+    vi.advanceTimersByTime(1000);
+    expect(component.formatDate(component.week()![0])).toBe('2026-09-07');
+    expect(component.formatDate(component.today())).toBe('2026-09-21');
   });
 
   it('should release timers, route subscriptions and pending requests on destruction', () => {

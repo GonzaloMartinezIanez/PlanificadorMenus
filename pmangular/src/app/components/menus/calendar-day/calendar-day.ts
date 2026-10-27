@@ -32,7 +32,7 @@ export class CalendarDay {
   }
 
   onRecipeSelected(event: { recipe: Recipe; time: string }) {
-    if (!this.day) {
+    if (!this.day || this.isPast) {
       return;
     }
 
@@ -44,7 +44,7 @@ export class CalendarDay {
   }
 
   onDeleteRecipe(event: { id_recipe: number; time: string }) {
-    if (!this.day) {
+    if (!this.day || this.isPast) {
       return;
     }
 

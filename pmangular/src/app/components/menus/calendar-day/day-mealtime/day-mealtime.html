@@ -7,20 +7,35 @@
         <div class="day-mealtime-recipe">
           <a [routerLink]="['/recipes', menu.recipe.id]">{{ menu.recipe.name }}</a>
 
-          <button
-            mat-stroked-button
-            class="button-danger-outline"
-            type="button"
-            (click)="onDeleteRecipe(menu.recipe.id)"
-          >
-            Eliminar
-          </button>
+          @if (!readOnly) {
+            <button
+              mat-icon-button
+              class="button-danger"
+              type="button"
+              [attr.aria-label]="'Quitar ' + menu.recipe.name + ' del menú'"
+              matTooltip="Quitar receta del menú"
+              (click)="onDeleteRecipe(menu.recipe.id)"
+            >
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          }
         </div>
       }
     </div>
   }
 
-  <button class="day-mealtime-add" mat-stroked-button type="button" (click)="openRecipeSearch()">Añadir receta</button>
+  @if (!readOnly) {
+    <button
+      class="day-mealtime-add"
+      mat-stroked-button
+      type="button"
+      [attr.aria-label]="'Añadir receta en ' + title"
+      matTooltip="Añadir receta"
+      (click)="openRecipeSearch()"
+    >
+      <span class="day-mealtime-add-symbol" aria-hidden="true">+</span>
+    </button>
+  }
 </section>
 
 <ng-template #recipeSearchDialog>

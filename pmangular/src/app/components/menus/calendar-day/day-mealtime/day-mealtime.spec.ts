@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Recipe } from '../../../../models/recipe';
 import { DayMealtime } from './day-mealtime';
+import { vi } from 'vitest';
 
 describe('DayMealtime', () => {
   let component: DayMealtime;
@@ -18,6 +19,19 @@ describe('DayMealtime', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('does not open a picker or emit changes in read-only mode', () => {
+    component.readOnly = true;
+    const open = vi.spyOn(component.dialog, 'open');
+    const actions: string[] = [];
+    component.addRecipe.subscribe(() => actions.push('add'));
+    component.deleteRecipe.subscribe(() => actions.push('delete'));
+    component.openRecipeSearch();
+    component.selectRecipe({ id: 4 } as Recipe);
+    component.onDeleteRecipe(4);
+    expect(open).not.toHaveBeenCalled();
+    expect(actions).toEqual([]);
   });
 
   it('should emits selected and deleted recipes with their mealtime', () => {

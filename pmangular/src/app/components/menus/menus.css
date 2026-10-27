@@ -1,4 +1,12 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
 .menu-calendar {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   width: 100%;
   margin: 0 auto;
   padding: var(--app-space-4) 0;
@@ -25,9 +33,13 @@
 }
 .menu-calendar-week {
   display: grid;
+  flex: 1;
+  min-height: 32rem;
   grid-template-columns: repeat(7, minmax(10.9375rem, 1fr));
+  grid-template-rows: max-content repeat(3, auto);
   align-items: stretch;
-  gap: var(--app-space-3);
+  column-gap: var(--app-space-3);
+  row-gap: 0;
   overflow-x: auto;
   padding: var(--app-space-1) var(--app-space-1) var(--app-space-4);
   overscroll-behavior-x: contain;
@@ -35,6 +47,9 @@
   scrollbar-color: var(--app-color-border) var(--app-color-surface);
 }
 app-calendar-day {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
   min-width: 0;
 }
 @media (max-width: 960px) {

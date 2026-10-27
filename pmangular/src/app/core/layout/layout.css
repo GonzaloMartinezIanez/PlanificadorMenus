@@ -16,6 +16,8 @@
 }
 
 .page-content:has(app-menus) {
+  display: flex;
+  flex-direction: column;
   max-width: var(--app-content-wide);
 }
 

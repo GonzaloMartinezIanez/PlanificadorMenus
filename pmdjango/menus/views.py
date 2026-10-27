@@ -11,6 +11,7 @@ from groups.utils import get_my_group
 from lists.models import List
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
 
 
 # Recorre la lista de ingredientes de la receta y los añade a la lista del grupo
@@ -71,14 +72,15 @@ class MenuApiView(APIView):
             return error
 
         today = timezone.localdate()
-        range_data = {"start": request.query_params.get("from", today.isoformat())}
+        monday = today - timedelta(days=today.weekday())
+        range_data = {"start": request.query_params.get("from", monday.isoformat())}
         if "to" in request.query_params:
             range_data["end"] = request.query_params["to"]
         interval = MenuRangeSerializer(data=range_data)
         interval.is_valid(raise_exception=True)
         start, end = interval.validated_data["start"], interval.validated_data["end"]
         menus = Menu.objects.filter(
-            group=group, date__gte=max(today, start), date__lte=end
+            group=group, date__gte=start, date__lte=end
         ).order_by("date", "time", "pk")
         serializer = MenuOutputSerializer(menus, many=True)
 
