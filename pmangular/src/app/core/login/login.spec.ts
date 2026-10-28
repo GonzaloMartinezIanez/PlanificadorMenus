@@ -4,8 +4,6 @@ import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { afterEach, vi } from 'vitest';
-import { environment } from '../../../environments/environment';
-import { GroupModel } from '../../models/group';
 import { AuthService } from '../../services/auth.service';
 import { GroupService } from '../../services/group.service';
 import { GoogleIdentityService } from '../../services/google-identity.service';
@@ -16,7 +14,7 @@ describe('Login', () => {
   let component: Login;
   let fixture: ComponentFixture<Login>;
   const auth = { isAuthenticated: signal(false) };
-  const groups = { getMyGroups: vi.fn() };
+  const groups = { getInitialRoute: vi.fn() };
   const router = { navigate: vi.fn() };
   const identity = { load: vi.fn(), renderButton: vi.fn() };
 
@@ -24,7 +22,7 @@ describe('Login', () => {
     vi.resetAllMocks();
     localStorage.clear();
     auth.isAuthenticated.set(false);
-    groups.getMyGroups.mockReturnValue(of([]));
+    groups.getInitialRoute.mockReturnValue(of(['/group-onboarding']));
     identity.load.mockResolvedValue(undefined);
     identity.renderButton.mockReturnValue(vi.fn());
     await TestBed.configureTestingModule({
@@ -43,19 +41,11 @@ describe('Login', () => {
   afterEach(() => localStorage.clear());
 
   it('opens the saved group after the shared button authenticates', async () => {
-    groups.getMyGroups.mockReturnValue(of([{ group_code: 'FIRST' }, { group_code: 'SAVED' }]));
-    localStorage.setItem(environment.ACTIVE_GROUP_KEY, 'SAVED');
+    groups.getInitialRoute.mockReturnValue(of(['/home', 'SAVED']));
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.debugElement.query(By.directive(GoogleLogin)).componentInstance.authenticated.emit();
-    expect(router.navigate).toHaveBeenCalledWith(['/home/SAVED']);
-  });
-
-  it('falls back to the first group if the saved group no longer exists', () => {
-    groups.getMyGroups.mockReturnValue(of([{ group_code: 'FIRST' }]));
-    localStorage.setItem(environment.ACTIVE_GROUP_KEY, 'REMOVED');
-    component.onAuthenticated();
-    expect(router.navigate).toHaveBeenCalledWith(['/home/FIRST']);
+    expect(router.navigate).toHaveBeenCalledWith(['/home', 'SAVED']);
   });
 
   it('opens onboarding when the user has no groups', () => {
@@ -84,7 +74,7 @@ describe('Login', () => {
   });
 
   it('reports a group loading failure without navigating', () => {
-    groups.getMyGroups.mockReturnValue(throwError(() => new Error('Unavailable')));
+    groups.getInitialRoute.mockReturnValue(throwError(() => new Error('Unavailable')));
     component.onAuthenticated();
     expect(component.errorMessage()).toBe('No se pudieron cargar los grupos del usuario.');
     expect(component.isLoading()).toBe(false);
@@ -92,8 +82,8 @@ describe('Login', () => {
   });
 
   it('does not navigate when a group response arrives after leaving the screen', () => {
-    const pending = new Subject<GroupModel[]>();
-    groups.getMyGroups.mockReturnValue(pending);
+    const pending = new Subject<string[]>();
+    groups.getInitialRoute.mockReturnValue(pending);
     component.onAuthenticated();
     fixture.destroy();
     pending.next([]);

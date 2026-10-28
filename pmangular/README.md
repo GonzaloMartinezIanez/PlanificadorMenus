@@ -103,6 +103,17 @@ con `app-loading-status` para evitar parpadeos y saltos de altura durante la pet
 
 ## Inicio de sesión compartido
 
+La ruta `/login` comprueba la sesión con `loginGuard` antes de mostrar la pantalla.
+Si hay una sesión guardada, consulta los grupos y redirige al calendario sin
+dibujar el login. `GroupService.getInitialRoute()` comparte esta selección con
+el inicio de sesión de Google: usa el último grupo si sigue disponible, el primero
+como alternativa o el onboarding cuando no hay grupos. El interceptor conserva
+la renovación de los tokens caducados; si falla, se permite acceder al login.
+Durante la primera navegación, `App` muestra el logo y un indicador de carga
+hasta que se activa la pantalla de destino. Se mantiene durante las redirecciones
+y las comprobaciones de sesión y grupo; las navegaciones posteriores conservan
+la pantalla actual hasta abrir la siguiente.
+
 `core/google-login/` contiene el botón reutilizable de Google y el intercambio de
 la credencial mediante `AuthService`. Emite `authenticated`, `loadingChange` y
 `loginError`, de modo que cada pantalla mantiene su navegación y mensajes.
@@ -113,6 +124,10 @@ API una sola vez y desconecta el callback de la pantalla al destruir el botón.
 Las pantallas de login e invitación a grupos usan este mismo componente.
 
 ## Estilos compartidos
+
+La raíz reserva el espacio de la barra vertical mediante la regla
+`scrollbar-gutter: stable`, para que cambiar categorías o semanas no desplace
+horizontalmente el contenido.
 
 La interfaz usa blanco como superficie principal y verde como acento para botones,
 enlaces y selecciones. El rojo se reserva para errores y acciones destructivas.

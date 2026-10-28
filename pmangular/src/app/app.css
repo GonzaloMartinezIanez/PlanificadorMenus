@@ -2,3 +2,65 @@
   display: block;
   min-height: 100dvh;
 }
+
+.startup-screen {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: var(--app-space-6);
+  background: var(--app-color-surface);
+}
+
+.startup-content {
+  display: flex;
+  width: 100%;
+  max-width: var(--app-form-width);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-space-6);
+  text-align: center;
+}
+
+.startup-content h1,
+.startup-content p {
+  margin: 0;
+}
+
+.startup-content p {
+  color: var(--app-color-text-muted);
+}
+
+.startup-progress {
+  width: 100%;
+  max-width: 16rem;
+  height: var(--app-space-1);
+  overflow: hidden;
+  border-radius: var(--app-radius-pill);
+  background: var(--app-color-accent-soft);
+}
+
+.startup-progress::after {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--app-color-accent);
+  content: '';
+  animation: startup-progress 1.5s ease-in-out infinite;
+}
+
+@keyframes startup-progress {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup-progress::after {
+    width: 100%;
+    animation: none;
+  }
+}

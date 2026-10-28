@@ -1,1 +1,12 @@
-<router-outlet></router-outlet>
+@if (isStarting()) {
+  <main class="startup-screen">
+    <section class="startup-content" role="status" aria-live="polite" aria-atomic="true">
+      <img src="logo.svg" alt="" width="70" height="78" />
+      <h1>Planificador de menús</h1>
+      <p>Preparando tu planificador...</p>
+      <div class="startup-progress" aria-hidden="true"></div>
+    </section>
+  </main>
+}
+
+<router-outlet (activate)="isStarting.set(false)" />

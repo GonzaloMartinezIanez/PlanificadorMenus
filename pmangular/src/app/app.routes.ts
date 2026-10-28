@@ -7,6 +7,7 @@ import { GroupJoin } from './components/groups/group-join/group-join';
 import { GroupAccess } from './components/groups/group-access/group-access';
 
 import { authGuard } from './guards/auth-guard';
+import { loginGuard } from './guards/login-guard';
 import { groupGuard } from './guards/group-guard';
 import { GroupManage } from './components/groups/group-manage/group-manage';
 import { List } from './components/lists/list';
@@ -17,7 +18,7 @@ import { Menus } from './components/menus/menus';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: Login },
+  { path: 'login', component: Login, canActivate: [loginGuard] },
   { path: 'groups/:group_code/join', component: GroupJoin },
   { path: 'group-onboarding', component: GroupOnboarding, canActivate: [authGuard] },
   {

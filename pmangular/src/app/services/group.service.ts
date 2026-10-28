@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { GroupMember, GroupModel, GroupShortModel } from '../models/group';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { MessageModel } from '../models/message';
 
 @Injectable({
@@ -13,6 +13,16 @@ export class GroupService {
 
   getMyGroups(): Observable<GroupModel[]> {
     return this.http.get<GroupModel[]>(`${environment.apiUrl}/groups/`);
+  }
+
+  getInitialRoute(): Observable<string[]> {
+    return this.getMyGroups().pipe(
+      map((groups) => {
+        const savedGroupCode = localStorage.getItem(environment.ACTIVE_GROUP_KEY);
+        const selectedGroup = groups.find((group) => group.group_code === savedGroupCode) ?? groups[0];
+        return selectedGroup ? ['/home', selectedGroup.group_code] : ['/group-onboarding'];
+      }),
+    );
   }
 
   createGroup(group_info: GroupShortModel): Observable<GroupModel> {
