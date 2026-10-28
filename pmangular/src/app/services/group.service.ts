@@ -15,6 +15,12 @@ export class GroupService {
     return this.http.get<GroupModel[]>(`${environment.apiUrl}/groups/`);
   }
 
+  getMembershipStatus(groupCode: string): Observable<{ status: 'accepted' | 'pending' | 'none' }> {
+    return this.http.get<{ status: 'accepted' | 'pending' | 'none' }>(
+      `${environment.apiUrl}/groups/${groupCode}/membership/`,
+    );
+  }
+
   getInitialRoute(): Observable<string[]> {
     return this.getMyGroups().pipe(
       map((groups) => {

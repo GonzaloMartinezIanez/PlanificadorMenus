@@ -9,6 +9,8 @@ import { AuthService } from '../../../services/auth.service';
 import { GroupService } from '../../../services/group.service';
 import { GroupManage } from './group-manage';
 import { GroupMember } from '../../../models/group';
+import { RealtimeService } from '../../../services/realtime.service';
+import { RealtimeEvent } from '../../../models/realtime';
 
 describe('GroupManage', () => {
   let component: GroupManage;
@@ -44,6 +46,26 @@ describe('GroupManage', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('keeps unsaved group fields when a remote update arrives', () => {
+    const events = new Subject<RealtimeEvent>();
+    vi.spyOn(TestBed.inject(RealtimeService), 'watchGroup').mockReturnValue(events);
+    route.root.snapshot.paramMap.get.mockReturnValue('ABC12345');
+    groupService.getGroupMembers.mockReturnValue(of([]));
+    groupService.getMyGroups.mockReturnValue(
+      of([{ group_code: 'ABC12345', group_name: 'Original', group_description: '' }]),
+    );
+    vi.spyOn(component, 'loadQRCode').mockImplementation(() => {});
+    component.ngOnInit();
+    component.groupForm.controls['group_name'].setValue('Mi edición');
+    component.groupForm.markAsDirty();
+    groupService.getMyGroups.mockReturnValue(
+      of([{ group_code: 'ABC12345', group_name: 'Actualización externa', group_description: '' }]),
+    );
+    events.next({ type: 'group.updated', group_code: 'ABC12345' });
+    expect(component.myGroups()[0].group_name).toBe('Actualización externa');
+    expect(component.groupForm.controls['group_name'].value).toBe('Mi edición');
   });
 
   it('stops route listeners and pending member requests when leaving group management', () => {

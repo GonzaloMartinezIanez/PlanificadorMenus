@@ -18,6 +18,15 @@ ng serve
 
 La aplicación de desarrollo se inicia en `http://localhost:4200` y usa la API configurada en `src/environments/environment.development.ts`.
 
+Para probar el conjunto con Docker, sigue la sección de Docker local del
+[README principal](../README.md). El argumento de build `BUILD_CONFIGURATION`
+del Dockerfile vale `production` por defecto. El Compose local usa
+`production,docker-local`: conserva la optimización de producción y sustituye
+solo el entorno por `environment.docker-local.ts`, con frontend, API y WebSockets
+en el mismo origen que la ventana (`localhost:4200` o `127.0.0.1:4200`). El cliente
+OAuth de Google debe autorizar el origen exacto usado. Nginx conserva el puerto original en el encabezado `Host`
+para que los enlaces absolutos de la API apunten también al servidor local.
+
 ## Comandos
 
 ```powershell
@@ -100,6 +109,40 @@ Las fechas de publicación se presentan mediante `Intl.DateTimeFormat` en
 Al actualizar los filtros se mantiene la lista anterior hasta recibir la respuesta
 y se reutilizan los elementos por usuario. El mensaje de carga reserva espacio
 con `app-loading-status` para evitar parpadeos y saltos de altura durante la petición.
+
+## Actualizaciones en tiempo real
+
+`RealtimeService` mantiene una conexión por pestaña a `/ws/events/`, derivada de
+la URL de la API (WSS con HTTPS). Autentica con el JWT en el primer mensaje, sin
+incluirlo en la URL. Comparte avisos mediante RxJS y expone el estado de conexión
+con signals. La suscripción de grupo sigue la ruta activa; una invitación pendiente
+usa solamente el canal personal. No hay Redux ni dependencias nuevas de frontend.
+
+`CalendarState` y `ShoppingListState`, limitados a la vida de cada pantalla, son
+los propietarios de los datos y los exponen como signals de solo lectura. Las
+pantallas mantienen filtros, fechas y formularios locales. Las respuestas antiguas
+no sustituyen consultas más recientes. Los eventos se agrupan durante 100 ms y
+solo actualizan la semana visible o el grupo correspondiente. Las filas de la
+lista conservan su identidad y su edición al recibir nuevos datos.
+
+El servicio reconecta con espera progresiva y variación aleatoria, renueva los JWT
+caducados y vuelve a consultar los datos después de conectar, confirmar una
+suscripción o recuperar la visibilidad de la pestaña. No se presupone que todos los
+avisos se hayan recibido. El cierre de sesión cancela conexión y temporizadores;
+también se propaga el cierre realizado en otra pestaña del mismo navegador.
+
+Las solicitudes se actualizan en gestión y en las pantallas de espera. Una
+aceptación solo navega automáticamente cuando la pantalla está esperando a ese
+grupo. Una expulsión o eliminación actualiza el selector y abre otro grupo
+disponible, o el onboarding. Los formularios del grupo con cambios sin guardar
+no se sobrescriben al actualizar sus datos remotos.
+
+Si se pierde la conexión, `core/realtime-status/` muestra un aviso discreto y
+permite actualizar los datos por HTTP y reintentar la conexión, sin recargar la
+página. La API sigue siendo el origen de los datos y las acciones continúan por HTTP.
+
+La gestión de grupos se carga bajo demanda para mantener ligero el arranque,
+incluyendo el generador de QR únicamente cuando se visita esa pantalla.
 
 ## Inicio de sesión compartido
 

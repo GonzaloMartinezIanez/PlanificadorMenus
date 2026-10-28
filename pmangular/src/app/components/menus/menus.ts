@@ -16,9 +16,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MenuService } from '../../services/menu.service';
 import { MenuModel, ShortMenuModel } from '../../models/menu';
 import { CalendarDay } from './calendar-day/calendar-day';
+import { RealtimeService } from '../../services/realtime.service';
+import { CalendarState } from '../../services/calendar-state.service';
 
 @Component({
   selector: 'app-menus',
+  providers: [CalendarState],
   imports: [MatButtonModule, MatSnackBarModule, CalendarDay],
   templateUrl: './menus.html',
   styleUrl: './menus.css',
@@ -30,9 +33,10 @@ export class Menus implements OnInit, AfterViewInit {
   menuService = inject(MenuService);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
+  private realtime = inject(RealtimeService);
   private midnightTimer?: ReturnType<typeof setTimeout>;
   private scrollTimer?: ReturnType<typeof setTimeout>;
-  private menuRequestId = 0;
+  readonly state = inject(CalendarState);
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -42,7 +46,7 @@ export class Menus implements OnInit, AfterViewInit {
   }
 
   groupCode = signal<string | null>(null);
-  menus = signal<MenuModel[]>([]);
+  menus = this.state.menus;
   today = signal(new Date());
   todayStart = computed(() => {
     const date = new Date(this.today());
@@ -63,6 +67,19 @@ export class Menus implements OnInit, AfterViewInit {
   week = signal<Date[] | null>(null);
 
   ngOnInit(): void {
+    this.realtime
+      .watchGroup(
+        () => this.groupCode(),
+        ['menu.changed'],
+        (event) => {
+          const week = this.week();
+          return (
+            !event.date || (!!week && event.date >= this.formatDate(week[0]) && event.date <= this.formatDate(week[6]))
+          );
+        },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadMenus(true));
     this.updateDayMidnight();
     this.week.set(this.generateWeek(this.thisMonday()));
 
@@ -72,7 +89,7 @@ export class Menus implements OnInit, AfterViewInit {
         const groupCode = params.get('group_code');
 
         this.groupCode.set(groupCode);
-        this.menus.set([]);
+        this.state.replace([]);
         if (!groupCode) {
           return;
         }
@@ -86,7 +103,7 @@ export class Menus implements OnInit, AfterViewInit {
     this.scrollToToday();
   }
 
-  loadMenus() {
+  loadMenus(background = false) {
     const groupCode = this.groupCode();
     const week = this.week();
 
@@ -94,22 +111,10 @@ export class Menus implements OnInit, AfterViewInit {
       return;
     }
 
-    const requestId = ++this.menuRequestId;
-    this.menuService
-      .getMenus(groupCode, this.formatDate(week[0]), this.formatDate(week[6]))
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (menus) => {
-          if (this.groupCode() === groupCode && requestId === this.menuRequestId) {
-            this.menus.set(menus);
-          }
-        },
-        error: () => {
-          if (this.groupCode() === groupCode && requestId === this.menuRequestId) {
-            this.showError('No se pudo cargar el calendario. Vuelve a intentarlo.');
-          }
-        },
-      });
+    this.state.load(groupCode, this.formatDate(week[0]), this.formatDate(week[6]), () => {
+      if (!background && this.groupCode() === groupCode)
+        this.showError('No se pudo cargar el calendario. Vuelve a intentarlo.');
+    });
   }
 
   generateWeek(monday: Date): Date[] {
@@ -134,7 +139,7 @@ export class Menus implements OnInit, AfterViewInit {
     nextMonday.setDate(nextMonday.getDate() + 1);
 
     this.week.set(this.generateWeek(nextMonday));
-    this.menus.set([]);
+    this.state.replace([]);
     this.loadMenus();
   }
 
@@ -148,7 +153,7 @@ export class Menus implements OnInit, AfterViewInit {
     previousMonday.setDate(previousMonday.getDate() - 7);
 
     this.week.set(this.generateWeek(previousMonday));
-    this.menus.set([]);
+    this.state.replace([]);
     this.loadMenus();
   }
 
@@ -256,7 +261,7 @@ export class Menus implements OnInit, AfterViewInit {
       const monday = this.week()?.[0];
       if (monday && monday.getTime() === previousMonday.getTime() && monday.getTime() < this.thisMonday().getTime()) {
         this.week.set(this.generateWeek(this.thisMonday()));
-        this.menus.set([]);
+        this.state.replace([]);
         this.loadMenus();
       }
       this.updateDayMidnight();

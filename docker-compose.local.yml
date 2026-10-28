@@ -1,0 +1,92 @@
+name: planificador-menus-local
+
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Configura MYSQL_DATABASE en .env.docker.local}
+      MYSQL_USER: ${MYSQL_USER:?Configura MYSQL_USER en .env.docker.local}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Configura MYSQL_PASSWORD en .env.docker.local}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configura MYSQL_ROOT_PASSWORD en .env.docker.local}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping --protocol=tcp -h 127.0.0.1 -p"$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - internal
+
+  redis:
+    image: redis:7.4-alpine
+    command:
+      ['redis-server', '--maxmemory', '128mb', '--maxmemory-policy', 'noeviction', '--save', '', '--appendonly', 'no']
+    mem_limit: 256m
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./pmdjango
+    environment:
+      DEBUG: 'False'
+      SECRET_KEY: ${SECRET_KEY:?Configura SECRET_KEY en .env.docker.local}
+      MYSQL_HOST: db
+      MYSQL_PORT: '3306'
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      REDIS_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      CORS_ALLOWED_ORIGINS: http://localhost:4200,http://127.0.0.1:4200
+      CSRF_TRUSTED_ORIGINS: http://localhost:4200,http://127.0.0.1:4200
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Configura GOOGLE_CLIENT_ID en .env.docker.local}
+      AUTHORIZED_EMAIL: ${AUTHORIZED_EMAIL:?Configura AUTHORIZED_EMAIL en .env.docker.local}
+    command: sh -c "python manage.py migrate --noinput && uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --workers 3 --ws websockets-sansio --ws-max-size 2048 --ws-ping-interval 25 --ws-ping-timeout 25"
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/recipes/top/', timeout=3).close()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  nginx:
+    build:
+      context: ./pmangular
+      args:
+        BUILD_CONFIGURATION: production,docker-local
+    environment:
+      DOMAIN: localhost
+    ports:
+      - '127.0.0.1:4200:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  mysql_data:

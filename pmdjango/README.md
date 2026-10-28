@@ -25,6 +25,14 @@ La API se inicia en `http://localhost:8000/api/`.
 
 Completa las variables de `.env` antes de iniciar el servidor.
 
+Para probar MySQL, Redis, Nginx y tres procesos de Uvicorn juntos sin certificados,
+consulta el [Docker local del README principal](../README.md). Usa el Compose
+independiente `docker-compose.local.yml` y `.env.docker.local` en la raíz. Ese modo
+ejecuta Django con `DEBUG=False`, la base MySQL del contenedor y Redis compartido;
+no utiliza `pmdjango/.env` ni la base SQLite de desarrollo. Las imágenes se
+construyen con el código local y las migraciones se aplican a la base del proyecto
+Docker `planificador-menus-local`.
+
 ## Comandos
 
 ```powershell
@@ -131,3 +139,55 @@ node .\scripts\loadRecipes.js
 ## Producción
 
 En producción el contenedor ejecuta las migraciones y levanta la API ASGI mediante Uvicorn. La configuración de MySQL, hosts permitidos, CORS, OAuth y secretos se recibe mediante variables de entorno definidas en el `.env` de Docker Compose.
+
+## Actualizaciones en tiempo real
+
+`config/realtime/` contiene el consumidor de Django Channels y los avisos de
+calendario, lista de la compra y pertenencia a grupos. Las escrituras siguen
+pasando por REST. Las señales publican avisos con `transaction.on_commit()`;
+un rollback no publica y un fallo de Redis se registra sin deshacer la escritura.
+Tras un fallo, el publicador espera cinco segundos antes de reintentar, evitando
+un timeout por cada producto de una operación masiva. Estos avisos no se reenvían.
+Los mensajes no contienen recetas, productos ni datos personales de otros miembros.
+
+El endpoint `/ws/events/` valida el origen contra `CORS_ALLOWED_ORIGINS`. El
+primer mensaje es `{"type":"authenticate","token":"<access JWT>"}`; hay cinco
+segundos para autenticarse. El servidor responde `ready` después de suscribir
+al canal personal. `{"type":"subscribe","group_code":"CODIGO01"}` sustituye
+la suscripción del grupo; `null` la elimina. Solo se admite pertenencia aceptada
+y el servidor responde `subscribed` o `subscription.denied`. Cada aviso de grupo
+vuelve a comprobar el permiso. Los JWT caducados cierran la conexión con 4401.
+Se limita cada mensaje a 2048 bytes y a 30 mensajes por conexión en diez segundos.
+El cliente envía `ping` cada 25 segundos; `pong` también comprueba el acceso actual.
+
+Los avisos son `menu.changed` (incluye `date`), `shopping_list.changed`,
+`membership.requested`, `membership.changed`, `membership.decided` (estado
+`accepted` o `rejected`), `membership.revoked`, `group.updated` y `group.deleted`.
+Todos incluyen `group_code`. Las decisiones y las revocaciones llegan al canal
+personal del afectado; los solicitantes no pueden suscribirse al grupo privado.
+Eliminar un grupo avisa también a quienes estaban pendientes.
+
+`GET /api/groups/{codigo}/membership/` requiere autenticación y devuelve solamente
+el estado del usuario que consulta: `accepted`, `pending` o `none`. No permite
+consultar a terceros. Un rechazo elimina la solicitud según las reglas anteriores;
+tras una desconexión `none` indica ausencia de solicitud, sin inventar un historial.
+
+En desarrollo, sin `REDIS_URL`, se usa memoria y **un único proceso**. Para probar
+WebSockets, usa Uvicorn en lugar del servidor HTTP de Django:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn config.asgi:application --host 127.0.0.1 --port 8000 --ws websockets-sansio --ws-max-size 2048
+```
+
+En producción `REDIS_URL` es obligatorio. Compose configura Redis interno sin
+publicar puertos, con 128 MiB de memoria interna, límite de contenedor de 256 MiB,
+colas de 100 mensajes y caducidad de mensajes de 30 segundos. No se guardan copias
+persistentes de los avisos; la base de datos conserva los datos reales. Los tres
+procesos de Uvicorn comparten Redis. No sustituirlo por memoria con varios procesos.
+
+Las pruebas de `config.realtime` usan SQLite de pruebas y la capa en memoria.
+Cubren permisos, transacciones, rechazo, eliminación, reconexión de permisos y una
+conexión WebSocket real con Uvicorn que recibe cambios hechos por HTTP. La prueba
+de red abre únicamente un puerto efímero en `127.0.0.1`. Antes del despliegue,
+comprobar también Redis, Nginx y los tres procesos juntos y medir la RAM bajo carga;
+el límite de Redis no limita la memoria del backend ni de sus conexiones.

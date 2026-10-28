@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { filter } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { RealtimeService } from '../../../services/realtime.service';
+import { auditTime } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -23,6 +25,8 @@ export class Header implements OnInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
+  private realtime = inject(RealtimeService);
+  private groupRequestId = 0;
 
   myGroups = signal<GroupModel[]>([]);
   selectedGroupCode = signal(localStorage.getItem(environment.ACTIVE_GROUP_KEY) ?? '');
@@ -55,6 +59,15 @@ export class Header implements OnInit {
   ]);
 
   ngOnInit(): void {
+    this.realtime.events$
+      .pipe(
+        filter(
+          (event) => event.type === 'resync' || event.type.startsWith('membership.') || event.type.startsWith('group.'),
+        ),
+        auditTime(100),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.loadMyGroups(true));
     // Guardar el código del grupo en selectedGroupCode
     this.updateSelectedGroupFromUrl();
 
@@ -88,20 +101,23 @@ export class Header implements OnInit {
   }
 
   // Select para cambiar de grupo recarga la vista actual con el nuevo grupo
-  loadMyGroups() {
+  loadMyGroups(checkAccess = false) {
     if (!this.authService.isAuthenticated()) {
       this.myGroups.set([]);
       return;
     }
 
+    const requestId = ++this.groupRequestId;
     this.groupService
       .getMyGroups()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (groups) => {
+          if (requestId !== this.groupRequestId || !this.authService.isAuthenticated()) return;
           this.myGroups.set(groups);
 
           const selectedGroupExists = groups.some((group) => group.group_code === this.selectedGroupCode());
+          const lostAccess = checkAccess && this.isGroupRoute() && !selectedGroupExists;
 
           if (!selectedGroupExists && groups.length > 0) {
             this.selectedGroupCode.set(groups[0].group_code);
@@ -110,6 +126,12 @@ export class Header implements OnInit {
             this.selectedGroupCode.set('');
             localStorage.removeItem(environment.ACTIVE_GROUP_KEY);
           }
+          if (lostAccess) {
+            void this.router.navigate(groups.length ? ['/home', groups[0].group_code] : ['/group-onboarding']);
+          }
+        },
+        error: () => {
+          /* Se conserva el selector y se reintentará al reconectar. */
         },
       });
   }

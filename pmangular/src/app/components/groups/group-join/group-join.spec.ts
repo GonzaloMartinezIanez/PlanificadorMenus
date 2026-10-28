@@ -8,13 +8,14 @@ import { AuthService } from '../../../services/auth.service';
 import { GroupService } from '../../../services/group.service';
 import { GoogleIdentityService } from '../../../services/google-identity.service';
 import { GoogleLogin } from '../../../core/google-login/google-login';
-import { GroupModel } from '../../../models/group';
 import { GroupJoin } from './group-join';
+import { RealtimeService } from '../../../services/realtime.service';
+import { RealtimeEvent } from '../../../models/realtime';
 
 describe('GroupJoin', () => {
   let component: GroupJoin;
   let fixture: ComponentFixture<GroupJoin>;
-  const groupService = { joinGroup: vi.fn(), getMyGroups: vi.fn() };
+  const groupService = { joinGroup: vi.fn(), getMyGroups: vi.fn(), getMembershipStatus: vi.fn() };
   const authService = { isAuthenticated: vi.fn(), login: vi.fn() };
   const router = { navigate: vi.fn() };
   const route = { snapshot: { paramMap: { get: vi.fn() } } };
@@ -25,7 +26,7 @@ describe('GroupJoin', () => {
     vi.resetAllMocks();
     authService.isAuthenticated.mockReturnValue(false);
     route.snapshot.paramMap.get.mockReturnValue('ABC12345');
-    groupService.getMyGroups.mockReturnValue(of([]));
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'none' }));
     groupService.joinGroup.mockReturnValue(of({ message: 'Solicitud enviada' }));
     identity.load.mockResolvedValue(undefined);
     identity.renderButton.mockReturnValue(vi.fn());
@@ -51,6 +52,30 @@ describe('GroupJoin', () => {
     expect(component).toBeTruthy();
   });
 
+  it('opens the requested calendar after a personal acceptance event', () => {
+    const events = new Subject<RealtimeEvent>();
+    vi.spyOn(TestBed.inject(RealtimeService), 'watchGroup').mockReturnValue(events);
+    authService.isAuthenticated.mockReturnValue(true);
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'pending' }));
+    component.ngOnInit();
+    expect(component.hasRequestedJoin()).toBe(true);
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'accepted' }));
+    events.next({ type: 'membership.decided', group_code: 'ABC12345', status: 'accepted' });
+    expect(router.navigate).toHaveBeenCalledWith(['/home', 'ABC12345']);
+  });
+
+  it('shows rejection without navigating or reporting it as still pending', () => {
+    const events = new Subject<RealtimeEvent>();
+    vi.spyOn(TestBed.inject(RealtimeService), 'watchGroup').mockReturnValue(events);
+    authService.isAuthenticated.mockReturnValue(true);
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'pending' }));
+    component.ngOnInit();
+    events.next({ type: 'membership.decided', group_code: 'ABC12345', status: 'rejected' });
+    expect(component.hasRequestedJoin()).toBe(false);
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(snackBar.open).toHaveBeenCalledWith('Tu solicitud ha sido rechazada.', 'Cerrar', expect.any(Object));
+  });
+
   it('should requests to join when the user is authenticated', () => {
     authService.isAuthenticated.mockReturnValue(true);
     groupService.joinGroup.mockReturnValue(of({ message: 'Solicitud enviada' }));
@@ -64,7 +89,7 @@ describe('GroupJoin', () => {
 
   it('should redirects to the group when the request has been accepted', () => {
     component.groupCode.set('ABC12345');
-    groupService.getMyGroups.mockReturnValue(of([{ group_code: 'ABC12345' }]));
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'accepted' }));
 
     component.checkAccepted();
 
@@ -84,7 +109,7 @@ describe('GroupJoin', () => {
 
   it('opens the invited group without sending another request if already a member', () => {
     component.groupCode.set('ABC12345');
-    groupService.getMyGroups.mockReturnValue(of([{ group_code: 'ABC12345' }]));
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'accepted' }));
     component.onAuthenticated();
     expect(router.navigate).toHaveBeenCalledWith(['/home', 'ABC12345']);
     expect(groupService.joinGroup).not.toHaveBeenCalled();
@@ -93,7 +118,7 @@ describe('GroupJoin', () => {
 
   it('checks an existing session without rendering another sign-in button', async () => {
     authService.isAuthenticated.mockReturnValue(true);
-    groupService.getMyGroups.mockReturnValue(of([{ group_code: 'ABC12345' }]));
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'accepted' }));
     fixture.detectChanges();
     await fixture.whenStable();
     expect(router.navigate).toHaveBeenCalledWith(['/home', 'ABC12345']);
@@ -114,7 +139,7 @@ describe('GroupJoin', () => {
 
   it('does not request a group when membership cannot be checked', () => {
     component.groupCode.set('ABC12345');
-    groupService.getMyGroups.mockReturnValue(throwError(() => new Error('Unavailable')));
+    groupService.getMembershipStatus.mockReturnValue(throwError(() => new Error('Unavailable')));
     component.onAuthenticated();
     expect(groupService.joinGroup).not.toHaveBeenCalled();
     expect(component.isLoading()).toBe(false);
@@ -126,12 +151,12 @@ describe('GroupJoin', () => {
   });
 
   it('does not process a late membership response after leaving the invitation', () => {
-    const pending = new Subject<GroupModel[]>();
+    const pending = new Subject<{ status: 'none' }>();
     component.groupCode.set('ABC12345');
-    groupService.getMyGroups.mockReturnValue(pending);
+    groupService.getMembershipStatus.mockReturnValue(pending);
     component.onAuthenticated();
     fixture.destroy();
-    pending.next([]);
+    pending.next({ status: 'none' });
     expect(groupService.joinGroup).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });

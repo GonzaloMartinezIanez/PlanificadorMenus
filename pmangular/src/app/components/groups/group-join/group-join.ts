@@ -6,6 +6,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { GoogleLogin } from '../../../core/google-login/google-login';
+import { RealtimeService } from '../../../services/realtime.service';
 
 @Component({
   selector: 'app-group-join',
@@ -20,6 +21,8 @@ export class GroupJoin implements OnInit {
   route = inject(ActivatedRoute);
   snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
+  private realtime = inject(RealtimeService);
+  private membershipRequestId = 0;
 
   groupCode = signal('');
   isLoading = signal(false);
@@ -28,7 +31,19 @@ export class GroupJoin implements OnInit {
   ngOnInit(): void {
     const groupCode = this.route.snapshot.paramMap.get('group_code');
     if (groupCode) this.groupCode.set(groupCode);
-    if (this.authService.isAuthenticated()) this.redirectIfAlreadyMember();
+    this.realtime
+      .watchGroup(() => this.groupCode(), ['membership.decided', 'membership.changed', 'group.deleted'])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (!this.authService.isAuthenticated()) return;
+        if (event.status === 'rejected' || event.type === 'group.deleted') {
+          this.hasRequestedJoin.set(false);
+          this.showInfo(
+            event.type === 'group.deleted' ? 'El grupo ya no está disponible.' : 'Tu solicitud ha sido rechazada.',
+          );
+        } else this.checkAccepted(true);
+      });
+    if (this.authService.isAuthenticated()) this.checkAccepted(true);
   }
 
   joinGroup(): void {
@@ -53,26 +68,34 @@ export class GroupJoin implements OnInit {
       });
   }
 
-  checkAccepted(): void {
+  checkAccepted(silent = false): void {
     const groupCode = this.groupCode();
     if (!groupCode) return;
+    const requestId = ++this.membershipRequestId;
     this.isLoading.set(true);
     this.groupService
-      .getMyGroups()
+      .getMembershipStatus(groupCode)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (groups) => {
-          const group = groups.find((item) => item.group_code === groupCode);
+        next: (membership) => {
+          if (requestId !== this.membershipRequestId || groupCode !== this.groupCode()) return;
           this.isLoading.set(false);
-          if (group) {
-            this.router.navigate(['/home', group.group_code]);
+          if (membership.status === 'accepted') {
+            this.router.navigate(['/home', groupCode]);
             return;
           }
-          this.showInfo('Tu solicitud está pendiente de aprobación.');
+          this.hasRequestedJoin.set(membership.status === 'pending');
+          if (!silent)
+            this.showInfo(
+              membership.status === 'pending'
+                ? 'Tu solicitud está pendiente de aprobación.'
+                : 'No tienes una solicitud activa en este grupo.',
+            );
         },
         error: () => {
+          if (requestId !== this.membershipRequestId || groupCode !== this.groupCode()) return;
           this.isLoading.set(false);
-          this.showError('No se pudo comprobar el estado de la solicitud.');
+          if (!silent) this.showError('No se pudo comprobar el estado de la solicitud.');
         },
       });
   }
@@ -86,14 +109,16 @@ export class GroupJoin implements OnInit {
     }
     this.isLoading.set(true);
     this.groupService
-      .getMyGroups()
+      .getMembershipStatus(groupCode)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (groups) => {
-          const group = groups.find((item) => item.group_code === groupCode);
-          if (group) {
+        next: (membership) => {
+          if (membership.status === 'accepted') {
             this.isLoading.set(false);
-            this.router.navigate(['/home', group.group_code]);
+            this.router.navigate(['/home', groupCode]);
+          } else if (membership.status === 'pending') {
+            this.isLoading.set(false);
+            this.hasRequestedJoin.set(true);
           } else {
             this.joinGroup();
           }
@@ -102,21 +127,6 @@ export class GroupJoin implements OnInit {
           this.isLoading.set(false);
           this.showError('No se pudo comprobar el grupo al que quieres unirte.');
         },
-      });
-  }
-
-  private redirectIfAlreadyMember(): void {
-    const groupCode = this.groupCode();
-    if (!groupCode) return;
-    this.groupService
-      .getMyGroups()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (groups) => {
-          const group = groups.find((item) => item.group_code === groupCode);
-          if (group) this.router.navigate(['/home', group.group_code]);
-        },
-        error: () => this.showError('No se pudo comprobar el grupo al que quieres unirte.'),
       });
   }
 

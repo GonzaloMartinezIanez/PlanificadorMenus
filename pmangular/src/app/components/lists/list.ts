@@ -4,7 +4,7 @@ import { finalize } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { ListService } from '../../services/list.service';
-import { ListModel, ListPatchItem, ListStatusItem } from '../../models/lists';
+import { ListPatchItem, ListStatusItem } from '../../models/lists';
 import { ListItem } from './list-item/list-item';
 import { MatButtonModule } from '@angular/material/button';
 import { IngredientService } from '../../services/ingredient.service';
@@ -16,9 +16,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ConfirmDialog } from '../../core/confirm-dialog/confirm-dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RealtimeService } from '../../services/realtime.service';
+import { ShoppingListState } from '../../services/shopping-list-state.service';
 
 @Component({
   selector: 'app-list',
+  providers: [ShoppingListState],
   imports: [
     ListItem,
     MatButtonModule,
@@ -41,11 +44,13 @@ export class List implements OnInit {
   dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
+  private realtime = inject(RealtimeService);
+  readonly state = inject(ShoppingListState);
   deletingItems = signal<Set<string>>(new Set());
 
   groupCode = signal<string | null>(null);
-  list = signal<ListModel[]>([]);
-  totalPrice = signal<number>(0);
+  list = this.state.list;
+  totalPrice = this.state.totalPrice;
   categories = signal<IngredientCategory[]>([]);
   activeCategories = computed(() => {
     const usedCategories: IngredientCategory[] = [];
@@ -78,8 +83,12 @@ export class List implements OnInit {
   ingredientAmount = signal(1);
 
   ngOnInit(): void {
+    this.realtime
+      .watchGroup(() => this.groupCode(), ['shopping_list.changed'])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadList(true));
     // Escuchar la url para el cambio de grupo
-    this.route.paramMap.subscribe({
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (params) => {
         const groupCode = params.get('group_code');
 
@@ -88,6 +97,7 @@ export class List implements OnInit {
         }
 
         this.groupCode.set(groupCode);
+        this.state.replace({ items: [], total_price: 0 });
         this.loadList();
       },
     });
@@ -114,27 +124,29 @@ export class List implements OnInit {
     });
   }
 
-  loadList() {
+  loadList(background = false) {
     const groupCode = this.groupCode();
     if (!groupCode) return;
-    this.listService
-      .getLists(groupCode)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          if (this.groupCode() !== groupCode) return;
-          this.list.set(response.items);
-          this.totalPrice.set(response.total_price);
-          const category = this.selectedCategory();
-          if (
-            category !== null &&
-            !response.items.some(
-              (item) => this.getMainCategory(item.ingredient.id_ingredient_categories[0]) === category,
-            )
-          )
-            this.selectedCategory.set(null);
-        },
-      });
+    this.state.load(
+      groupCode,
+      (response) => {
+        if (this.groupCode() !== groupCode) return;
+        const category = this.selectedCategory();
+        if (
+          category !== null &&
+          !response.items.some((item) => this.getMainCategory(item.ingredient.id_ingredient_categories[0]) === category)
+        )
+          this.selectedCategory.set(null);
+      },
+      () => {
+        if (!background && this.groupCode() === groupCode) {
+          this.snackBar.open('No se pudo cargar la lista de la compra. Vuelve a intentarlo.', 'Cerrar', {
+            duration: 4000,
+            panelClass: ['snackbar-error'],
+          });
+        }
+      },
+    );
   }
 
   deleteItem(id: string) {

@@ -15,6 +15,7 @@ describe('GroupForms', () => {
     createGroup: vi.fn(),
     joinGroup: vi.fn(),
     getMyGroups: vi.fn(),
+    getMembershipStatus: vi.fn(),
   };
   const authService = { logout: vi.fn() };
   const snackBar = { open: vi.fn() };
@@ -58,15 +59,10 @@ describe('GroupForms', () => {
 
   it('should redirects to the group whose request was accepted', () => {
     component.requestedGroupCode.set('SECOND01');
-    groupService.getMyGroups.mockReturnValue(
-      of([
-        { group_code: 'FIRST001', group_name: 'Primero' },
-        { group_code: 'SECOND01', group_name: 'Segundo' },
-      ]),
-    );
+    groupService.getMembershipStatus.mockReturnValue(of({ status: 'accepted' }));
 
     component.checkAccepted();
 
-    expect(router.navigate).toHaveBeenCalledWith(['/home/SECOND01']);
+    expect(router.navigate).toHaveBeenCalledWith(['/home', 'SECOND01']);
   });
 });

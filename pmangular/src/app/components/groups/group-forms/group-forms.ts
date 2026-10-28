@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, signal } from '@angular/core';
+import { Component, DestroyRef, inject, Input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupService } from '../../../services/group.service';
 import { Router } from '@angular/router';
@@ -8,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RealtimeService } from '../../../services/realtime.service';
 
 @Component({
   selector: 'app-group-forms',
@@ -30,6 +32,8 @@ export class GroupForms {
   joinGroupForm: FormGroup;
 
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
+  private realtime = inject(RealtimeService);
 
   constructor() {
     this.newGroupForm = this.fb.group({
@@ -40,6 +44,34 @@ export class GroupForms {
     this.joinGroupForm = this.fb.group({
       group_code: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]],
     });
+    this.realtime
+      .watchGroup(() => this.requestedGroupCode(), ['membership.decided', 'membership.changed', 'group.deleted'])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (!this.requestedGroupCode()) return;
+        if (event.status === 'rejected' || event.type === 'group.deleted') {
+          this.showCheckAcceptedButton.set(false);
+          this.showInfo(
+            event.type === 'group.deleted' ? 'El grupo ya no está disponible.' : 'Tu solicitud ha sido rechazada.',
+          );
+          this.requestedGroupCode.set('');
+        } else this.refreshMembership();
+      });
+  }
+
+  private refreshMembership(): void {
+    const code = this.requestedGroupCode();
+    this.groupService
+      .getMembershipStatus(code)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (membership) => {
+          if (code !== this.requestedGroupCode()) return;
+          if (membership.status === 'accepted') void this.router.navigate(['/home', code]);
+          this.showCheckAcceptedButton.set(membership.status === 'pending');
+        },
+        error: () => {},
+      });
   }
 
   createGroup() {
@@ -77,18 +109,27 @@ export class GroupForms {
   }
 
   checkAccepted() {
-    this.groupService.getMyGroups().subscribe({
-      next: (res) => {
-        const acceptedGroup = res.find((group) => group.group_code === this.requestedGroupCode());
-
-        if (acceptedGroup) {
-          this.router.navigate([`/home/${acceptedGroup.group_code}`]);
-          return;
-        }
-
-        this.showInfo('Tu solicitud está pendiente de aprobación.');
-      },
-    });
+    const code = this.requestedGroupCode();
+    if (!code) return;
+    this.groupService
+      .getMembershipStatus(code)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (membership) => {
+          if (code !== this.requestedGroupCode()) return;
+          if (membership.status === 'accepted') {
+            this.router.navigate(['/home', code]);
+            return;
+          }
+          this.showCheckAcceptedButton.set(membership.status === 'pending');
+          this.showInfo(
+            membership.status === 'pending'
+              ? 'Tu solicitud está pendiente de aprobación.'
+              : 'No tienes una solicitud activa en este grupo.',
+          );
+        },
+        error: () => this.showError('No se pudo comprobar el estado de la solicitud.'),
+      });
   }
 
   logout() {

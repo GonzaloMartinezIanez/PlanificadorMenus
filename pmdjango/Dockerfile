@@ -28,4 +28,4 @@ COPY . .
 EXPOSE 8000
 
 # Se lanza la API usando uvicorn
-CMD ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
+CMD ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "3", "--ws", "websockets-sansio", "--ws-max-size", "2048"]

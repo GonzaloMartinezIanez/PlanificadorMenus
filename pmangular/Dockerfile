@@ -12,7 +12,8 @@ RUN npm ci
 COPY . .
 
 # Compilar la aplicación y generar los ficheros que habrá que pegar en nginx
-RUN npm run build
+ARG BUILD_CONFIGURATION=production
+RUN npm run build -- --configuration=${BUILD_CONFIGURATION}
 
 # Usar una versión de linux con nginx
 FROM nginx:1.27-alpine

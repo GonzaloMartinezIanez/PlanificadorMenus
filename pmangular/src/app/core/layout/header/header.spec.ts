@@ -90,6 +90,15 @@ describe('Header', () => {
     expect(localStorage.getItem(environment.ACTIVE_GROUP_KEY)).toBe('OLD12345');
   });
 
+  it('opens another group when a realtime refresh detects revoked access', async () => {
+    await renderHeader();
+    groupService.getMyGroups.mockReturnValue(of([groups[1]]));
+    component.loadMyGroups(true);
+    await fixture.whenStable();
+    expect(router.url).toBe('/home/NEW12345');
+    expect(component.selectedGroupCode()).toBe('NEW12345');
+  });
+
   it('keeps a single group visible without showing an unnecessary selector', async () => {
     groupService.getMyGroups.mockReturnValue(of([groups[0]]));
     await renderHeader();

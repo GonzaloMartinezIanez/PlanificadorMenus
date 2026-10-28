@@ -8,6 +8,8 @@ import { afterEach, vi } from 'vitest';
 import { Menus } from './menus';
 import { defaultTestProviders } from '../../testing/test-providers';
 import { MenuModel } from '../../models/menu';
+import { RealtimeEvent } from '../../models/realtime';
+import { RealtimeService } from '../../services/realtime.service';
 
 describe('Menus', () => {
   let component: Menus;
@@ -44,6 +46,22 @@ describe('Menus', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('refreshes remote changes without clearing the displayed calendar and stops when leaving', () => {
+    const events = new Subject<RealtimeEvent>();
+    vi.spyOn(TestBed.inject(RealtimeService), 'watchGroup').mockReturnValue(events);
+    component.ngOnInit();
+    component.groupCode.set('GROUP001');
+    const displayed: MenuModel[] = [{ recipe: { id: 1 } as MenuModel['recipe'], date: '2026-10-28', time: 'LUNCH' }];
+    component.state.replace(displayed);
+    events.next({ type: 'menu.changed', group_code: 'GROUP001' });
+    expect(component.menus()).toEqual(displayed);
+    http.expectOne((req) => req.url.includes('/menus/GROUP001/')).flush([]);
+    expect(component.menus()).toEqual([]);
+    fixture.destroy();
+    events.next({ type: 'menu.changed', group_code: 'GROUP001' });
+    http.expectNone((req) => req.url.includes('/menus/'));
   });
 
   it('requests the visible week and ignores a late response from the previous week', () => {
@@ -91,7 +109,7 @@ describe('Menus', () => {
   it('should report a calendar loading error without discarding displayed menus', () => {
     component.groupCode.set('GROUP');
     const menus: MenuModel[] = [{ recipe: { id: 1 } as MenuModel['recipe'], date: '2026-09-19', time: 'LUNCH' }];
-    component.menus.set(menus);
+    component.state.replace(menus);
 
     component.loadMenus();
     http.expectOne((req) => req.method === 'GET').flush({}, { status: 500, statusText: 'Server error' });

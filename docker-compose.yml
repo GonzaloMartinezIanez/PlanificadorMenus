@@ -2,6 +2,19 @@
 # Primero se descargan las imágenes con: docker compose pull
 # Si todo va bien se lanza en modo proceso con: docker compose up -d
 services:
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command:
+      ['redis-server', '--maxmemory', '128mb', '--maxmemory-policy', 'noeviction', '--save', '', '--appendonly', 'no']
+    mem_limit: 256m
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - internal
   # Se crea un contenedor con la base de datos MySQL
   db:
     image: mysql:8.4
@@ -36,10 +49,13 @@ services:
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
+      REDIS_URL: redis://redis:6379/0
     # Lanzar la API dentro del contenedor
-    command: sh -c "python manage.py migrate --noinput && uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --workers 3"
+    command: sh -c "python manage.py migrate --noinput && uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --workers 3 --ws websockets-sansio --ws-max-size 2048 --ws-ping-interval 25 --ws-ping-timeout 25"
     # No la lanza si no funciona la base de datos
     depends_on:
+      redis:
+        condition: service_healthy
       db:
         condition: service_healthy
     # Expone su puerto 8000 de su contenedor, pero no a Internet, de eso se encarga nginx

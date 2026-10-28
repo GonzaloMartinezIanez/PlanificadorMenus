@@ -24,6 +24,24 @@ def generate_random_code():
             return random_code
 
 
+class MembershipStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, group_code):
+        membership = GroupMember.objects.filter(
+            user=request.user, group__group_code=group_code
+        ).first()
+        return Response(
+            {
+                "status": (
+                    "accepted"
+                    if membership and membership.accepted
+                    else "pending" if membership else "none"
+                )
+            }
+        )
+
+
 class GroupApiView(APIView):
     permission_classes = [IsAuthenticated]
 

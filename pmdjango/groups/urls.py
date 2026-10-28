@@ -5,9 +5,15 @@ from .views import (
     GroupMemberJoinApiView,
     GroupMemberRoleApiView,
     GroupLeaveApiView,
+    MembershipStatusView,
 )
 
 urlpatterns = [
+    path(
+        "groups/<str:group_code>/membership/",
+        MembershipStatusView.as_view(),
+        name="membership-status",
+    ),
     path("groups/", GroupApiView.as_view(), name="groups-apiview"),
     path(
         "groups/<str:group_code>/",

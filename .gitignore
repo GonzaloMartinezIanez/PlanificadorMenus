@@ -1,4 +1,5 @@
 .env
+.env.docker.local
 mysql-data
 certbot
 AGENTS.md

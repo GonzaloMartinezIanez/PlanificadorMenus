@@ -18,6 +18,7 @@ import { toDataURL } from 'qrcode';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialog } from '../../../core/confirm-dialog/confirm-dialog';
 import { MatIcon } from '@angular/material/icon';
+import { RealtimeService } from '../../../services/realtime.service';
 
 @Component({
   selector: 'app-group-manage',
@@ -43,6 +44,8 @@ export class GroupManage implements OnInit {
   snackBar = inject(MatSnackBar);
   dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
+  private realtime = inject(RealtimeService);
+  private memberRequestId = 0;
 
   displayedAcceptedColumns = computed(() => {
     if (this.isAdmin()) {
@@ -95,6 +98,27 @@ export class GroupManage implements OnInit {
   }
 
   ngOnInit(): void {
+    this.realtime
+      .watchGroup(
+        () => this.selectedGroupCode(),
+        ['membership.requested', 'membership.changed', 'membership.decided', 'group.updated'],
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadGroupMembers();
+        const groupCode = this.selectedGroupCode();
+        this.groupService
+          .getMyGroups()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (groups) => {
+              if (groupCode !== this.selectedGroupCode()) return;
+              this.myGroups.set(groups);
+              if (!this.groupForm.dirty) this.syncGroupForm();
+            },
+            error: () => {},
+          });
+      });
     this.updateSelectedGroupFromUrl();
 
     this.router.events
@@ -286,6 +310,7 @@ export class GroupManage implements OnInit {
 
   loadGroupMembers() {
     const groupCode = this.selectedGroupCode();
+    const requestId = ++this.memberRequestId;
     if (!groupCode || !this.authService.isAuthenticated()) {
       return;
     }
@@ -295,11 +320,22 @@ export class GroupManage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          if (!this.authService.isAuthenticated() || this.selectedGroupCode() !== groupCode) return;
+          if (
+            !this.authService.isAuthenticated() ||
+            this.selectedGroupCode() !== groupCode ||
+            requestId !== this.memberRequestId
+          )
+            return;
           this.groupMembers.set(res);
         },
         error: (err) => {
-          if (!this.authService.isAuthenticated() || this.selectedGroupCode() !== groupCode) return;
+          if (
+            !this.authService.isAuthenticated() ||
+            this.selectedGroupCode() !== groupCode ||
+            requestId !== this.memberRequestId
+          )
+            return;
+          if (err.status === 403 || err.status === 404) return; // El header recupera el acceso y navega al grupo disponible.
           this.showError(err.error?.error ?? 'No se pudieron cargar los miembros del grupo.');
         },
       });

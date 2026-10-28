@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "recipes",
     "menus",
     "lists",
+    "config.realtime",
 ]
 
 MIDDLEWARE = [
@@ -84,6 +85,36 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL and not DEBUG:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        "REDIS_URL es obligatorio en producción para compartir los avisos entre procesos."
+    )
+CHANNEL_LAYERS = (
+    {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [
+                    {
+                        "address": REDIS_URL,
+                        "socket_connect_timeout": 1,
+                        # La recepción usa BZPOPMIN con espera de cinco segundos.
+                        "socket_timeout": 10,
+                    }
+                ],
+                "capacity": 100,
+                "expiry": 30,
+            },
+        }
+    }
+    if REDIS_URL
+    else {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+)
 
 
 # Database

@@ -9,7 +9,6 @@ import { GroupAccess } from './components/groups/group-access/group-access';
 import { authGuard } from './guards/auth-guard';
 import { loginGuard } from './guards/login-guard';
 import { groupGuard } from './guards/group-guard';
-import { GroupManage } from './components/groups/group-manage/group-manage';
 import { List } from './components/lists/list';
 import { RecipeDetail } from './components/recipes/recipe-detail/recipe-detail';
 import { Recipes } from './components/recipes/recipes';
@@ -39,7 +38,8 @@ export const routes: Routes = [
       { path: 'recipes/:id', component: RecipeDetail },
       {
         path: 'groups/:group_code/manage',
-        component: GroupManage,
+        loadComponent: () =>
+          import('./components/groups/group-manage/group-manage').then((module) => module.GroupManage),
         canActivate: [authGuard, groupGuard],
       },
     ],
