@@ -3,9 +3,13 @@ from decimal import Decimal, ROUND_HALF_UP
 from rest_framework import serializers
 from .models import List
 from ingredients.models import Ingredient
+from ingredients.quantities import package_amount
 
 
 class ListInputSerializer(serializers.ModelSerializer):
+    amount = serializers.DecimalField(
+        max_digits=10, decimal_places=3, min_value=Decimal("0.001")
+    )
     id_ingredient = serializers.CharField(write_only=True)
 
     class Meta:
@@ -28,9 +32,16 @@ class ListInputSerializer(serializers.ModelSerializer):
 
 
 class ListPatchSerializer(serializers.ModelSerializer):
+    amount = serializers.DecimalField(
+        max_digits=10, decimal_places=3, min_value=Decimal("0.001"), required=False
+    )
+    expected_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=3, required=False, write_only=True
+    )
+
     class Meta:
         model = List
-        fields = ["amount", "unit", "bought"]
+        fields = ["amount", "unit", "bought", "expected_amount"]
 
     def validate(self, data):
         if "unit" in data and data["unit"] != self.instance.ingredient.reference_format:
@@ -82,11 +93,15 @@ class ListOutputSerializer(serializers.ModelSerializer):
             "reference_price": ingredient.reference_price,
             "unit_price": ingredient.unit_price,
             "unit_size": ingredient.unit_size,
+            "package_amount": package_amount(ingredient),
             "image": ingredient.image,
         }
 
     # Cuanto contiene el envase del producto en su unidad de referencia
     def get_package_reference_amount(self, ingredient):
+        known = package_amount(ingredient)
+        if known is not None:
+            return known
         reference_format = ingredient.reference_format
 
         if ingredient.unit_size is not None and ingredient.unit_size > 0:
@@ -103,7 +118,12 @@ class ListOutputSerializer(serializers.ModelSerializer):
                 return ingredient.unit_size * Decimal("10")
 
         # Faltan datos
-        if ingredient.reference_price is None or ingredient.unit_price is None:
+        if (
+            not ingredient.reference_price
+            or ingredient.reference_price <= 0
+            or not ingredient.unit_price
+            or ingredient.unit_price <= 0
+        ):
             return None
 
         return ingredient.unit_price / ingredient.reference_price

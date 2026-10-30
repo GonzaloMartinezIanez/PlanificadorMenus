@@ -4,6 +4,7 @@ from .views import (
     IngredientCategoryViewSet,
     IngredientViewSet,
     IngredientCategoryIngredientsApiView,
+    IngredientFavoriteApiView,
 )
 from rest_framework.routers import DefaultRouter
 
@@ -16,6 +17,7 @@ ingredient_category_router.register(
 )
 
 urlpatterns = [
+    path("ingredients/<str:pk>/favorite/", IngredientFavoriteApiView.as_view()),
     path(
         "ingredient_by_name/",
         IngredientByNameApiView.as_view(),

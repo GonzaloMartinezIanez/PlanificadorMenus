@@ -72,6 +72,27 @@ existente, salvo Uvicorn 0.54.0, que no estaba instalado localmente.
 
 ## Aplicaciones
 
+Los favoritos pertenecen al usuario autenticado, mediante relaciones independientes
+en productos y recetas. Las migraciones `ingredients/0003_ingredient_favorite_users`
+y `recipes/0005_recipe_favorite_users` crean las tablas de relación, sin modificar
+los productos o recetas existentes; inicialmente nadie tiene favoritos.
+
+`PUT /ingredients/{id}/favorite/` y `PUT /recipes/{id}/favorite/` marcan como
+favorito; `DELETE` en esas mismas rutas lo quita. Son operaciones idempotentes y
+solo afectan a `request.user`. Devuelven `{ "is_favorite": true/false }`.
+Exigen autenticación y devuelven 404 si el recurso no existe o la receta no es
+visible. Marcar una receta no concede permisos sobre ella: si se pierde acceso
+a su grupo, tampoco aparece entre favoritas.
+
+Los listados y búsquedas de ingredientes y recetas (incluidas las categorías)
+aceptan `favorites=true`, combinado con sus filtros existentes antes de paginar.
+Este filtro exige autenticación; un valor inválido devuelve 400. Los resultados
+incluyen `is_favorite`, relativo al usuario de la petición (false para invitados).
+La búsqueda de ingredientes admite `favorites=true` sin nombre ni categoría.
+Las consultas usan `Exists` para resolver el indicador sin una consulta adicional
+por favorito; las relaciones de usuarios no se exponen ni se pueden editar desde
+los serializers de catálogo.
+
 `DELETE /lists/{codigo}/{id_ingrediente}/` elimina toda la fila de ese producto
 de la lista del grupo, con independencia de su cantidad o estado comprado.
 Requiere pertenencia aceptada al grupo y devuelve 404 si la fila no existe.
@@ -139,6 +160,37 @@ node .\scripts\loadRecipes.js
 ## Producción
 
 En producción el contenedor ejecuta las migraciones y levanta la API ASGI mediante Uvicorn. La configuración de MySQL, hosts permitidos, CORS, OAuth y secretos se recibe mediante variables de entorno definidas en el `.env` de Docker Compose.
+
+## Productos: búsqueda, envases y recuperación
+
+`GET /ingredient_by_name/` conserva `name` y admite además `category`. Ambos filtros
+se combinan antes de paginar; una categoría principal incluye sus subcategorías.
+Sin nombre ni categoría mantiene el error anterior. Las respuestas de ingredientes,
+ingredientes de recetas y filas de compra incorporan `package_amount`, calculado
+con `Decimal` en `ingredients/quantities.py`, sin cambiar la unidad de referencia.
+
+El tamaño del catálogo sirve directamente para kg, litros (incluyendo `L`) y
+metros; docenas y formatos por 100 g/100 ml se expresan en su unidad de referencia
+como ya hace la lista. Para piezas y lavados no se interpreta el peso como número
+de unidades: solo se infiere un conteo cuando la relación de precios es un entero
+exacto. Los datos incompletos o ambiguos devuelven `null` y el cliente pide cantidad
+manual. Las cantidades de entrada son positivas, con tres decimales como máximo.
+
+El PATCH de una fila acepta `expected_amount` opcional: si difiere de la cantidad
+guardada devuelve 409 sin modificarla. Las escrituras de listas y menús bloquean
+la fila del grupo dentro de una transacción, para serializar sus acumulaciones
+en MySQL. SQLite mantiene sus propias restricciones de escritura concurrente.
+
+DELETE de un producto conserva el mensaje anterior y añade `undo_id`. La migración
+`lists/0003_removedlistitem` crea tickets personales en `RemovedListItem`, con
+cantidad, unidad, estado comprado y caducidad de treinta segundos. El nuevo
+`POST /lists/{codigo}/{ingrediente}/restore/` recibe `{"undo_id":"<UUID>"}` y exige
+que el usuario conserve pertenencia aceptada al grupo y sea quien lo eliminó.
+Restaura una sola vez; devuelve 404 para tickets caducados, ajenos o consumidos y
+409 si el producto ya existe o su unidad ha cambiado. Nunca suma ni sobrescribe
+cantidades al deshacer. Limpiar la lista invalida sus tickets; las eliminaciones
+posteriores purgan los tickets caducados. Estas operaciones generan los mismos
+avisos de lista por WebSocket después del commit.
 
 ## Actualizaciones en tiempo real
 

@@ -4,6 +4,7 @@ html {
   // El contorno define la silueta sin apagar el relleno amarillo.
   --app-rating-color: #ffc400;
   --app-rating-outline-color: #8a6400;
+  --app-favorite-color: #c62828;
   color-scheme: light;
   @include mat.theme(
     (

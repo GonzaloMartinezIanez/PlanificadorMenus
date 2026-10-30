@@ -72,20 +72,6 @@
 
         <button mat-stroked-button type="button" (click)="openIngredientPicker()">Añadir ingrediente</button>
 
-        <ng-template #ingredientPickerDialog>
-          <div class="ingredient-dialog">
-            <app-ingredient-picker
-              class="ingredient-dialog-content"
-              [selectedIngredientIds]="getSelectedIngredientIds()"
-              (ingredientSelected)="selectIngredient($event)"
-            />
-
-            <button class="ingredient-dialog-close-button" mat-button type="button" (click)="dialog.closeAll()">
-              Cerrar
-            </button>
-          </div>
-        </ng-template>
-
         <div formArrayName="ingredients">
           @for (ingredient of ingredients().controls; track $index) {
             <div [formGroupName]="$index" class="recipe-form-ingredients">
@@ -101,13 +87,12 @@
                 <div>
                   <p class="recipe-form-ingredients-name">{{ ingredient.get('name')?.value }}</p>
                   <div class="recipe-form-ingredients-input">
-                    <mat-form-field>
-                      <mat-label>Cantidad</mat-label>
-                      <input matInput type="number" min="0.001" step="0.001" formControlName="amount" />
-                    </mat-form-field>
-                    <p class="recipe-form-ingredients-unit">
-                      {{ formatUnit(ingredient.get('reference_format')?.value) }}
-                    </p>
+                    <app-product-quantity
+                      [value]="ingredient.get('amount')?.value"
+                      (valueChange)="ingredient.get('amount')?.setValue($event); ingredient.markAsDirty()"
+                      [unit]="ingredient.get('unit')?.value || ''"
+                      [packageAmount]="ingredient.get('package_amount')?.value"
+                    />
                   </div>
                 </div>
               </div>

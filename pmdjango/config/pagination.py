@@ -16,6 +16,7 @@ class CommentPagination(RecipePagination):
 
 
 def paginated_response(queryset, request, serializer_class, pagination_class, **kwargs):
+    kwargs.setdefault("context", {"request": request})
     paginator = pagination_class()
     page = paginator.paginate_queryset(queryset, request)
     serializer = serializer_class(page, many=True, **kwargs)

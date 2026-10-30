@@ -86,8 +86,9 @@ class MenuApiView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @transaction.atomic
     def post(self, request, group_code):
-        group, error = get_my_group(request, group_code)
+        group, error = get_my_group(request, group_code, lock=True)
         if error:
             return error
 
@@ -126,8 +127,9 @@ class MenuApiView(APIView):
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
     # Se elimina el menú pasado en el body junto sus ingredientes en la lista
+    @transaction.atomic
     def delete(self, request, group_code):
-        group, error = get_my_group(request, group_code)
+        group, error = get_my_group(request, group_code, lock=True)
         if error:
             return error
 

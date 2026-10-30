@@ -17,13 +17,20 @@ export class RecipeService {
     });
   }
 
-  searchRecipes(name: string, categoryIds: number[], page = 1): Observable<PaginatedResponse<Recipe>> {
+  searchRecipes(
+    name: string,
+    categoryIds: number[],
+    page = 1,
+    favorites = false,
+  ): Observable<PaginatedResponse<Recipe>> {
     let url = `${environment.apiUrl}/recipes/search/?`;
     if (name) url += `name=${encodeURIComponent(name)}&`;
 
     if (categoryIds.length > 0) url += `categories=${categoryIds.join(',')}`;
 
-    return this.http.get<PaginatedResponse<Recipe>>(url, { params: page > 1 ? { page } : {} });
+    return this.http.get<PaginatedResponse<Recipe>>(url, {
+      params: { ...(page > 1 ? { page } : {}), ...(favorites ? { favorites: true } : {}) },
+    });
   }
 
   getTopRecipes(): Observable<Recipe[]> {

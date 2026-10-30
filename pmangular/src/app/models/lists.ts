@@ -22,9 +22,14 @@ export interface ListItem {
 }
 
 export interface ListPatchItem {
+  expected_amount?: number;
   id_ingredient: string;
   amount?: number;
   unit?: string;
+}
+
+export interface ListItemSaveResult {
+  success: boolean;
 }
 
 export interface ListStatusItem {

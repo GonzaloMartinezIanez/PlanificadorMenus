@@ -5,6 +5,7 @@ export interface RecipeCategory {
 }
 
 export interface RecipeIngredient {
+  package_amount?: number | string | null;
   id_ingredient: string;
   name: string;
   image?: string | null;
@@ -31,6 +32,7 @@ export interface RecipeComment {
 export type CommentOrder = 'newest' | 'oldest';
 
 export interface Recipe {
+  is_favorite?: boolean;
   id: number;
   author: string;
   is_author: boolean;

@@ -6,10 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { RecipeRating } from '../../recipe-rating/recipe-rating';
+import { FavoriteButton } from '../../../../core/favorite-button/favorite-button';
 
 @Component({
   selector: 'app-recipe-search-result',
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, RouterLink, RecipeRating],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, RouterLink, RecipeRating, FavoriteButton],
   templateUrl: './recipe-search-result.html',
   styleUrl: './recipe-search-result.css',
 })
@@ -18,6 +19,7 @@ export class RecipeSearchResult {
   @Input() actionLabel = '';
   @Output() actionClicked = new EventEmitter<Recipe>();
   @Output() detailsClicked = new EventEmitter<void>();
+  @Output() favoriteChanged = new EventEmitter<boolean>();
 
   emitAction() {
     if (this.recipe) {

@@ -13,6 +13,12 @@ from ingredients.models import Ingredient
 from .utils import get_my_visible_recipes
 from config.permissions import IsEmailAuthorizedOrReadOnly
 from config.pagination import RecipePagination, paginated_response
+from config.favorites import FavoriteApiView, filter_favorites
+
+
+class RecipeFavoriteApiView(FavoriteApiView):
+    def get_queryset(self, request):
+        return get_my_visible_recipes(request)
 
 
 # CRUD de Categorias de recetas
@@ -35,6 +41,7 @@ class RecipeCategoryRecipesApiView(APIView):
         recipes = get_my_visible_recipes(request).filter(
             recipe_categories__id=id_recipe_category
         )
+        recipes = filter_favorites(recipes, request)
 
         return paginated_response(
             recipes.order_by("id"),
@@ -50,7 +57,7 @@ class RecipeApiView(APIView):
     permission_classes = []
 
     def get(self, request):
-        recipes = get_my_visible_recipes(request)
+        recipes = filter_favorites(get_my_visible_recipes(request), request)
         return paginated_response(
             recipes.order_by("id"),
             request,
@@ -109,7 +116,7 @@ class RecipeSearchApiView(APIView):
     permission_classes = []
 
     def get(self, request):
-        recipes = get_my_visible_recipes(request)
+        recipes = filter_favorites(get_my_visible_recipes(request), request)
 
         name = request.GET.get("name", "").strip()
         categories = request.GET.get("categories", "").strip()

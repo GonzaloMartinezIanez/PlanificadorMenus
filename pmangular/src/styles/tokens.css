@@ -13,6 +13,7 @@
   --app-color-error: var(--mat-sys-error);
   --app-color-error-soft: var(--mat-sys-error-container);
   --app-color-rating: var(--app-rating-color);
+  --app-color-favorite: var(--app-favorite-color);
   --app-color-rating-outline: var(--app-rating-outline-color);
 
   --app-space-1: 0.25rem;

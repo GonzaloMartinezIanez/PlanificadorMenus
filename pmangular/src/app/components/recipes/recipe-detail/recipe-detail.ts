@@ -15,6 +15,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { RecipeRating } from '../recipe-rating/recipe-rating';
 import { ConfirmDialog } from '../../../core/confirm-dialog/confirm-dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { FavoriteButton } from '../../../core/favorite-button/favorite-button';
 
 @Component({
   selector: 'app-recipe-detail',
@@ -29,6 +30,7 @@ import { MatDialog } from '@angular/material/dialog';
     MatChipsModule,
     RecipeRating,
     MatSelectModule,
+    FavoriteButton,
   ],
   templateUrl: './recipe-detail.html',
   styleUrl: './recipe-detail.css',
@@ -41,6 +43,9 @@ export class RecipeDetail implements OnInit {
   snackBar = inject(MatSnackBar);
 
   recipe = signal<Recipe | null>(null);
+  onFavoriteChanged(favorite: boolean): void {
+    this.recipe.update((recipe) => (recipe ? { ...recipe, is_favorite: favorite } : recipe));
+  }
   // Es una fecha de calendario: se muestra sin convertirla a una hora o zona horaria.
   formattedCreationDate = computed(() => this.recipe()?.creation_date?.split('-').reverse().join('/') ?? '');
   stackRecipeSections = computed(() => {

@@ -51,4 +51,21 @@ describe('RecipeCreate', () => {
     expect(component.formatUnit('dc')).toBe('docenas');
     expect(component.formatUnit('kg')).toBe('kg');
   });
+
+  it('initializes ingredients with one package and validates manually entered fractions', () => {
+    component.addIngredient({
+      id_ingredient: 'rice',
+      name: 'Arroz',
+      reference_format: 'kg',
+      package_amount: 0.5,
+    } as Ingredient);
+    const amount = component.ingredients().at(0).get('amount')!;
+    expect(amount.value).toBe(0.5);
+    amount.setValue(0.2);
+    expect(amount.valid).toBe(true);
+    amount.setValue(0.0001);
+    expect(amount.valid).toBe(false);
+    amount.setValue(0.1234);
+    expect(amount.valid).toBe(false);
+  });
 });

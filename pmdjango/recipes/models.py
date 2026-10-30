@@ -14,6 +14,9 @@ class RecipeCategory(models.Model):
 
 
 class Recipe(models.Model):
+    favorite_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="favorite_recipes", blank=True
+    )
     VISIBILITY_CHOICES = [
         ("PUBLIC", "PUBLIC"),
         ("PRIVATE", "PRIVATE"),

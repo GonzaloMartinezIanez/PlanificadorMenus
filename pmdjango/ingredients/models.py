@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class IngredientCategory(models.Model):
@@ -12,6 +13,9 @@ class IngredientCategory(models.Model):
 
 
 class Ingredient(models.Model):
+    favorite_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="favorite_ingredients", blank=True
+    )
     id_ingredient = models.CharField(
         max_length=50, primary_key=True
     )  # Algunos ingredientes ids tienen decimales

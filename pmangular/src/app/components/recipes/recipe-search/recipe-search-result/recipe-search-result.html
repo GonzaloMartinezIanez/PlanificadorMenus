@@ -28,6 +28,15 @@
   </mat-card-content>
   <mat-card-actions class="recipe-card-actions">
     @if (recipe) {
+      <app-favorite-button
+        kind="recipes"
+        [itemId]="recipe.id"
+        [name]="recipe.name"
+        [active]="recipe.is_favorite ?? false"
+        (favoriteChanged)="favoriteChanged.emit($event)"
+      />
+    }
+    @if (recipe) {
       <button mat-button [routerLink]="['/recipes', recipe.id]" (click)="emitDetails()">Ver detalles</button>
     }
     @if (recipe && actionLabel) {

@@ -5,82 +5,7 @@
     <button mat-stroked-button type="button" (click)="openIngredientPicker()">Añadir producto</button>
   </header>
 
-  <ng-template #ingredientPickerDialog>
-    <div class="ingredient-dialog">
-      @if (!selectedIngredient()) {
-        <app-ingredient-picker
-          class="ingredient-dialog-content"
-          [selectedIngredientIds]="getSelectedIngredientIds()"
-          (ingredientSelected)="selectIngredient($event)"
-        />
-      } @else {
-        <div class="ingredient-dialog-content shopping-list-add-product">
-          <div class="shopping-list-add-product-header">
-            @if (selectedIngredient()!.image) {
-              <img [src]="selectedIngredient()!.image" [alt]="selectedIngredient()!.name" />
-            }
-            <h2>{{ selectedIngredient()!.name }}</h2>
-          </div>
-
-          <div class="shopping-list-add-product-details">
-            @if (selectedIngredient()!.packaging) {
-              <span>{{ selectedIngredient()!.packaging }}</span>
-            }
-            @if (selectedIngredient()!.unit_size !== null && selectedIngredient()!.reference_format) {
-              <span>
-                {{ formatAmount(selectedIngredient()!.unit_size!) }}
-                {{ formatUnit(selectedIngredient()!.reference_format || '') }}
-              </span>
-            }
-            @if (selectedIngredient()!.unit_price !== null) {
-              <strong>{{ formatPrice(selectedIngredient()!.unit_price!) }}</strong>
-            }
-            @if (selectedIngredient()!.reference_price !== null && selectedIngredient()!.reference_format) {
-              <span>
-                {{ formatPrice(selectedIngredient()!.reference_price!) }}/{{
-                  formatUnit(selectedIngredient()!.reference_format || '')
-                }}
-              </span>
-            }
-          </div>
-
-          <div class="shopping-list-add-product-amount">
-            <mat-form-field>
-              <mat-label>Cantidad</mat-label>
-              <input
-                matInput
-                type="number"
-                min="0.001"
-                step="0.001"
-                [ngModel]="ingredientAmount()"
-                (ngModelChange)="ingredientAmount.set($event)"
-              />
-            </mat-form-field>
-
-            <span>{{ formatUnit(selectedIngredient()!.reference_format || '') }}</span>
-          </div>
-
-          <div class="shopping-list-add-product-actions">
-            <button
-              mat-flat-button
-              type="button"
-              (click)="addSelectedIngredient()"
-              [disabled]="ingredientAmount() < 0.001"
-            >
-              Añadir a la lista
-            </button>
-            <button mat-button type="button" (click)="selectedIngredient.set(null)">Volver</button>
-          </div>
-        </div>
-      }
-
-      <button mat-button class="ingredient-dialog-close-button" type="button" (click)="dialog.closeAll()">
-        Cerrar
-      </button>
-    </div>
-  </ng-template>
-
-  @if (filteredList().length === 0) {
+  @if (list().length === 0) {
     <p class="shopping-list-empty app-empty-state">No hay productos en la lista.</p>
   } @else {
     <div class="shopping-list-summary">
@@ -97,6 +22,9 @@
         Limpiar la lista
       </button>
     </div>
+    <mat-checkbox [checked]="onlyPending()" (change)="onlyPending.set($event.checked)"
+      >Mostrar solo pendientes</mat-checkbox
+    >
 
     <nav class="shopping-list-categories" aria-label="Filtrar productos por categoría">
       @for (cat of activeCategories(); track cat.id_ingredient_category) {
@@ -106,13 +34,14 @@
           class="shopping-list-category"
           [class.shopping-list-category--selected]="selectedCategory() === cat.id_ingredient_category"
           [attr.aria-label]="cat.name"
+          [attr.aria-pressed]="selectedCategory() === cat.id_ingredient_category"
           [matTooltip]="cat.name"
           (click)="changeSelectedCategory(cat.id_ingredient_category)"
         >
           @if (cat.icon) {
-            <img [src]="cat.icon" [alt]="cat.name" />
+            <img [src]="cat.icon" alt="" />
           }
-          @if (selectedCategory() === cat.id_ingredient_category) {
+          @if (!cat.icon || selectedCategory() === cat.id_ingredient_category) {
             <span>{{ cat.name }}</span>
           }
         </button>
@@ -120,10 +49,18 @@
     </nav>
 
     <div class="shopping-list-items">
+      @if (!filteredList().length) {
+        <p role="status">No hay productos con estos filtros.</p>
+        <button mat-button type="button" (click)="onlyPending.set(false); selectedCategory.set(null)">
+          Ver todos los productos
+        </button>
+      }
       @for (item of filteredList(); track item.ingredient.id_ingredient) {
         <app-list-item
           [item]="item"
           [deleting]="deletingItems().has(item.ingredient.id_ingredient)"
+          [saving]="savingItems().has(item.ingredient.id_ingredient)"
+          [saveResult]="saveResults()[item.ingredient.id_ingredient]"
           (removeItem)="deleteItem($event)"
           (changeItemStatus)="changeItemStatus($event)"
           (changeItemAmount)="changeItemAmount($event)"

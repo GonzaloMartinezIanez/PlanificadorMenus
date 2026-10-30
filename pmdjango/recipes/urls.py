@@ -6,6 +6,7 @@ from .views import (
     RecipeSearchApiView,
     RecipeTopApiView,
     RecipeIdApiView,
+    RecipeFavoriteApiView,
 )
 from .comment_views import CommentApiView, MyCommentApiView, CommentDeleteApiView
 from rest_framework.routers import DefaultRouter
@@ -16,6 +17,7 @@ recipe_category_router.register(
 )
 
 urlpatterns = [
+    path("recipes/<int:pk>/favorite/", RecipeFavoriteApiView.as_view()),
     path("recipe_category/", include(recipe_category_router.urls)),
     path(
         "recipe_category/<int:id_recipe_category>/recipes/",

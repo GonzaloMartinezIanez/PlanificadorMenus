@@ -8,6 +8,13 @@
       <section class="recipe-detail-header">
         <div>
           <h1>{{ recipe()!.name }}</h1>
+          <app-favorite-button
+            kind="recipes"
+            [itemId]="recipe()!.id"
+            [name]="recipe()!.name"
+            [active]="recipe()!.is_favorite ?? false"
+            (favoriteChanged)="onFavoriteChanged($event)"
+          />
           <h3>Autor: {{ recipe()!.author }}</h3>
           @if (recipe()!.visibility === 'PRIVATE') {
             <p>

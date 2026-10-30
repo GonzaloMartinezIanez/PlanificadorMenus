@@ -1,109 +1,123 @@
 <section class="ingredient-picker">
-  <h3>Buscar ingrediente</h3>
-
   <mat-form-field>
-    <mat-label>Nombre del ingrediente</mat-label>
+    <mat-label>Buscar productos por nombre</mat-label>
     <mat-icon matPrefix>search</mat-icon>
-    <input matInput [value]="searchText()" (input)="searchIngredients($event)" />
-  </mat-form-field>
-
-  <!-- Si se busca por texto desaparecen las categorías (TODO Añadir un endpoint que acepte ambos) -->
-  @if (searchText()) {
-    <h4>Resultados</h4>
-
-    @if (isLoadingSearchResults()) {
-      <p>Cargando...</p>
-    } @else if (searchResults().length > 0) {
-      <div class="ingredient-picker-result">
-        @for (ingredient of searchResults(); track ingredient.id_ingredient) {
-          <app-ingredient-picker-result
-            [ingredient]="ingredient"
-            [selected]="isIngredientSelected(ingredient.id_ingredient)"
-            (ingredientAdded)="addIngredient($event)"
-          />
-        }
-      </div>
-    } @else if (!errorMessage()) {
-      <p>No se han encontrado ingredientes.</p>
+    <input matInput cdkFocusInitial [value]="searchText()" (input)="searchIngredients($event)" />
+    @if (searchText()) {
+      <button mat-icon-button matSuffix type="button" aria-label="Borrar búsqueda" (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
     }
-  } @else {
-    <div class="ingredient-picker-category-list">
-      @for (category of mainCategories(); track category.id_ingredient_category) {
+  </mat-form-field>
+  <nav class="ingredient-picker-category-list" aria-label="Categorías de productos">
+    @if (auth.isAuthenticated()) {
+      <button
+        mat-button
+        type="button"
+        class="ingredient-picker-category ingredient-picker-category--favorites"
+        [class.ingredient-picker-category--selected]="onlyFavorites()"
+        [attr.aria-pressed]="onlyFavorites()"
+        aria-label="Favoritos"
+        matTooltip="Favoritos"
+        (click)="setOnlyFavorites(!onlyFavorites())"
+      >
+        <mat-icon>favorite</mat-icon>
+        @if (onlyFavorites()) {
+          <span>Favoritos</span>
+        }
+      </button>
+    }
+    @for (category of mainCategories(); track category.id_ingredient_category) {
+      <button
+        mat-button
+        type="button"
+        class="ingredient-picker-category"
+        [class.ingredient-picker-category--selected]="
+          selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category
+        "
+        [attr.aria-pressed]="selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category"
+        [attr.aria-label]="category.name"
+        [matTooltip]="category.name"
+        (click)="selectMainCategory(category)"
+      >
+        @if (category.icon) {
+          <img [src]="category.icon" alt="" width="24" height="24" />
+        }
+        @if (!category.icon || selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category) {
+          <span>{{ category.name }}</span>
+        }
+      </button>
+    }
+  </nav>
+  @if (selectedMainCategory()) {
+    <nav class="ingredient-picker-category-list" aria-label="Subcategorías de productos">
+      @for (category of subcategories(); track category.id_ingredient_category) {
         <button
           mat-button
           type="button"
           class="ingredient-picker-category"
-          [attr.aria-label]="category.name"
           [class.ingredient-picker-category--selected]="
-            selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category
+            selectedSubcategory()?.id_ingredient_category === category.id_ingredient_category
           "
+          [attr.aria-pressed]="selectedSubcategory()?.id_ingredient_category === category.id_ingredient_category"
+          [attr.aria-label]="category.name"
           [matTooltip]="category.name"
-          (click)="selectMainCategory(category)"
+          (click)="selectSubcategory(category)"
         >
           @if (category.icon) {
-            <img [src]="category.icon" [alt]="category.name" width="50" height="50" />
+            <img [src]="category.icon" alt="" width="24" height="24" />
           }
-          @if (selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category) {
+          @if (!category.icon || selectedSubcategory()?.id_ingredient_category === category.id_ingredient_category) {
             <span>{{ category.name }}</span>
           }
         </button>
       }
-    </div>
-
-    @if (selectedMainCategory()) {
-      <h4>Selecciona una subcategoría</h4>
-      <div class="ingredient-picker-category-list ingredient-picker-subcategory-list">
-        @for (subcategory of subcategories(); track subcategory.id_ingredient_category) {
-          <button
-            mat-button
-            type="button"
-            class="ingredient-picker-subcategory"
-            [class.ingredient-picker-subcategory--selected]="
-              selectedSubcategory()?.id_ingredient_category === subcategory.id_ingredient_category
-            "
-            (click)="selectSubcategory(subcategory)"
-          >
-            <!-- @if (subcategory.icon) {
-              <img [src]="subcategory.icon" [alt]="subcategory.name" width="25" height="25" />
-            } -->
-            {{ subcategory.name }}
-          </button>
-        }
+    </nav>
+  }
+  <p class="app-loading-status status-message" role="status">
+    {{
+      isLoadingSearchResults() || isLoadingCategoryIngredients()
+        ? 'Actualizando productos…'
+        : searchText() || selectedMainCategory() || selectedSubcategory() || onlyFavorites()
+          ? resultCount() + ' productos encontrados'
+          : 'Busca por nombre o selecciona una categoría'
+    }}
+  </p>
+  <div class="ingredient-picker-result" [attr.aria-busy]="isLoadingSearchResults() || isLoadingCategoryIngredients()">
+    @for (ingredient of displayedResults(); track ingredient.id_ingredient) {
+      <app-ingredient-picker-result
+        [ingredient]="ingredient"
+        [selected]="isIngredientSelected(ingredient.id_ingredient)"
+        [allowSelected]="allowSelected"
+        (ingredientAdded)="addIngredient($event)"
+        (favoriteChanged)="onFavoriteChanged(ingredient, $event)"
+      />
+    }
+    @if (
+      !displayedResults().length &&
+      !isLoadingSearchResults() &&
+      !isLoadingCategoryIngredients() &&
+      !errorMessage() &&
+      (searchText() || selectedMainCategory() || selectedSubcategory() || onlyFavorites())
+    ) {
+      <p>No hay productos con estos filtros. Prueba otro nombre o categoría.</p>
+    }
+    @if (errorMessage()) {
+      <div>
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+        <button mat-button type="button" (click)="retry()">Reintentar</button>
       </div>
     }
-
-    @if (selectedSubcategory()) {
-      @if (isLoadingCategoryIngredients()) {
-        <p>Cargando...</p>
-      } @else if (categoryIngredients().length > 0) {
-        <div class="ingredient-picker-result">
-          @for (ingredient of categoryIngredients(); track ingredient.id_ingredient) {
-            <app-ingredient-picker-result
-              [ingredient]="ingredient"
-              [selected]="isIngredientSelected(ingredient.id_ingredient)"
-              (ingredientAdded)="addIngredient($event)"
-            />
-          }
-        </div>
-      } @else if (!errorMessage()) {
-        <p>No hay ingredientes en esta subcategoría.</p>
-      }
+    @if (nextPage()) {
+      <button
+        class="load-more"
+        mat-stroked-button
+        type="button"
+        (click)="loadMore()"
+        [disabled]="isLoadingMore() || isLoadingSearchResults() || isLoadingCategoryIngredients()"
+      >
+        {{ isLoadingMore() ? 'Cargando…' : 'Cargar más productos' }}
+      </button>
     }
-  }
-  @if (errorMessage()) {
-    <p class="error-message" role="alert">{{ errorMessage() }}</p>
-    <button
-      mat-button
-      type="button"
-      (click)="loadIngredients(nextPage() ?? 1)"
-      [disabled]="isLoadingMore() || isLoadingSearchResults() || isLoadingCategoryIngredients()"
-    >
-      Reintentar
-    </button>
-  }
-  @if (nextPage()) {
-    <button mat-stroked-button type="button" (click)="loadMore()" [disabled]="isLoadingMore()">
-      {{ isLoadingMore() ? 'Cargando...' : 'Cargar más ingredientes' }}
-    </button>
-  }
+  </div>
 </section>

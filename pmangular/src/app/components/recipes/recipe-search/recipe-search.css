@@ -22,6 +22,15 @@
 .recipe-search-categories mat-chip-option {
   margin: var(--app-space-1);
 }
+.recipe-search-favorites mat-icon {
+  color: var(--app-color-favorite);
+}
+.recipe-search-favorites-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  vertical-align: middle;
+}
 .recipe-search-results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 18.75rem), 1fr));

@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from decimal import Decimal
 from .models import Recipe, RecipeCategory, RecipeComment, IngredientInRecipe
+from config.favorites import favorite_status
 
 
 class RecipeCategorySerializer(serializers.ModelSerializer):
@@ -10,7 +12,9 @@ class RecipeCategorySerializer(serializers.ModelSerializer):
 
 class RecipeIngredientInputSerializer(serializers.Serializer):
     id_ingredient = serializers.CharField()
-    amount = serializers.DecimalField(max_digits=10, decimal_places=3)
+    amount = serializers.DecimalField(
+        max_digits=10, decimal_places=3, min_value=Decimal("0.001")
+    )
     unit = serializers.CharField(max_length=30)
 
 
@@ -37,6 +41,13 @@ class RecipeInputSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientOutputSerializer(serializers.ModelSerializer):
+    package_amount = serializers.SerializerMethodField()
+
+    def get_package_amount(self, obj):
+        from ingredients.quantities import package_amount
+
+        return package_amount(obj.ingredient)
+
     id_ingredient = serializers.CharField(
         source="ingredient.id_ingredient", read_only=True
     )
@@ -56,12 +67,18 @@ class RecipeIngredientOutputSerializer(serializers.ModelSerializer):
             "name",
             "image",
             "reference_format",
+            "package_amount",
             "amount",
             "unit",
         ]
 
 
 class RecipeOutputSerializer(serializers.ModelSerializer):
+    is_favorite = serializers.SerializerMethodField()
+
+    def get_is_favorite(self, obj):
+        return favorite_status(obj, self.context.get("request"))
+
     author = serializers.CharField(source="user.username", read_only=True)
     recipe_categories = RecipeCategorySerializer(many=True, read_only=True)
     ingredients = serializers.SerializerMethodField()  # get_ingredients()
@@ -73,6 +90,7 @@ class RecipeOutputSerializer(serializers.ModelSerializer):
             "id",
             "author",
             "is_author",
+            "is_favorite",
             "creation_date",
             "name",
             "description",

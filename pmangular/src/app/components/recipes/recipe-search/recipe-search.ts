@@ -10,6 +10,8 @@ import { MatInputModule } from '@angular/material/input';
 import { RecipeSearchResult } from './recipe-search-result/recipe-search-result';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-recipe-search',
@@ -22,6 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatChipsModule,
     MatIconModule,
     MatButtonModule,
+    MatTooltipModule,
   ],
   templateUrl: './recipe-search.html',
   styleUrl: './recipe-search.css',
@@ -32,6 +35,8 @@ export class RecipeSearch implements OnInit {
   @Output() detailsClicked = new EventEmitter<void>();
 
   recipeService = inject(RecipeService);
+  readonly auth = inject(AuthService);
+  readonly onlyFavorites = signal(false);
   private destroyRef = inject(DestroyRef);
   private requestId = 0;
   nextPage = signal<number | null>(null);
@@ -47,7 +52,9 @@ export class RecipeSearch implements OnInit {
 
   searchName = signal('');
   selectedCategoryIds = signal<number[]>([]);
-  showingTopRecipes = computed(() => this.searchName().trim() === '' && this.selectedCategoryIds().length === 0);
+  showingTopRecipes = computed(
+    () => !this.onlyFavorites() && this.searchName().trim() === '' && this.selectedCategoryIds().length === 0,
+  );
 
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -64,10 +71,16 @@ export class RecipeSearch implements OnInit {
   updateSearchName(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchName.set(value);
+    if (value.trim()) {
+      this.onlyFavorites.set(false);
+      this.selectedCategoryIds.set([]);
+    }
     this.scheduleSearch();
   }
 
   toggleCategory(categoryId: number) {
+    this.onlyFavorites.set(false);
+    this.searchName.set('');
     const currentCategoryIds = this.selectedCategoryIds();
 
     // Untoogle
@@ -112,7 +125,7 @@ export class RecipeSearch implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.recipeService
-      .searchRecipes(this.searchName(), this.selectedCategoryIds(), page)
+      .searchRecipes(this.searchName(), this.selectedCategoryIds(), page, this.onlyFavorites())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -157,6 +170,20 @@ export class RecipeSearch implements OnInit {
   loadMore() {
     const page = this.nextPage();
     if (page && !this.isLoading()) this.searchRecipes(page);
+  }
+
+  setOnlyFavorites(value: boolean): void {
+    this.onlyFavorites.set(value);
+    this.searchName.set('');
+    this.selectedCategoryIds.set([]);
+    this.loadRecipes();
+  }
+
+  onFavoriteChanged(recipe: Recipe, favorite: boolean): void {
+    this.searchedRecipes.update((recipes) =>
+      recipes.map((item) => (item.id === recipe.id ? { ...item, is_favorite: favorite } : item)),
+    );
+    if (this.onlyFavorites()) this.loadRecipes();
   }
 
   onActionClicked(recipe: Recipe) {

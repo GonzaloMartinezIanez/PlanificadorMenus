@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.quantity-control {
+  display: flex;
+  gap: var(--app-space-1);
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: var(--app-space-1);
+}
+mat-form-field {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+}
+.quantity-hint {
+  margin: 0;
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
+}

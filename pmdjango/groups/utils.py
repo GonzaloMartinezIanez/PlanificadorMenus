@@ -4,8 +4,9 @@ from rest_framework import status
 
 
 # Comrpueba que el grupo existe y el usuario pertenece a él
-def get_my_group(request, group_code):
-    group = Group.objects.filter(group_code=group_code).first()
+def get_my_group(request, group_code, lock=False):
+    groups = Group.objects.select_for_update() if lock else Group.objects.all()
+    group = groups.filter(group_code=group_code).first()
     if not group:
         return None, Response(
             {"error": "El grupo no existe."}, status=status.HTTP_404_NOT_FOUND

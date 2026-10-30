@@ -6,6 +6,8 @@ export interface IngredientCategory {
 }
 
 export interface Ingredient {
+  is_favorite?: boolean;
+  package_amount?: number | string | null;
   id_ingredient: string;
   id_ingredient_categories: number[];
   name: string;

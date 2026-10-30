@@ -1,19 +1,21 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { finalize, tap } from 'rxjs';
+import {
+  ProductPickerDialog,
+  ProductPickerData,
+  ProductSelection,
+} from '../ingredients/product-picker-dialog/product-picker-dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { ListService } from '../../services/list.service';
-import { ListPatchItem, ListStatusItem } from '../../models/lists';
+import { ListPatchItem, ListStatusItem, ListItemSaveResult } from '../../models/lists';
 import { ListItem } from './list-item/list-item';
 import { MatButtonModule } from '@angular/material/button';
 import { IngredientService } from '../../services/ingredient.service';
-import { Ingredient, IngredientCategory } from '../../models/ingredient';
-import { IngredientPicker } from '../ingredients/ingredient-picker/ingredient-picker';
-import { MatDialog } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { IngredientCategory } from '../../models/ingredient';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ConfirmDialog } from '../../core/confirm-dialog/confirm-dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RealtimeService } from '../../services/realtime.service';
@@ -22,31 +24,27 @@ import { ShoppingListState } from '../../services/shopping-list-state.service';
 @Component({
   selector: 'app-list',
   providers: [ShoppingListState],
-  imports: [
-    ListItem,
-    MatButtonModule,
-    IngredientPicker,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatTooltipModule,
-    MatSnackBarModule,
-  ],
+  imports: [ListItem, MatButtonModule, MatCheckboxModule, MatTooltipModule, MatSnackBarModule],
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
 export class List implements OnInit {
-  @ViewChild('ingredientPickerDialog') ingredientPickerDialog!: TemplateRef<unknown>;
-
   route = inject(ActivatedRoute);
   listService = inject(ListService);
   ingredientService = inject(IngredientService);
   dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
+  private pickerRef?: MatDialogRef<ProductPickerDialog>;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.pickerRef?.close());
+  }
   private realtime = inject(RealtimeService);
   readonly state = inject(ShoppingListState);
   deletingItems = signal<Set<string>>(new Set());
+  savingItems = signal<Set<string>>(new Set());
+  saveResults = signal<Record<string, ListItemSaveResult>>({});
 
   groupCode = signal<string | null>(null);
   list = this.state.list;
@@ -57,10 +55,9 @@ export class List implements OnInit {
     this.list().forEach((item) => {
       const mainCategory = this.getMainCategory(item.ingredient.id_ingredient_categories[0]); // La primera categoría será la principal
 
-      if (!usedCategories.some((cat) => cat.id_ingredient_category === mainCategory)) {
-        usedCategories.push(
-          this.categories().find((cat) => cat.id_ingredient_category === mainCategory) as IngredientCategory,
-        );
+      const category = this.categories().find((cat) => cat.id_ingredient_category === mainCategory);
+      if (category && !usedCategories.some((cat) => cat.id_ingredient_category === mainCategory)) {
+        usedCategories.push(category);
       }
     });
 
@@ -68,19 +65,18 @@ export class List implements OnInit {
     return usedCategories.sort((a, b) => (a.id_ingredient_category < b.id_ingredient_category ? -1 : 1));
   });
   selectedCategory = signal<number | null>(null);
+  onlyPending = signal(false);
   filteredList = computed(() => {
-    if (!this.selectedCategory()) return this.list();
+    const items = this.onlyPending() ? this.list().filter((item) => !item.bought) : this.list();
+    if (!this.selectedCategory()) return items;
 
-    return this.list().filter((item) => {
+    return items.filter((item) => {
       return this.getMainCategory(item.ingredient.id_ingredient_categories[0]) === this.selectedCategory();
     });
   });
   boughtItems = computed(() => {
     return this.list().filter((item) => item.bought).length;
   });
-
-  selectedIngredient = signal<Ingredient | null>(null);
-  ingredientAmount = signal(1);
 
   ngOnInit(): void {
     this.realtime
@@ -96,7 +92,10 @@ export class List implements OnInit {
           return;
         }
 
+        if (groupCode !== this.groupCode()) this.pickerRef?.close();
         this.groupCode.set(groupCode);
+        this.saveResults.set({});
+        this.savingItems.set(new Set());
         this.state.replace({ items: [], total_price: 0 });
         this.loadList();
       },
@@ -166,8 +165,28 @@ export class List implements OnInit {
         ),
       )
       .subscribe({
-        next: () => {
+        next: (response) => {
           if (this.groupCode() === groupCode) this.loadList();
+          if (response.undo_id) {
+            this.snackBar
+              .open('Producto eliminado.', 'Deshacer', { duration: 8000 })
+              .onAction()
+              .pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe(() => {
+                this.listService
+                  .restoreListItem(groupCode, id, response.undo_id!)
+                  .pipe(takeUntilDestroyed(this.destroyRef))
+                  .subscribe({
+                    next: () => {
+                      if (this.groupCode() === groupCode) this.loadList();
+                    },
+                    error: (err) =>
+                      this.snackBar.open(err.error?.error ?? 'No se pudo deshacer la eliminación.', 'Cerrar', {
+                        duration: 5000,
+                      }),
+                  });
+              });
+          }
         },
         error: () => {
           if (this.groupCode() !== groupCode) return;
@@ -213,65 +232,72 @@ export class List implements OnInit {
   }
 
   changeItemAmount(event: ListPatchItem) {
+    const groupCode = this.groupCode();
+    if (!groupCode || this.savingItems().has(event.id_ingredient)) return;
+    this.savingItems.update((ids) => new Set(ids).add(event.id_ingredient));
     this.listService
-      .changeAmountListItem(this.groupCode() || '', event.id_ingredient, { amount: event.amount })
+      .changeAmountListItem(groupCode, event.id_ingredient, {
+        amount: event.amount,
+        expected_amount: event.expected_amount,
+      })
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          if (this.groupCode() === groupCode)
+            this.savingItems.update((ids) => {
+              const remaining = new Set(ids);
+              remaining.delete(event.id_ingredient);
+              return remaining;
+            });
+        }),
+      )
       .subscribe({
         next: () => {
+          if (this.groupCode() !== groupCode) return;
+          this.saveResults.update((results) => ({ ...results, [event.id_ingredient]: { success: true } }));
           this.loadList();
+        },
+        error: (err) => {
+          if (this.groupCode() !== groupCode) return;
+          this.saveResults.update((results) => ({ ...results, [event.id_ingredient]: { success: false } }));
+          this.loadList();
+          this.snackBar.open(err.error?.error ?? 'No se pudo actualizar la cantidad.', 'Cerrar', { duration: 5000 });
         },
       });
   }
 
   openIngredientPicker() {
-    this.selectedIngredient.set(null);
-    this.ingredientAmount.set(1);
-    this.dialog.open(this.ingredientPickerDialog, {
-      width: '80vw',
-      maxWidth: '80vw',
-      height: '95vh',
-      maxHeight: '95vh',
+    const groupCode = this.groupCode();
+    if (!groupCode) return;
+    const ref = this.dialog.open(ProductPickerDialog, {
+      width: '75rem',
+      maxWidth: '96vw',
+      height: '92dvh',
+      maxHeight: '96dvh',
+      ariaLabelledBy: 'product-picker-title',
+      data: {
+        mode: 'list',
+        getAmounts: () => Object.fromEntries(this.list().map((item) => [item.ingredient.id_ingredient, item.amount])),
+        confirm: ({ ingredient, amount }: ProductSelection) =>
+          this.listService
+            .postListItem(groupCode, {
+              id_ingredient: ingredient.id_ingredient,
+              amount,
+              unit: ingredient.reference_format!,
+            })
+            .pipe(
+              tap(() => {
+                if (this.groupCode() === groupCode) this.loadList();
+              }),
+            ),
+      } satisfies ProductPickerData,
     });
-  }
-
-  selectIngredient(ingredient: Ingredient) {
-    this.selectedIngredient.set(ingredient);
-  }
-
-  getSelectedIngredientIds() {
-    return this.list().map((item) => item.ingredient.id_ingredient);
-  }
-
-  formatPrice(price: number) {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(price);
-  }
-
-  formatAmount(amount: number) {
-    return new Intl.NumberFormat('es-ES', {
-      maximumFractionDigits: 3,
-    }).format(amount);
-  }
-
-  addSelectedIngredient() {
-    const ingredient = this.selectedIngredient();
-
-    if (!ingredient || this.ingredientAmount() < 0.001 || !ingredient.reference_format) {
-      return;
-    }
-
-    this.listService
-      .postListItem(this.groupCode() || '', {
-        id_ingredient: ingredient.id_ingredient,
-        amount: this.ingredientAmount(),
-        unit: ingredient.reference_format,
-      })
-      .subscribe({
-        next: () => {
-          this.dialog.closeAll();
-          this.loadList();
-        },
+    this.pickerRef = ref;
+    ref
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.pickerRef === ref) this.pickerRef = undefined;
       });
   }
 

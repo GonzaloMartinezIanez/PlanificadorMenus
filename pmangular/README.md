@@ -110,6 +110,57 @@ Al actualizar los filtros se mantiene la lista anterior hasta recibir la respues
 y se reutilizan los elementos por usuario. El mensaje de carga reserva espacio
 con `app-loading-status` para evitar parpadeos y saltos de altura durante la petición.
 
+## Selección de productos y cantidades
+
+`components/ingredients/product-picker-dialog/` es el diálogo compartido por la
+lista y el formulario de recetas. Conserva el buscador, las categorías y el scroll
+al añadir; en escritorio muestra resultados y cantidad a los lados y en móvil el
+detalle aparece debajo. «Terminar» cierra el diálogo.
+En móvil, «Ocultar» pliega el detalle y «Mostrar» lo recupera conservando producto
+y cantidad. Elegir otro producto despliega su detalle; en escritorio siempre se muestra.
+Las categorías muestran solo el icono y el nombre de la seleccionada, tanto en el
+selector como en la lista; conservan etiquetas accesibles y tooltips. Si no hay
+icono, se muestra el nombre. En el selector se busca por nombre o por categoría:
+escribir reinicia las categorías y elegir una categoría limpia el texto.
+Las consultas anteriores no sustituyen a
+las nuevas y sus resultados permanecen visibles durante la actualización.
+
+`ProductQuantity` reutiliza el campo manual y los botones + y − de envase en los tres
+contextos: selector, edición de lista e ingredientes de la receta. El backend
+devuelve `package_amount`, expresado en la unidad fija del producto. La cantidad
+inicial es ese contenido; los botones (también arriba/abajo del teclado) lo suman
+o restan desde el valor actual. Se admiten coma decimal y cantidades de hasta tres
+decimales; restar nunca deja cero o un número negativo. Si falta un tamaño fiable,
+la cantidad inicial queda vacía y solo se permite entrada manual.
+
+Una receta permite revisar la cantidad de un ingrediente ya incluido sin duplicar
+la fila. En la compra, añadir uno existente suma la nueva cantidad. El diálogo
+espera la respuesta, bloquea envíos repetidos y conserva la selección si falla.
+
+Los favoritos son personales y se guardan en el servidor. `core/favorite-button/`
+comparte el corazón rojo (relleno al marcar, centro blanco al desmarcar), bloquea
+peticiones repetidas y conserva el estado si falla el guardado. En productos solo
+aparece en los resultados del diálogo; en recetas, en las tarjetas y el detalle.
+En productos, «Favoritos» aparece como una categoría con un corazón rojo; al
+seleccionarla se limpian el texto, la categoría y la subcategoría. Escribir o elegir
+otra categoría desactiva favoritos. El nombre solo aparece cuando está seleccionada.
+En recetas, «Favoritas» está integrada en las categorías y se comporta igual:
+seleccionarla limpia texto y categorías; escribir o elegir otra categoría la desactiva.
+El corazón y el nombre permanecen visibles y se añade el tick al seleccionarla.
+Texto y categorías también son alternativos, manteniendo la selección múltiple de
+categorías de recetas. Ambos filtros de favoritos actúan antes de paginar.
+Quitar un favorito con el filtro activo actualiza el listado.
+
+La lista permite mostrar solo pendientes y marcar productos mediante casillas
+accesibles. Una edición conserva el borrador si falla; ante cambios remotos exige
+revisar el valor actual. El PATCH envía `expected_amount` para detectar también
+conflictos que lleguen antes del WebSocket.
+
+Eliminar una fila ofrece «Deshacer» durante ocho segundos. El backend guarda un
+ticket personal de un solo uso, válido treinta segundos, y nunca sobrescribe un
+producto que haya vuelto a añadir otro miembro. Esta función requiere la migración
+`lists/0003_removedlistitem`; el arranque de Docker la aplica automáticamente.
+
 ## Actualizaciones en tiempo real
 
 `RealtimeService` mantiene una conexión por pestaña a `/ws/events/`, derivada de

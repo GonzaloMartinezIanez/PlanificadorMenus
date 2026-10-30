@@ -5,12 +5,29 @@
   <mat-form-field appearance="fill" class="recipe-search-text">
     <mat-label>Busca recetas por texto</mat-label>
     <mat-icon matPrefix>search</mat-icon>
-    <input matInput placeholder="Nombre de la receta" (input)="updateSearchName($event)" />
+    <input matInput placeholder="Nombre de la receta" [value]="searchName()" (input)="updateSearchName($event)" />
   </mat-form-field>
 
   <mat-chip-listbox class="recipe-search-categories" multiple aria-label="Filtrar por categorías">
+    @if (auth.isAuthenticated()) {
+      <mat-chip-option
+        class="recipe-search-favorites"
+        [selected]="onlyFavorites()"
+        aria-label="Favoritas"
+        matTooltip="Favoritas"
+        (selectionChange)="$event.isUserInput && setOnlyFavorites($event.selected)"
+      >
+        <span class="recipe-search-favorites-label">
+          <mat-icon>favorite</mat-icon>
+          Favoritas
+        </span>
+      </mat-chip-option>
+    }
     @for (cat of recipeCategories(); track cat.id) {
-      <mat-chip-option [selected]="isCategorySelected(cat.id)" (selectionChange)="toggleCategory(cat.id)">
+      <mat-chip-option
+        [selected]="isCategorySelected(cat.id)"
+        (selectionChange)="$event.isUserInput && toggleCategory(cat.id)"
+      >
         {{ cat.name }}
       </mat-chip-option>
     }
@@ -28,6 +45,7 @@
           [actionLabel]="actionLabel"
           (actionClicked)="onActionClicked($event)"
           (detailsClicked)="onDetailsClicked()"
+          (favoriteChanged)="onFavoriteChanged(rec, $event)"
         />
       }
     </div>

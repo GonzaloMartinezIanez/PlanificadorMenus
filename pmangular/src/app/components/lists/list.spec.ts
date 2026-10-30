@@ -31,6 +31,19 @@ describe('List', () => {
     expect(component).toBeTruthy();
   });
 
+  it('waits for category metadata instead of rendering undefined categories', () => {
+    component.state.replace({
+      items: [{ ingredient: { id_ingredient: '1', id_ingredient_categories: [2] } }] as never,
+      total_price: 0,
+    });
+    expect(component.activeCategories()).toEqual([]);
+    component.categories.set([
+      { id_ingredient_category: 1, name: 'Comida', primary_category: null, icon: null },
+      { id_ingredient_category: 2, name: 'Fruta', primary_category: 1, icon: null },
+    ]);
+    expect(component.activeCategories().map((category) => category.name)).toEqual(['Comida']);
+  });
+
   it('updates a remote list change while retaining a category that still has products', () => {
     const http = TestBed.inject(HttpTestingController);
     const events = new Subject<RealtimeEvent>();

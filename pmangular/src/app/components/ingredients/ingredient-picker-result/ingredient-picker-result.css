@@ -65,3 +65,6 @@ mat-card-content > button {
   margin-top: var(--app-space-2);
   background: var(--app-color-surface-muted);
 }
+app-favorite-button {
+  align-self: flex-end;
+}

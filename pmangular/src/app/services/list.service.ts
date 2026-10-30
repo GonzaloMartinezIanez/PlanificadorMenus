@@ -22,7 +22,7 @@ export class ListService {
   changeAmountListItem(
     group_code: string,
     id_ingredient: string,
-    patchItem: { amount?: number; unit?: string },
+    patchItem: { amount?: number; unit?: string; expected_amount?: number },
   ): Observable<MessageModel> {
     return this.http.patch<MessageModel>(`${environment.apiUrl}/lists/${group_code}/${id_ingredient}/`, patchItem);
   }
@@ -37,9 +37,15 @@ export class ListService {
     return this.http.delete<MessageModel>(`${environment.apiUrl}/lists/${group_code}/`);
   }
 
-  deleteListItem(group_code: string, id_ingredient: string): Observable<MessageModel> {
-    return this.http.delete<MessageModel>(
+  deleteListItem(group_code: string, id_ingredient: string): Observable<MessageModel & { undo_id?: string }> {
+    return this.http.delete<MessageModel & { undo_id?: string }>(
       `${environment.apiUrl}/lists/${group_code}/${encodeURIComponent(id_ingredient)}/`,
     );
+  }
+
+  restoreListItem(group: string, ingredient: string, undoId: string): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/lists/${group}/${encodeURIComponent(ingredient)}/restore/`, {
+      undo_id: undoId,
+    });
   }
 }

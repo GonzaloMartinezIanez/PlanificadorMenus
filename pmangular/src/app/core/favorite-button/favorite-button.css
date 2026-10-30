@@ -1,0 +1,18 @@
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+svg {
+  display: block;
+  overflow: visible;
+  fill: var(--app-color-surface);
+  stroke: var(--app-color-favorite);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+svg.active {
+  fill: var(--app-color-favorite);
+}
+button:disabled svg {
+  opacity: 0.6;
+}

@@ -6,6 +6,13 @@
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
+      <app-favorite-button
+        kind="ingredients"
+        [itemId]="ingredient.id_ingredient"
+        [name]="ingredient.name"
+        [active]="ingredient.is_favorite ?? false"
+        (favoriteChanged)="favoriteChanged.emit($event)"
+      />
       <div class="ingredient-card-info">
         <div class="ingredient-card-info-details">
           @if (ingredient.unit_price !== null) {
@@ -14,10 +21,12 @@
             </strong>
           }
 
-          @if (ingredient.packaging || ingredient.unit_size !== null) {
+          @if (ingredient.packaging || ingredient.package_amount) {
             <span>
-              {{ ingredient.packaging }} · {{ formatAmount(ingredient.unit_size || 0) }}
-              {{ formatUnit(ingredient.reference_format || '') }}
+              {{ ingredient.packaging }}
+              @if (ingredient.package_amount) {
+                · {{ formatAmount(ingredient.package_amount) }} {{ formatUnit(ingredient.reference_format || '') }}
+              }
             </span>
           }
 
@@ -39,7 +48,12 @@
         }
       </div>
 
-      <button mat-button type="button" [disabled]="selected" (click)="addIngredient()">Añadir</button>
+      @if (selected) {
+        <span class="status-message">Ya incluido</span>
+      }
+      <button mat-button type="button" [disabled]="selected && !allowSelected" (click)="addIngredient()">
+        {{ selected ? 'Ver cantidad' : 'Seleccionar' }}
+      </button>
     </mat-card-content>
   </mat-card>
 }

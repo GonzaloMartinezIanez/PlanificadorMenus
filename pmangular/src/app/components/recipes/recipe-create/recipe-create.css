@@ -130,3 +130,8 @@
     flex: 1 1 100%;
   }
 }
+:host app-product-quantity {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}

@@ -1,98 +1,69 @@
+:host {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
 .ingredient-picker {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
   min-width: 0;
   min-height: 0;
-  margin-top: 0;
 }
-
-.ingredient-picker-category {
-  min-height: 52px;
-  line-height: 1;
-}
-
 .ingredient-picker-category-list {
-  width: 100%;
-  min-width: 0;
   display: flex;
-  flex-wrap: wrap;
   gap: var(--app-space-1);
-  margin-bottom: var(--app-space-3);
-  padding: var(--app-space-2);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-color-surface-muted);
+  flex-wrap: wrap;
+  max-height: 9rem;
+  overflow-y: auto;
+  flex-shrink: 0;
 }
-
-.ingredient-picker-subcategory-list {
-  margin-bottom: var(--app-space-2);
+.ingredient-picker-category {
+  min-width: var(--app-space-12);
+  min-height: var(--app-space-12);
+  padding-inline: var(--app-space-3);
 }
-
-.ingredient-picker-category img,
-.ingredient-picker-category span {
+.ingredient-picker-category img {
   vertical-align: middle;
+  object-fit: contain;
 }
-
+.ingredient-picker-category img + span {
+  margin-left: var(--app-space-2);
+}
+.ingredient-picker-category--favorites mat-icon {
+  margin: 0;
+  color: var(--app-color-favorite);
+}
+.ingredient-picker-category--favorites mat-icon + span {
+  margin-left: var(--app-space-2);
+}
 .ingredient-picker-category--selected {
-  border-color: var(--app-color-accent);
-  background-color: var(--app-color-accent-soft);
+  background: var(--app-color-accent-soft);
   color: var(--app-color-accent-text);
-  font-weight: 600;
 }
-
-.ingredient-picker-subcategory--selected {
-  border: 1px solid var(--app-color-accent);
-  background-color: var(--app-color-accent-soft);
-  color: var(--app-color-accent-text);
-  font-weight: 600;
-}
-
 .ingredient-picker-result {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
   align-content: start;
-  flex: 1;
-  min-height: 0;
   overflow-y: auto;
-  gap: var(--app-space-4);
-  padding-bottom: var(--app-space-4);
+  min-height: 0;
+  flex: 1;
+  gap: var(--app-space-3);
+  padding: var(--app-space-1);
 }
-
-@media (max-width: 960px) {
+.load-more {
+  grid-column: 1 / -1;
+}
+@media (max-width: 640px) {
   .ingredient-picker-category-list {
-    display: flex;
     flex-wrap: nowrap;
-    gap: var(--app-space-1);
     overflow-x: auto;
-    overscroll-behavior-x: contain;
-    padding-bottom: var(--app-space-2);
+    max-height: none;
   }
-
-  .ingredient-picker-category:not(.ingredient-picker-category--selected) {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
-    min-height: 40px;
-    padding: 0;
-  }
-
-  .ingredient-picker-category--selected {
-    width: auto;
-    min-width: max-content;
-    height: 40px;
-    min-height: 40px;
-    padding: 0 var(--app-space-2);
-    white-space: nowrap;
-  }
-
-  .ingredient-picker-category img {
-    width: 34px;
-    height: 34px;
-  }
-
   .ingredient-picker-category-list button {
-    flex: 0 0 auto;
-    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ingredient-picker-result {
+    grid-template-columns: 1fr;
   }
 }

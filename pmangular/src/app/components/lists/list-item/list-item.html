@@ -1,22 +1,11 @@
 <div class="shopping-list-item" [class.shopping-list-item--bought]="item?.bought">
-  @if (item?.bought) {
-    <mat-icon
-      class="shopping-list-item-check shopping-list-item-check--bought"
-      (click)="change(false)"
-      aria-hidden="false"
-      aria-label="Desmarcar un item"
-      fontIcon="check"
-    ></mat-icon>
-  } @else {
-    <mat-icon
-      class="shopping-list-item-check"
-      (click)="change(true)"
-      aria-hidden="false"
-      aria-label="Marcar un item"
-      fontIcon="check"
-    ></mat-icon>
-  }
-
+  <mat-checkbox
+    [checked]="item?.bought ?? false"
+    [aria-label]="
+      (item?.bought ? 'Marcar como pendiente: ' : 'Marcar como comprado: ') + (item?.ingredient?.name ?? 'producto')
+    "
+    (change)="change($event.checked)"
+  />
   <img
     class="shopping-list-item-image"
     [src]="item?.ingredient?.image"
@@ -43,20 +32,34 @@
     </div>
   } @else {
     <div class="shopping-list-item-edit">
-      <mat-form-field>
-        <mat-label>Nueva cantidad</mat-label>
-        <input
-          matInput
-          type="number"
-          min="0.001"
-          step="0.001"
-          [ngModel]="editedAmount()"
-          (ngModelChange)="editedAmount.set($event)"
-        />
-      </mat-form-field>
+      @if (conflict()) {
+        <p class="error-message" role="status">La cantidad ha cambiado mientras editabas. Tu borrador se conserva.</p>
+        <button mat-button type="button" (click)="useCurrent()">
+          Usar cantidad actual: {{ item?.amount }} {{ item?.unit }}
+        </button>
+      }
+      @if (saveFailed()) {
+        <p class="error-message" role="status">No se pudo guardar. Tu borrador se conserva.</p>
+      }
+      <app-product-quantity
+        [value]="editedAmount()"
+        (valueChange)="editedAmount.set($event)"
+        [unit]="item?.unit || ''"
+        [packageAmount]="item?.ingredient?.package_amount"
+        [disabled]="saving"
+        (submitted)="editAmount()"
+        (cancelled)="editMode.set(false)"
+      />
 
-      <button mat-button type="button" (click)="editAmount()" [disabled]="editedAmount() < 0.001">Guardar</button>
-      <button mat-button type="button" (click)="editMode.set(false)">Volver</button>
+      <button
+        mat-button
+        type="button"
+        (click)="editAmount()"
+        [disabled]="!validAmount(editedAmount()) || conflict() || saving"
+      >
+        {{ saving ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <button mat-button type="button" [disabled]="saving" (click)="editMode.set(false)">Cancelar</button>
     </div>
   }
   <button

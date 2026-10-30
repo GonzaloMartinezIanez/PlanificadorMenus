@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,9 +10,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RecipeService } from '../../../services/recipe.service';
 import { Recipe, RecipeCategory } from '../../../models/recipe';
 import { Ingredient } from '../../../models/ingredient';
-import { IngredientPicker } from '../../ingredients/ingredient-picker/ingredient-picker';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
+import { ProductQuantity, productAmountValidator } from '../../ingredients/product-quantity/product-quantity';
+import {
+  ProductPickerDialog,
+  ProductPickerData,
+  ProductSelection,
+} from '../../ingredients/product-picker-dialog/product-picker-dialog';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-recipe-create',
@@ -24,15 +31,13 @@ import { MatIconModule } from '@angular/material/icon';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
-    IngredientPicker,
     MatIconModule,
+    ProductQuantity,
   ],
   templateUrl: './recipe-create.html',
   styleUrl: './recipe-create.css',
 })
 export class RecipeCreate implements OnInit {
-  @ViewChild('ingredientPickerDialog') ingredientPickerDialog!: TemplateRef<unknown>;
-
   route = inject(ActivatedRoute);
   router = inject(Router);
   fb = inject(FormBuilder);
@@ -40,6 +45,12 @@ export class RecipeCreate implements OnInit {
   snackBar = inject(MatSnackBar);
   dialog = inject(MatDialog);
   changeDetectorRef = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
+  private pickerRef?: MatDialogRef<ProductPickerDialog>;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.pickerRef?.close());
+  }
 
   recipeCategories = signal<RecipeCategory[]>([]);
   isLoading = signal(false);
@@ -160,7 +171,8 @@ export class RecipeCreate implements OnInit {
             name: [ingredient.name],
             image: [ingredient.image ?? null],
             reference_format: [ingredient.reference_format ?? null],
-            amount: [ingredient.amount, [Validators.required, Validators.min(0.001)]],
+            package_amount: [ingredient.package_amount ?? null],
+            amount: [ingredient.amount, [Validators.required, productAmountValidator]],
             unit: [ingredient.unit, Validators.required],
           }),
         );
@@ -192,14 +204,15 @@ export class RecipeCreate implements OnInit {
 
   // Función que se ejecuta cuando se selecciona un ingrediente en el ingrediente-picker
   // Añade el ingrediente al final de la lista
-  addIngredient(ingredient: Ingredient) {
+  addIngredient(ingredient: Ingredient, amount: number | null = Number(ingredient.package_amount) || null) {
     this.ingredients().push(
       this.fb.group({
         id_ingredient: [ingredient.id_ingredient, Validators.required],
         name: [ingredient.name],
         image: [ingredient.image],
         reference_format: [ingredient.reference_format],
-        amount: [0, [Validators.required, Validators.min(0.001)]],
+        package_amount: [ingredient.package_amount ?? null],
+        amount: [amount, [Validators.required, productAmountValidator]],
         unit: [ingredient.reference_format, Validators.required],
       }),
     );
@@ -208,17 +221,41 @@ export class RecipeCreate implements OnInit {
   }
 
   openIngredientPicker() {
-    this.dialog.open(this.ingredientPickerDialog, {
-      width: '80vw',
-      maxWidth: '80vw',
-      height: '95vh',
-      maxHeight: '95vh',
+    const ref = this.dialog.open(ProductPickerDialog, {
+      width: '75rem',
+      maxWidth: '96vw',
+      height: '92dvh',
+      maxHeight: '96dvh',
+      ariaLabelledBy: 'product-picker-title',
+      data: {
+        mode: 'recipe',
+        getAmounts: () =>
+          Object.fromEntries(
+            this.ingredients().controls.map((control) => [control.value.id_ingredient, control.value.amount]),
+          ),
+        confirm: ({ ingredient, amount }: ProductSelection) => {
+          const existing = this.ingredients().controls.find(
+            (control) => control.value.id_ingredient === ingredient.id_ingredient,
+          );
+          if (existing) existing.patchValue({ amount, package_amount: ingredient.package_amount ?? null });
+          else this.addIngredient(ingredient, amount);
+          this.recipeForm.markAsDirty();
+          this.changeDetectorRef.markForCheck();
+          return of(null);
+        },
+      } satisfies ProductPickerData,
     });
+    this.pickerRef = ref;
+    ref
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.pickerRef === ref) this.pickerRef = undefined;
+      });
   }
 
   selectIngredient(ingredient: Ingredient) {
     this.addIngredient(ingredient);
-    this.dialog.closeAll();
   }
 
   removeIngredient(index: number) {

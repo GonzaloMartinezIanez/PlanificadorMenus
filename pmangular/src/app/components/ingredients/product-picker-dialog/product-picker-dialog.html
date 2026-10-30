@@ -1,0 +1,107 @@
+<header>
+  <div>
+    <h2 id="product-picker-title">
+      {{ data.mode === 'list' ? 'Añadir productos a la compra' : 'Ingredientes de la receta' }}
+    </h2>
+    <p>Selecciona un producto y elige la cantidad</p>
+  </div>
+  <button
+    mat-icon-button
+    type="button"
+    aria-label="Cerrar selector de productos"
+    [disabled]="busy()"
+    (click)="ref.close()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+<div class="picker-body">
+  <app-ingredient-picker
+    [selectedIngredientIds]="selectedIds()"
+    [allowSelected]="true"
+    (ingredientSelected)="select($event)"
+  />
+  <aside aria-label="Cantidad del producto seleccionado" [class.product-panel--collapsed]="detailsCollapsed()">
+    @if (selected(); as product) {
+      <div class="mobile-panel-heading">
+        <span>{{ product.name }}</span>
+        <button
+          mat-button
+          type="button"
+          [attr.aria-expanded]="!detailsCollapsed()"
+          aria-controls="product-quantity-panel"
+          [attr.aria-label]="detailsCollapsed() ? 'Mostrar detalle del producto' : 'Ocultar detalle del producto'"
+          (click)="toggleDetails()"
+        >
+          {{ detailsCollapsed() ? 'Mostrar' : 'Ocultar' }}
+          <mat-icon>{{ detailsCollapsed() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+      <div id="product-quantity-panel" class="product-editor">
+        <div class="product-details">
+          <div class="product-heading">
+            @if (product.image) {
+              <img [src]="product.image" alt="" width="80" height="80" />
+            }
+            <h3>{{ product.name }}</h3>
+          </div>
+          @if (product.packaging) {
+            <p>{{ product.packaging }}</p>
+          }
+          @if (product.unit_price !== null) {
+            <p>
+              Precio por envase: <strong>{{ price(product.unit_price) }}</strong>
+            </p>
+          }
+          @if (existing() !== null) {
+            <p class="existing">
+              {{ data.mode === 'list' ? 'En la lista' : 'Ya incluido en la receta' }}: {{ format(existing()!) }}
+              {{ unit(product.reference_format || '') }}.
+              {{ data.mode === 'list' ? 'La nueva cantidad se sumará a la actual.' : 'Puedes actualizar su cantidad.' }}
+            </p>
+          }
+          <app-product-quantity
+            [value]="amount()"
+            (valueChange)="amount.set($event)"
+            [unit]="product.reference_format || ''"
+            [packageAmount]="product.package_amount"
+            [disabled]="busy()"
+            (submitted)="add()"
+            (cancelled)="ref.close()"
+          />
+          @if (data.mode === 'list' && existing() !== null && resultingAmount() !== null) {
+            <p>Cantidad tras añadir: {{ format(resultingAmount()!) }} {{ unit(product.reference_format || '') }}.</p>
+          }
+          @if (packageCount() !== null) {
+            <p>
+              Compra estimada{{ data.mode === 'list' && existing() !== null ? ' tras añadir' : '' }}:
+              {{ packageCount() }} {{ packageCount() === 1 ? 'envase' : 'envases' }}.
+            </p>
+          }
+          @if (!product.reference_format) {
+            <p class="error-message">Este producto no tiene unidad de medida definida.</p>
+          }
+        </div>
+        <button mat-flat-button type="button" [disabled]="!valid() || busy()" (click)="add()">
+          {{
+            busy()
+              ? 'Guardando…'
+              : data.mode === 'recipe' && existing() !== null
+                ? 'Actualizar cantidad'
+                : 'Añadir ' + (data.mode === 'list' ? 'a la lista' : 'a la receta')
+          }}
+        </button>
+        @if (error()) {
+          <p class="error-message" role="alert">{{ error() }}</p>
+        }
+      </div>
+    } @else {
+      <h3>Elige un producto</h3>
+      <p>Aquí podrás ajustar la cantidad necesaria. Los botones + y − suman o restan el contenido de un envase.</p>
+    }
+  </aside>
+</div>
+<footer>
+  <p role="status" aria-live="polite">{{ message() }}</p>
+  <button mat-stroked-button type="button" [disabled]="busy()" (click)="ref.close()">Terminar</button>
+</footer>
