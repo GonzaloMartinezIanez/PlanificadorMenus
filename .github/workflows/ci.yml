@@ -54,6 +54,7 @@ jobs:
           cache: npm
           cache-dependency-path: pmangular/package-lock.json
       # Instala las dependencias
+      - run: npm install --global npm@11.21.1
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
@@ -84,6 +85,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: ./pmangular
+          pull: true
           push: true
           tags: ghcr.io/${{ env.IMAGE_OWNER }}/planificador-menus-frontend:${{ github.ref_name }}
       # Sube la imagen de django al registro con el formato:
@@ -91,5 +93,6 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: ./pmdjango
+          pull: true
           push: true
           tags: ghcr.io/${{ env.IMAGE_OWNER }}/planificador-menus-backend:${{ github.ref_name }}

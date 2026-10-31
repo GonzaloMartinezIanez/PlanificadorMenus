@@ -7,6 +7,8 @@
 }
 
 .ingredient-card-title {
+  flex: 1;
+  min-width: 0;
   display: -webkit-box;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -18,7 +20,10 @@
   line-height: 1.4;
 }
 
-mat-card-header {
+.ingredient-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-space-2);
   padding: var(--app-space-4);
 }
 
@@ -64,7 +69,4 @@ mat-card-content > button {
   width: 100%;
   margin-top: var(--app-space-2);
   background: var(--app-color-surface-muted);
-}
-app-favorite-button {
-  align-self: flex-end;
 }

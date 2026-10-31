@@ -2,6 +2,13 @@
   display: block;
   min-width: 0;
 }
+.quantity-label {
+  display: block;
+  margin-bottom: var(--app-space-2);
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
+  overflow-wrap: anywhere;
+}
 .quantity-control {
   display: flex;
   gap: var(--app-space-1);

@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copiar estos ficheros e instalar las dependencias
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --global npm@11.21.1 && npm ci
 
 # Copiar el resto del proyecto
 COPY . .
@@ -16,7 +16,7 @@ ARG BUILD_CONFIGURATION=production
 RUN npm run build -- --configuration=${BUILD_CONFIGURATION}
 
 # Usar una versión de linux con nginx
-FROM nginx:1.27-alpine
+FROM nginx:1.30.6-alpine
 
 # Copiar los ficheros generados anteriormente a la carpeta que usa nginx
 COPY --from=build /app/dist/pmangular/browser /usr/share/nginx/html

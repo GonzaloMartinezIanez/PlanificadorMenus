@@ -27,6 +27,7 @@ export function productUnit(unit: string): string {
   selector: 'app-product-quantity',
   imports: [MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   template: `
+    <label class="quantity-label" [attr.for]="quantityInput.id">Cantidad necesaria ({{ unitLabel }})</label>
     <div class="quantity-control">
       <button
         mat-icon-button
@@ -38,10 +39,10 @@ export function productUnit(unit: string): string {
         <mat-icon>remove</mat-icon>
       </button>
       <mat-form-field>
-        <mat-label>Cantidad necesaria ({{ unitLabel }})</mat-label>
         <input
           matInput
           #amountInput
+          #quantityInput="matInput"
           inputmode="decimal"
           [value]="value ?? ''"
           [disabled]="disabled"

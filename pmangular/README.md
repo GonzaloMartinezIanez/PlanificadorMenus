@@ -7,16 +7,21 @@ Para una descripción general del proyecto y el despliegue, consulta el [README 
 ## Requisitos
 
 - Node.js 22.
-- npm 11 o compatible.
+- npm 11.21.1, declarado en `packageManager` y usado también en Docker y CI.
 
 ## Instalación y ejecución
 
 ```powershell
-npm install
+npm ci
 ng serve
 ```
 
 La aplicación de desarrollo se inicia en `http://localhost:4200` y usa la API configurada en `src/environments/environment.development.ts`.
+
+Si tu npm local es anterior, puedes instalar desde el lockfile sin cambiar la
+instalación global con `npm exec --yes --package=npm@11.21.1 -- npm ci`.
+Usa `npm ci` para reproducir las versiones verificadas. La auditoría y las
+actualizaciones están descritas en [DEPENDENCIES.md](../DEPENDENCIES.md).
 
 Para probar el conjunto con Docker, sigue la sección de Docker local del
 [README principal](../README.md). El argumento de build `BUILD_CONFIGURATION`

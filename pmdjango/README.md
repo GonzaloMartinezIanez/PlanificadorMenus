@@ -67,8 +67,9 @@ el formato con `python -m black --check --no-cache --workers 1 .`.
 `requirements.txt` fija las versiones de las dependencias directas de ejecución;
 `requirements-dev.txt` añade Black sin instalarlo en producción. Las versiones
 transitivas no están bloqueadas. Actualiza las versiones de forma deliberada y
-ejecuta las pruebas después. Las versiones fijadas corresponden al entorno local
-existente, salvo Uvicorn 0.54.0, que no estaba instalado localmente.
+ejecuta las pruebas después. Django, DRF y Black incluyen las correcciones de
+seguridad verificadas el 30/10/2026. Consulta los resultados, el alcance de la
+auditoría y cómo repetirla en [DEPENDENCIES.md](../DEPENDENCIES.md).
 
 ## Aplicaciones
 

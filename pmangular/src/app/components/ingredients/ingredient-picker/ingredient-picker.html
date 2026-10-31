@@ -41,7 +41,7 @@
         (click)="selectMainCategory(category)"
       >
         @if (category.icon) {
-          <img [src]="category.icon" alt="" width="24" height="24" />
+          <img [src]="category.icon" alt="" width="40" height="40" />
         }
         @if (!category.icon || selectedMainCategory()?.id_ingredient_category === category.id_ingredient_category) {
           <span>{{ category.name }}</span>
@@ -65,7 +65,7 @@
           (click)="selectSubcategory(category)"
         >
           @if (category.icon) {
-            <img [src]="category.icon" alt="" width="24" height="24" />
+            <img [src]="category.icon" alt="" width="40" height="40" />
           }
           @if (!category.icon || selectedSubcategory()?.id_ingredient_category === category.id_ingredient_category) {
             <span>{{ category.name }}</span>

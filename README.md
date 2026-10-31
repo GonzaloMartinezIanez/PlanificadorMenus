@@ -68,6 +68,7 @@ Consulta las instrucciones concretas de cada aplicación:
 
 - [Frontend Angular](pmangular/README.md)
 - [Backend Django](pmdjango/README.md)
+- [Auditoría y actualización de dependencias](DEPENDENCIES.md)
 
 Calendario, lista de la compra y gestión de grupos reciben actualizaciones por
 WebSockets. Las acciones siguen usando la API REST. Docker Compose añade Redis

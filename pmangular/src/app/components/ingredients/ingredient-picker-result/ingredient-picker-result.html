@@ -1,11 +1,9 @@
 @if (ingredient) {
   <mat-card appearance="outlined" class="ingredient-card">
-    <mat-card-header>
+    <div class="ingredient-card-heading">
       <mat-card-title class="ingredient-card-title" [matTooltip]="ingredient.name">
         {{ ingredient.name }}
       </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
       <app-favorite-button
         kind="ingredients"
         [itemId]="ingredient.id_ingredient"
@@ -13,6 +11,8 @@
         [active]="ingredient.is_favorite ?? false"
         (favoriteChanged)="favoriteChanged.emit($event)"
       />
+    </div>
+    <mat-card-content>
       <div class="ingredient-card-info">
         <div class="ingredient-card-info-details">
           @if (ingredient.unit_price !== null) {

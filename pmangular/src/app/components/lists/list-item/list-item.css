@@ -1,4 +1,5 @@
 .shopping-list-item {
+  position: relative;
   display: grid;
   grid-template-columns: 32px 64px minmax(0, 1fr) auto auto;
   align-items: center;
@@ -8,6 +9,22 @@
   background: var(--app-color-surface);
   border: 1px solid var(--app-color-border);
 }
+
+.shopping-list-item-toggle {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  cursor: pointer;
+}
+
+.shopping-list-item > mat-checkbox,
+.shopping-list-item-actions,
+.shopping-list-item-edit,
+.shopping-list-item-delete {
+  position: relative;
+  z-index: 2;
+}
+
 .shopping-list-item-delete {
   grid-column: -2;
   grid-row: 1;

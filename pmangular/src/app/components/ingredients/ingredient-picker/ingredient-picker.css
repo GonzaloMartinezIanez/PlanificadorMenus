@@ -21,9 +21,11 @@
 .ingredient-picker-category {
   min-width: var(--app-space-12);
   min-height: var(--app-space-12);
-  padding-inline: var(--app-space-3);
+  padding-inline: var(--app-space-1);
 }
 .ingredient-picker-category img {
+  width: var(--app-space-10);
+  height: var(--app-space-10);
   vertical-align: middle;
   object-fit: contain;
 }
@@ -31,6 +33,9 @@
   margin-left: var(--app-space-2);
 }
 .ingredient-picker-category--favorites mat-icon {
+  width: var(--app-space-8);
+  height: var(--app-space-8);
+  font-size: var(--app-space-8);
   margin: 0;
   color: var(--app-color-favorite);
 }

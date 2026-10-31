@@ -48,18 +48,69 @@ describe('ListItem', () => {
   });
 
   it('should emit the product state change', () => {
-    component.item = {
+    fixture.componentRef.setInput('item', {
       ingredient: { id_ingredient: '1', name: 'Huevos' },
       amount: 2,
       unit: 'ud',
       bought: false,
-    } as ListModel;
+    } as ListModel);
     let emittedStatus: unknown;
     component.changeItemStatus.subscribe((value) => (emittedStatus = value));
 
     component.change(true);
 
     expect(emittedStatus).toEqual({ id_ingredient: '1', bought: true });
+  });
+
+  it('toggles the product when its row is clicked without intercepting its actions', () => {
+    fixture.componentRef.setInput('item', {
+      ingredient: { id_ingredient: '1', name: 'Huevos' },
+      amount: 2,
+      unit: 'ud',
+      bought: false,
+    } as ListModel);
+    const statusChanges: unknown[] = [];
+    component.changeItemStatus.subscribe((value) => statusChanges.push(value));
+    fixture.detectChanges();
+    const nativeElement = fixture.nativeElement as HTMLElement;
+
+    const rowToggle = nativeElement.querySelector('.shopping-list-item-toggle') as HTMLLabelElement;
+    rowToggle.click();
+    expect(statusChanges).toEqual([{ id_ingredient: '1', bought: true }]);
+
+    const editButton = Array.from(nativeElement.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.trim() === 'Editar',
+    ) as HTMLButtonElement;
+    editButton.click();
+    expect(component.editMode()).toBe(true);
+    expect(statusChanges).toHaveLength(1);
+
+    const deleteButton = nativeElement.querySelector('.shopping-list-item-delete') as HTMLButtonElement;
+    deleteButton.click();
+    expect(statusChanges).toHaveLength(1);
+  });
+
+  it('does not change the state while the product is being saved or deleted', () => {
+    fixture.componentRef.setInput('item', {
+      ingredient: { id_ingredient: '1', name: 'Huevos' },
+      amount: 2,
+      unit: 'ud',
+      bought: false,
+    } as ListModel);
+    fixture.componentRef.setInput('saving', true);
+    let statusChanges = 0;
+    component.changeItemStatus.subscribe(() => statusChanges++);
+    fixture.detectChanges();
+    const nativeElement = fixture.nativeElement as HTMLElement;
+
+    (nativeElement.querySelector('.shopping-list-item-toggle') as HTMLLabelElement).click();
+    expect(statusChanges).toBe(0);
+
+    fixture.componentRef.setInput('saving', false);
+    fixture.componentRef.setInput('deleting', true);
+    fixture.detectChanges();
+    (nativeElement.querySelector('.shopping-list-item-toggle') as HTMLLabelElement).click();
+    expect(statusChanges).toBe(0);
   });
 
   it('should edits a valid amount and formats units', () => {

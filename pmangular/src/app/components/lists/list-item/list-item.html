@@ -1,6 +1,9 @@
 <div class="shopping-list-item" [class.shopping-list-item--bought]="item?.bought">
+  <label class="shopping-list-item-toggle" [attr.for]="boughtCheckbox.inputId" aria-hidden="true"></label>
   <mat-checkbox
+    #boughtCheckbox
     [checked]="item?.bought ?? false"
+    [disabled]="!item || deleting || saving"
     [aria-label]="
       (item?.bought ? 'Marcar como pendiente: ' : 'Marcar como comprado: ') + (item?.ingredient?.name ?? 'producto')
     "

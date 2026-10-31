@@ -49,7 +49,7 @@ export class ListItem implements OnChanges {
   }
 
   change(bought: boolean) {
-    if (!this.item) {
+    if (!this.item || this.deleting || this.saving) {
       return;
     }
 
