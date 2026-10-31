@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RecipeSearch } from './recipe-search/recipe-search';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-recipes',
@@ -9,4 +10,6 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './recipes.html',
   styleUrl: './recipes.css',
 })
-export class Recipes {}
+export class Recipes {
+  readonly auth = inject(AuthService);
+}

@@ -88,7 +88,8 @@
       </mat-menu>
     } @else {
       <div class="header-actions header-actions--public">
-        <a mat-stroked-button [routerLink]="['/login']">Iniciar sesión</a>
+        <a mat-button [routerLink]="['/recipes']">Recetas públicas</a>
+        <button mat-flat-button type="button" (click)="openLoginDialog()">Iniciar sesión</button>
       </div>
     }
   </div>

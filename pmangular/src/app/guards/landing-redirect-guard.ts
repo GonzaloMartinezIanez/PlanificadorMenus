@@ -4,7 +4,7 @@ import { catchError, map, of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { GroupService } from '../services/group.service';
 
-export const loginGuard: CanActivateFn = () => {
+export const landingRedirectGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const groupService = inject(GroupService);
   const router = inject(Router);
@@ -13,7 +13,7 @@ export const loginGuard: CanActivateFn = () => {
 
   return groupService.getInitialRoute().pipe(
     map((commands) => router.createUrlTree(commands)),
-    // Si la sesión caduca o falla la consulta, el login permite recuperarse.
+    // Si no se puede recuperar la sesión, se muestra la landing para permitir iniciar sesión de nuevo.
     catchError(() => of(true)),
   );
 };

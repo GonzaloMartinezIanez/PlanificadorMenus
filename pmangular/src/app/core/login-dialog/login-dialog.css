@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  min-width: min(100%, 20rem);
+}
+
+mat-dialog-content {
+  display: grid;
+  gap: var(--app-space-5);
+}
+
+mat-dialog-content > p {
+  margin: 0;
+  color: var(--app-color-text-muted);
+  line-height: 1.5;
+}
+
+app-google-login {
+  justify-content: flex-start;
+}

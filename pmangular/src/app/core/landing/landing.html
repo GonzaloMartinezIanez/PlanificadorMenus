@@ -1,0 +1,129 @@
+<main class="landing-page">
+  <section class="landing-hero" aria-labelledby="landing-title">
+    <div class="landing-hero-copy">
+      <p class="landing-eyebrow">
+        Comer bien, sin organizarlo todo
+      </p>
+      <h1 id="landing-title">Planificad juntos. Comprad solo lo necesario.</h1>
+      <p class="landing-lead">
+        Organiza los menús de tu grupo, reúne vuestras recetas y convierte el calendario semanal en una lista de la
+        compra compartida.
+      </p>
+      <div class="landing-actions">
+        @if (!auth.isAuthenticated()) {
+          <app-google-login
+            class="landing-google-login"
+            (authenticated)="onAuthenticated()"
+            (loadingChange)="onLoadingChange($event)"
+            (loginError)="errorMessage.set($event)"
+          />
+        }
+        <a mat-stroked-button routerLink="/recipes">Explorar recetas públicas</a>
+      </div>
+      @if (isLoading()) {
+        <p class="landing-status status-message" role="status">Conectando con el servidor...</p>
+      }
+      @if (errorMessage()) {
+        <p class="landing-status error-message" role="alert">{{ errorMessage() }}</p>
+      }
+      <p class="landing-note">
+        <mat-icon aria-hidden="true">group</mat-icon> Pensado para familias, parejas y pisos compartidos.
+      </p>
+    </div>
+
+    <div class="landing-preview" aria-label="Vista previa del calendario y la lista de la compra">
+      <div class="preview-window">
+        <div class="preview-window-bar"><span></span><span></span><span></span></div>
+        <div class="preview-content">
+          <div class="preview-calendar">
+            <div class="preview-calendar-heading"><strong>Esta semana</strong><span>Octubre</span></div>
+            <div class="preview-days" aria-hidden="true">
+              <div><span>L</span><b>20</b><i></i></div>
+              <div><span>M</span><b>21</b><i></i></div>
+              <div class="preview-day-active"><span>X</span><b>22</b><i></i></div>
+              <div><span>J</span><b>23</b><i></i></div>
+              <div><span>V</span><b>24</b><i></i></div>
+            </div>
+            <article class="preview-recipe preview-recipe--lunch">
+              <small>Comida</small><strong>Arroz con verduras</strong><span>35 min</span>
+            </article>
+            <article class="preview-recipe preview-recipe--dinner">
+              <small>Cena</small><strong>Crema de calabacín</strong><span>25 min</span>
+            </article>
+          </div>
+          <aside class="preview-list">
+            <div class="preview-list-heading"><strong>Lista de la compra</strong><span>4 productos</span></div>
+            <p><i></i> Arroz integral</p>
+            <p><i></i> Calabacín</p>
+            <p class="preview-list-done"><i></i> Cebolla</p>
+            <p><i></i> Caldo de verduras</p>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section landing-benefits" aria-labelledby="benefits-title">
+    <div class="landing-section-heading">
+      <p class="landing-eyebrow">Todo conectado</p>
+      <h2 id="benefits-title">Menos mensajes, menos olvidos</h2>
+      <p>Una única herramienta para decidir las comidas y preparar la compra de vuestro grupo.</p>
+    </div>
+    <div class="benefit-grid">
+      <article class="benefit-card">
+        <mat-icon aria-hidden="true">calendar_month</mat-icon>
+        <h3>Menú semanal compartido</h3>
+        <p>Decidid desayuno, comida y cena en un calendario visible para todo el grupo.</p>
+      </article>
+      <article class="benefit-card">
+        <mat-icon aria-hidden="true">shopping_basket</mat-icon>
+        <h3>Compra que se actualiza sola</h3>
+        <p>Las recetas planificadas añaden sus ingredientes a una lista común y editable.</p>
+      </article>
+      <article class="benefit-card">
+        <mat-icon aria-hidden="true">menu_book</mat-icon>
+        <h3>Recetas para guardar e inspirarte</h3>
+        <p>Crea recetas privadas o descubre propuestas públicas de otros usuarios.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="landing-section landing-steps" aria-labelledby="steps-title">
+    <div class="landing-section-heading">
+      <p class="landing-eyebrow">En tres pasos</p>
+      <h2 id="steps-title">De la idea a la compra, sin cambiar de sitio</h2>
+    </div>
+    <ol>
+      <li>
+        <span>1</span>
+        <div>
+          <h3>Crea o únete a un grupo</h3>
+          <p>Invita a las personas con las que compartes menú.</p>
+        </div>
+      </li>
+      <li>
+        <span>2</span>
+        <div>
+          <h3>Añadid recetas al calendario</h3>
+          <p>Planificad cada comida de la semana a vuestro ritmo.</p>
+        </div>
+      </li>
+      <li>
+        <span>3</span>
+        <div>
+          <h3>Consultad la lista común</h3>
+          <p>Marcáis lo comprado y la tenéis siempre actualizada.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="landing-recipes" aria-labelledby="public-recipes-title">
+    <div>
+      <p class="landing-eyebrow">Para empezar con ideas</p>
+      <h2 id="public-recipes-title">El recetario público está abierto a todo el mundo</h2>
+      <p>Busca recetas y consulta ingredientes sin registro.</p>
+    </div>
+    <a mat-flat-button routerLink="/recipes">Ver recetas públicas <mat-icon iconPositionEnd>arrow_forward</mat-icon></a>
+  </section>
+</main>

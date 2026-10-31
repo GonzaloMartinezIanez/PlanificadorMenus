@@ -176,6 +176,6 @@ describe('RealtimeService', () => {
     localStorage.removeItem(environment.ACCESS_TOKEN_KEY);
     window.dispatchEvent(new StorageEvent('storage', { key: environment.ACCESS_TOKEN_KEY, newValue: null }));
     expect(auth.clearSession).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 });

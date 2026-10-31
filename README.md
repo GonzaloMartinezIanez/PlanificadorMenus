@@ -6,7 +6,7 @@ Aplicación web para planificar menús compartidos, guardar recetas y generar un
 
 Proyecto desarrollado como Trabajo Fin de Máster del Máster en Desarrollo de Aplicaciones Web de la Universidad Europea.
 
-La aplicación está desplegada en https://planificadormenus.es/login.
+La aplicación está desplegada en https://planificadormenus.es.
 
 ## Funcionalidades
 
@@ -15,7 +15,8 @@ La aplicación está desplegada en https://planificadormenus.es/login.
 - Calendario semanal con desayuno, comida y cena.
 - Lista de la compra generada a partir de las recetas del menú y editable manualmente.
 - Buscador de recetas por nombre y categorías.
-- Recetas públicas y privadas, con ingredientes, pasos, valoraciones y comentarios.
+- Recetario público accesible sin registro y recetas privadas para usuarios autenticados,
+  con ingredientes, pasos, valoraciones y comentarios.
 
 ## Capturas
 

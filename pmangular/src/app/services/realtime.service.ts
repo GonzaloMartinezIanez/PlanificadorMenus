@@ -63,7 +63,7 @@ export class RealtimeService {
           !localStorage.getItem(environment.ACCESS_TOKEN_KEY)
         ) {
           this.auth.clearSession();
-          void this.router.navigate(['/login']);
+          void this.router.navigate(['/']);
         }
       });
     fromEvent(document, 'visibilitychange')
@@ -112,7 +112,7 @@ export class RealtimeService {
       if (generation !== this.generation) return;
       this.auth.clearSession();
       this.stop();
-      void this.router.navigate(['/login']);
+      void this.router.navigate(['/']);
       return;
     }
     if (generation !== this.generation || !this.auth.isAuthenticated()) return;
@@ -177,7 +177,7 @@ export class RealtimeService {
       this.socket = undefined;
       if (event.code === 4401 && ++this.authFailures > 2) {
         this.auth.clearSession();
-        void this.router.navigate(['/login']);
+        void this.router.navigate(['/']);
         return;
       }
       this.scheduleReconnect(event.code === 4401);

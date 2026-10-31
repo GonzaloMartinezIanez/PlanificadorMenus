@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { of, Subject } from 'rxjs';
 import { afterEach, vi } from 'vitest';
 import { AuthService } from '../../../services/auth.service';
@@ -9,6 +10,7 @@ import { environment } from '../../../../environments/environment';
 import { AuthUser } from '../../../models/auth-user';
 import { GroupModel } from '../../../models/group';
 import { Header } from './header';
+import { LoginDialog } from '../../login-dialog/login-dialog';
 
 @Component({ template: '' })
 class TestPage {}
@@ -23,6 +25,7 @@ describe('Header', () => {
     logout: vi.fn(),
   };
   const groupService = { getMyGroups: vi.fn() };
+  const dialog = { open: vi.fn() };
   const groups: GroupModel[] = [
     { group_code: 'OLD12345', group_name: 'Nuestra casa', group_description: '', creation_date: '2026-10-01' },
     { group_code: 'NEW12345', group_name: 'Amigos', group_description: '', creation_date: '2026-10-01' },
@@ -50,6 +53,7 @@ describe('Header', () => {
         ]),
         { provide: AuthService, useValue: authService },
         { provide: GroupService, useValue: groupService },
+        { provide: MatDialog, useValue: dialog },
       ],
     }).compileComponents();
     router = TestBed.inject(Router);
@@ -119,8 +123,19 @@ describe('Header', () => {
     await renderHeader();
     expect(groupService.getMyGroups).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelector('.desktop-nav')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.header-actions a').getAttribute('href')).toBe('/login');
-    expect(fixture.nativeElement.querySelector('.brand').getAttribute('href')).toBe('/recipes');
+    expect(fixture.nativeElement.querySelector('.header-actions button')?.textContent).toContain('Iniciar sesión');
+    expect(fixture.nativeElement.querySelector('.header-actions a[href="/recipes"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.brand').getAttribute('href')).toBe('/');
+
+    const publicLoginButton = (fixture.nativeElement as HTMLElement).querySelector(
+      '.header-actions button',
+    ) as HTMLButtonElement;
+    publicLoginButton.click();
+    expect(dialog.open).toHaveBeenCalledWith(LoginDialog, {
+      width: '24rem',
+      maxWidth: 'calc(100vw - 2rem)',
+      ariaLabelledBy: 'login-dialog-title',
+    });
   });
 
   it('provides valid destinations when the user has no groups', async () => {

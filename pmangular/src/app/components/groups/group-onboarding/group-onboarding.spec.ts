@@ -40,10 +40,10 @@ describe('GroupOnboarding', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/home/ABC12345']);
   });
 
-  it('should logs out and returns to login', () => {
+  it('should log out and return to the landing page', () => {
     component.logout();
 
     expect(authService.logout).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 });

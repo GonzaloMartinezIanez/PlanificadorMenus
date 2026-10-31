@@ -21,11 +21,13 @@ describe('Recipes', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the recipe search and create recipe link', () => {
+  it('shows the public recipe repository and invites visitors to sign in before creating recipes', () => {
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.querySelector('app-recipe-search')).toBeTruthy();
-    expect(element.querySelector<HTMLAnchorElement>('[routerLink="/recipes/create"]')).toBeTruthy();
+    expect(element.textContent).toContain('Recetas públicas');
+    expect(element.querySelector<HTMLAnchorElement>('[routerLink="/"]')).toBeTruthy();
+    expect(element.querySelector('[routerLink="/recipes/create"]')).toBeNull();
   });
 });

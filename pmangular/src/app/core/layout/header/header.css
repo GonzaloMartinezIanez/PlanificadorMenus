@@ -147,6 +147,10 @@
   grid-column: 4;
 }
 
+.header-actions--public {
+  gap: var(--app-space-3);
+}
+
 .mobile-menu-button {
   display: none;
 }
@@ -249,5 +253,15 @@
 
   .brand-name {
     font-size: var(--app-font-small);
+  }
+
+  .header-actions--public {
+    gap: var(--app-space-1);
+  }
+
+  .header-actions--public a {
+    min-width: 0;
+    padding-inline: var(--app-space-2);
+    font-size: var(--app-font-caption);
   }
 }

@@ -8,10 +8,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { RealtimeService } from '../../../services/realtime.service';
 import { auditTime } from 'rxjs';
+import { LoginDialog } from '../../login-dialog/login-dialog';
 
 @Component({
   selector: 'app-header',
@@ -26,6 +28,7 @@ export class Header implements OnInit {
   route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   private realtime = inject(RealtimeService);
+  private dialog = inject(MatDialog);
   private groupRequestId = 0;
 
   myGroups = signal<GroupModel[]>([]);
@@ -38,7 +41,7 @@ export class Header implements OnInit {
   showAvatar = computed(() => !!this.currentUser()?.profile_picture && !this.avatarFailed());
   selectedGroup = computed(() => this.myGroups().find((group) => group.group_code === this.selectedGroupCode()));
   homeLink = computed(() => {
-    if (!this.authService.isAuthenticated()) return ['/recipes'];
+    if (!this.authService.isAuthenticated()) return ['/'];
     return this.selectedGroupCode() ? ['/home', this.selectedGroupCode()] : ['/groups/access'];
   });
   navigationItems = computed(() => [
@@ -151,6 +154,14 @@ export class Header implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['']);
+  }
+
+  openLoginDialog(): void {
+    this.dialog.open(LoginDialog, {
+      width: '24rem',
+      maxWidth: 'calc(100vw - 2rem)',
+      ariaLabelledBy: 'login-dialog-title',
+    });
   }
 
   onAvatarError() {

@@ -1,7 +1,16 @@
 <section class="create-recipe app-page-heading">
-  <h1>Recetas</h1>
+  <div>
+    <h1>Recetas{{ auth.isAuthenticated() ? '' : ' públicas' }}</h1>
+    @if (!auth.isAuthenticated()) {
+      <p>Explora recetas compartidas por la comunidad sin necesidad de crear una cuenta.</p>
+    }
+  </div>
 
-  <button mat-stroked-button routerLink="/recipes/create" class="create-recipe-button">Crear receta</button>
+  @if (auth.isAuthenticated()) {
+    <button mat-stroked-button routerLink="/recipes/create" class="create-recipe-button">Crear receta</button>
+  } @else {
+    <a mat-stroked-button routerLink="/" class="create-recipe-button">Iniciar sesión para crear</a>
+  }
 </section>
 
 <app-recipe-search />

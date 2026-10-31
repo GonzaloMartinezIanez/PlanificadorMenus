@@ -27,12 +27,12 @@ describe('authGuard', () => {
     });
   });
 
-  it('should send to login if not token provided', async () => {
+  it('should send to the landing page if not token provided', async () => {
     authService.getAccessToken.mockReturnValue(null);
 
     await expect(executeGuard({} as never, {} as never)).resolves.toBe(false);
 
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('should let navigate with a valid token', async () => {
@@ -62,6 +62,6 @@ describe('authGuard', () => {
     await expect(executeGuard({} as never, {} as never)).resolves.toBe(false);
 
     expect(authService.clearSession).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 });

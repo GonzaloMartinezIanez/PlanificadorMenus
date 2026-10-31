@@ -1,0 +1,479 @@
+:host {
+  display: block;
+}
+
+.landing-page {
+  overflow: hidden;
+}
+
+.landing-hero,
+.landing-section,
+.landing-recipes {
+  max-width: var(--app-content-wide);
+  margin-inline: auto;
+}
+
+.landing-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(26rem, 1.05fr);
+  align-items: center;
+  gap: clamp(var(--app-space-10), 6vw, 6rem);
+  min-height: min(44rem, calc(100dvh - 10rem));
+  padding: clamp(var(--app-space-10), 6vw, 6rem) 0;
+}
+
+.landing-hero-copy {
+  max-width: 40rem;
+}
+
+.landing-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  margin: 0 0 var(--app-space-3);
+  color: var(--app-color-accent-text);
+  font-size: var(--app-font-small);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.landing-eyebrow mat-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--app-color-accent);
+  font-size: 1.125rem;
+}
+
+.landing-hero h1 {
+  max-width: 13ch;
+  margin: 0;
+  color: var(--app-color-accent-text);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+}
+
+.landing-lead {
+  max-width: 37rem;
+  margin: var(--app-space-6) 0 0;
+  color: var(--app-color-text-muted);
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.6;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-3);
+  margin-top: var(--app-space-8);
+}
+
+.landing-actions a,
+.landing-recipes a {
+  min-height: 3rem;
+  padding-inline: var(--app-space-5);
+}
+
+.landing-google-login {
+  min-height: 3rem;
+}
+
+.landing-status {
+  margin: var(--app-space-4) 0 0;
+}
+
+.landing-note {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  margin: var(--app-space-6) 0 0;
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
+}
+
+.landing-note mat-icon {
+  color: var(--app-color-accent);
+}
+
+.landing-preview {
+  position: relative;
+  padding: var(--app-space-6) 0 var(--app-space-6) var(--app-space-6);
+}
+
+.landing-preview::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 0 12%;
+  border-radius: var(--app-radius-panel);
+  background: var(--app-color-accent-soft);
+  content: '';
+}
+
+.preview-window {
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-panel);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-card);
+}
+
+.preview-window-bar {
+  display: flex;
+  gap: var(--app-space-1);
+  padding: var(--app-space-3) var(--app-space-4);
+  border-bottom: 1px solid var(--app-color-border);
+}
+
+.preview-window-bar span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--app-color-border);
+}
+
+.preview-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(10rem, 0.75fr);
+}
+
+.preview-calendar,
+.preview-list {
+  padding: var(--app-space-5);
+}
+
+.preview-list {
+  border-left: 1px solid var(--app-color-border);
+  background: var(--app-color-surface-muted);
+}
+
+.preview-calendar-heading,
+.preview-list-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--app-space-2);
+  margin-bottom: var(--app-space-4);
+  color: var(--app-color-text-muted);
+  font-size: 0.6875rem;
+}
+
+.preview-calendar-heading strong,
+.preview-list-heading strong {
+  color: var(--app-color-text);
+  font-size: var(--app-font-caption);
+}
+
+.preview-days {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--app-space-1);
+  margin-bottom: var(--app-space-4);
+}
+
+.preview-days div {
+  display: grid;
+  place-items: center;
+  gap: 0.125rem;
+  min-height: 3.25rem;
+  border-radius: var(--app-radius-sm);
+  color: var(--app-color-text-muted);
+  font-size: 0.625rem;
+}
+
+.preview-days b {
+  color: var(--app-color-text);
+  font-size: var(--app-font-caption);
+}
+
+.preview-days i {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 50%;
+}
+
+.preview-day-active {
+  background: var(--app-color-accent-soft);
+}
+
+.preview-day-active i {
+  background: var(--app-color-accent);
+}
+
+.preview-recipe {
+  display: grid;
+  gap: 0.125rem;
+  margin-top: var(--app-space-2);
+  padding: var(--app-space-3);
+  border-left: 3px solid var(--app-color-accent);
+  border-radius: 0 var(--app-radius-sm) var(--app-radius-sm) 0;
+  background: var(--app-color-accent-soft);
+}
+
+.preview-recipe--dinner {
+  border-left-color: var(--app-color-control-border);
+  background: var(--app-color-surface-muted);
+}
+
+.preview-recipe small,
+.preview-recipe span {
+  color: var(--app-color-text-muted);
+  font-size: 0.625rem;
+}
+
+.preview-recipe strong {
+  font-size: var(--app-font-caption);
+}
+
+.preview-list p {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  margin: 0;
+  padding-block: var(--app-space-2);
+  color: var(--app-color-text);
+  font-size: 0.6875rem;
+}
+
+.preview-list p i {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--app-color-control-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.preview-list p.preview-list-done {
+  color: var(--app-color-text-muted);
+  text-decoration: line-through;
+}
+
+.preview-list p.preview-list-done i {
+  border-color: var(--app-color-accent);
+  background: var(--app-color-accent);
+}
+
+.landing-section {
+  padding-block: clamp(3.5rem, 8vw, 7rem);
+}
+
+.landing-section-heading {
+  max-width: 42rem;
+}
+
+.landing-section-heading h2,
+.landing-recipes h2 {
+  margin: 0;
+  color: var(--app-color-accent-text);
+  font-size: clamp(1.875rem, 3vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.landing-section-heading > p:last-child,
+.landing-recipes > div > p:last-child {
+  margin: var(--app-space-4) 0 0;
+  color: var(--app-color-text-muted);
+  line-height: 1.6;
+}
+
+.landing-benefits {
+  border-top: 1px solid var(--app-color-border);
+}
+
+.benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--app-space-5);
+  margin-top: var(--app-space-8);
+}
+
+.benefit-card {
+  padding: var(--app-space-6);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-card);
+  background: var(--app-color-surface);
+}
+
+.benefit-card mat-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: var(--app-space-2);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-color-accent-soft);
+  color: var(--app-color-accent);
+  font-size: 1.75rem;
+}
+
+.benefit-card h3,
+.landing-steps h3 {
+  margin: var(--app-space-5) 0 var(--app-space-2);
+  color: var(--app-color-accent-text);
+  font-size: var(--app-font-body);
+}
+
+.benefit-card p,
+.landing-steps p {
+  margin: 0;
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-small);
+  line-height: 1.55;
+}
+
+.landing-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(var(--app-space-8), 8vw, 8rem);
+  align-items: start;
+  border-top: 1px solid var(--app-color-border);
+}
+
+.landing-steps ol {
+  display: grid;
+  gap: var(--app-space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-steps li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: var(--app-space-4);
+  align-items: start;
+}
+
+.landing-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--app-color-accent-soft);
+  color: var(--app-color-accent-text);
+  font-size: var(--app-font-small);
+  font-weight: 700;
+}
+
+.landing-steps h3 {
+  margin: 0 0 var(--app-space-2);
+}
+
+.landing-recipes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-6);
+  margin-bottom: clamp(var(--app-space-8), 7vw, 6rem);
+  padding: clamp(var(--app-space-8), 5vw, 4rem);
+  border-radius: var(--app-radius-panel);
+  background: var(--app-color-accent-soft);
+}
+
+.landing-recipes > div {
+  max-width: 44rem;
+}
+
+.landing-recipes .landing-eyebrow {
+  margin-bottom: var(--app-space-2);
+}
+
+.landing-recipes a {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 960px) {
+  .landing-hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    padding-top: var(--app-space-8);
+  }
+
+  .landing-preview {
+    width: min(100%, 44rem);
+    justify-self: center;
+    padding-left: 0;
+  }
+
+  .landing-preview::before {
+    inset: 0 8% 0 0;
+  }
+
+  .landing-steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--app-space-8);
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-hero,
+  .landing-section,
+  .landing-recipes {
+    width: 100%;
+  }
+
+  .landing-hero {
+    gap: var(--app-space-8);
+    padding: var(--app-space-6) 0 var(--app-space-10);
+  }
+
+  .landing-hero h1 {
+    max-width: none;
+    font-size: clamp(2.25rem, 11vw, 3.25rem);
+  }
+
+  .landing-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing-actions a {
+    width: 100%;
+  }
+
+  .landing-google-login {
+    justify-content: flex-start;
+  }
+
+  .preview-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .preview-list {
+    border-top: 1px solid var(--app-color-border);
+    border-left: 0;
+  }
+
+  .preview-list p {
+    display: inline-flex;
+    width: 50%;
+  }
+
+  .benefit-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-6);
+  }
+
+  .benefit-card {
+    padding: var(--app-space-5);
+  }
+
+  .benefit-card h3 {
+    margin-top: var(--app-space-4);
+  }
+
+  .landing-section {
+    padding-block: var(--app-space-12);
+  }
+
+  .landing-recipes {
+    display: grid;
+    gap: var(--app-space-5);
+    margin-bottom: var(--app-space-8);
+    padding: var(--app-space-6);
+  }
+
+  .landing-recipes a {
+    width: 100%;
+  }
+}

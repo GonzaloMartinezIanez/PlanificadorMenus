@@ -9,7 +9,7 @@ export const authGuard: CanActivateFn = async () => {
 
   // No hay token guardado
   if (!authService.getAccessToken()) {
-    router.navigate(['/login']);
+    router.navigate(['/']);
     return false;
   }
 
@@ -21,14 +21,14 @@ export const authGuard: CanActivateFn = async () => {
       // Si después del refresh sigue sin haber token, logout
       if (!authService.getAccessToken()) {
         authService.clearSession();
-        router.navigate(['/login']);
+        router.navigate(['/']);
         return false;
       }
 
       return true;
     } catch {
       authService.clearSession();
-      router.navigate(['/login']);
+      router.navigate(['/']);
       return false;
     }
   }
