@@ -5,6 +5,11 @@ services:
   redis:
     image: redis:7.4-alpine
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: '10m'
+        max-file: '3'
     command:
       ['redis-server', '--maxmemory', '128mb', '--maxmemory-policy', 'noeviction', '--save', '', '--appendonly', 'no']
     mem_limit: 256m
@@ -19,6 +24,11 @@ services:
   db:
     image: mysql:8.4
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: '10m'
+        max-file: '3'
     env_file: .env
     # Variables necesarias para crear la base de datos
     environment:
@@ -44,6 +54,11 @@ services:
     # Usar la imagen subida a ghcr.io
     image: ${BACKEND_IMAGE}
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: '10m'
+        max-file: '3'
     env_file: .env
     # Se conecta a la base de datos mediante su contenedor
     environment:
@@ -69,6 +84,11 @@ services:
   nginx:
     image: ${FRONTEND_IMAGE}
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: '10m'
+        max-file: '3'
     # Se pasa el dominio asignado al VPS
     environment:
       DOMAIN: ${DOMAIN}
@@ -91,6 +111,11 @@ services:
   certbot:
     image: certbot/certbot:latest
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: '10m'
+        max-file: '3'
     # Compartir los ficheros de configuración y certificado con nginx
     volumes:
       - certbot_conf:/etc/letsencrypt
